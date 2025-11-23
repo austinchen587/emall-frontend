@@ -1,26 +1,13 @@
 version: '3.8'
-
 services:
   frontend:
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: emall-frontend-dev
     ports:
       - "5173:5173"
     volumes:
       - .:/app
       - /app/node_modules
-    working_dir: /app
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-      - NODE_ENV=development
-    stdin_open: true
-    tty: true
-    networks:
-      - emall-network
-
-networks:
-  emall-network:
-    driver: bridge
