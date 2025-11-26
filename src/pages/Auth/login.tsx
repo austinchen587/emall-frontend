@@ -1,12 +1,11 @@
-// login.tsx
+// src/pages/Auth/login.tsx
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { AuthLayout } from '../../components/auth/AuthLayout';
-import { LoginForm } from '../../components/auth/LoginForm';
+import AuthLayout from '../../components/auth/AuthLayout';
 import './Login.css';
 
-export const Login: React.FC = () => {
+const Login: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,23 +17,19 @@ export const Login: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    // 创建粒子效果
     const createParticles = () => {
       const container = containerRef.current;
       if (!container) return;
 
-      // 清除现有粒子
       const existingParticles = container.querySelectorAll('.particle');
       existingParticles.forEach(particle => particle.remove());
 
-      // 根据屏幕尺寸创建不同数量的粒子
       const particleCount = window.innerWidth > 768 ? 15 : 8;
       
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
         
-        // 随机大小和位置
         const size = Math.random() * 4 + 2;
         const posX = Math.random() * 100;
         const posY = Math.random() * 100;
@@ -47,7 +42,6 @@ export const Login: React.FC = () => {
         particle.style.animationDelay = `${delay}s`;
         particle.style.opacity = `${Math.random() * 0.6 + 0.2}`;
         
-        // 随机颜色
         const colors = ['#29c4ff', '#8400ff', '#ff1493'];
         const color = colors[Math.floor(Math.random() * colors.length)];
         particle.style.background = color;
@@ -58,7 +52,6 @@ export const Login: React.FC = () => {
 
     createParticles();
     
-    // 窗口大小变化时重新创建粒子
     const handleResize = () => {
       createParticles();
     };
@@ -66,6 +59,10 @@ export const Login: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleAuthSuccess = () => {
+    navigate('/dashboard', { replace: true });
+  };
 
   if (isLoading) {
     return (
@@ -90,13 +87,13 @@ export const Login: React.FC = () => {
 
   return (
     <div className="login-page" ref={containerRef}>
-      <AuthLayout title="磊极科技">
-        <LoginForm />
-        <div className="login-links">
-          <a href="/forgot-password">⟳ 密码重置</a>
-          <a href="/register">⚡ 注册</a>
-        </div>
-      </AuthLayout>
+      {/* 让 AuthLayout 完全控制表单和切换逻辑 */}
+      <AuthLayout 
+        title="磊极科技"
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };
+
+export default Login;
