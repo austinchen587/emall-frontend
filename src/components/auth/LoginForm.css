@@ -1,0 +1,203 @@
+/* LoginForm.css - 响应式科幻设计 */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #29c4ff;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 15px rgba(41, 196, 255, 0.7);
+}
+
+.form-group input {
+  padding: 1.2rem 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(41, 196, 255, 0.4);
+  border-radius: 12px;
+  font-size: 1.1rem;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  font-family: 'Orbitron', monospace;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #29c4ff;
+  box-shadow: 
+    0 0 30px rgba(41, 196, 255, 0.4),
+    inset 0 0 20px rgba(41, 196, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.form-group input.error {
+  border-color: #ff1493;
+  box-shadow: 0 0 30px rgba(255, 20, 147, 0.4);
+}
+
+.form-group::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #29c4ff, #8400ff, #ff1493);
+  transition: width 0.4s ease;
+  border-radius: 2px;
+}
+
+.form-group:focus-within::after {
+  width: 100%;
+}
+
+.login-button {
+  background: linear-gradient(135deg, #29c4ff 0%, #8400ff 50%, #ff1493 100%);
+  color: white;
+  border: none;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 1rem;
+  font-family: 'Orbitron', sans-serif;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.login-button:hover::before {
+  left: 100%;
+}
+
+.login-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 15px 40px rgba(41, 196, 255, 0.5),
+    0 0 50px rgba(132, 0, 255, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(-1px);
+}
+
+.login-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.login-button:disabled::before {
+  display: none;
+}
+
+.error-message {
+  color: #ff1493;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+  background: rgba(255, 20, 147, 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #ff1493;
+  font-weight: 500;
+}
+
+.submit-error {
+  background: rgba(255, 20, 147, 0.15);
+  color: #ff1493;
+  padding: 1.2rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border: 1px solid rgba(255, 20, 147, 0.4);
+  text-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+  font-weight: 600;
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.3);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .login-form {
+    gap: 1.5rem;
+  }
+  
+  .form-group {
+    gap: 0.8rem;
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+  }
+  
+  .form-group input {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+  
+  .login-button {
+    padding: 1.2rem 1.5rem;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+  
+  .error-message {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .submit-error {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-group input {
+    padding: 0.9rem 1rem;
+  }
+  
+  .login-button {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+  }
+}

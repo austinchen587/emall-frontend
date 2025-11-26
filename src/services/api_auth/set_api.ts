@@ -1,15 +1,20 @@
-// src/services/api.ts
+// src/api/api/api.ts
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',  // 添加 /api 前缀
+export const apiClient = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api',
   timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // 请求拦截器
-api.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
-    console.log(`请求: ${config.method?.toUpperCase()} ${config.url}`);
+    const method = config.method?.toUpperCase() || 'UNKNOWN';
+    const url = config.url || 'unknown';
+    console.log(`请求: ${method} ${url}`);
     return config;
   },
   (error) => {
@@ -18,7 +23,7 @@ api.interceptors.request.use(
 );
 
 // 响应拦截器
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => {
     console.log('响应:', response.status, response.data);
     return response;
@@ -29,4 +34,5 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default apiClient;
+ 
