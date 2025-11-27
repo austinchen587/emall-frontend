@@ -1,16 +1,11 @@
 import apiClient from '../api_auth/set_api'; // 使用你现有的apiClient
-import { EmallListResponse, EmallItem } from '../types';
+import { EmallListResponse, EmallItem, EmallFilterParams } from '../types';
 
 export const emallApi = {
   /**
    * 获取采购项目列表
    */
-  getEmallList: (params?: {
-    search?: string;
-    ordering?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<{ data: EmallListResponse }> => 
+  getEmallList: (params?: EmallFilterParams): Promise<{ data: EmallListResponse }> => 
     apiClient.get('/emall/list/', { params }),
   
   /**
