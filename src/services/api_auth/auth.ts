@@ -33,38 +33,37 @@ export const authAPI = {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 重要：包含 session cookie
         body: JSON.stringify(credentials),
       });
       console.log('响应状态:', response.status, response.statusText);
       
       if (!response.ok) {
-        // 获取详细的错误信息
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       console.log('后端返回的数据:', data);
       
-      // 直接返回后端的数据，不要二次包装
       return data;
       
     } catch (error) {
       console.error('Login error:', error);
-      // 错误时返回统一的错误格式
       return {
         status: 'error',
         message: error instanceof Error ? error.message : '登录失败'
       };
     }
   },
-  // 同样修复 register 方法
+
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch('${API_BASE_URL}/api/auth/register/', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register/`, { // 修复：使用模板字符串
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 重要：包含 session cookie
         body: JSON.stringify(userData),
       });
       if (!response.ok) {
@@ -72,7 +71,7 @@ export const authAPI = {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      return data; // 直接返回后端数据
+      return data;
       
     } catch (error) {
       console.error('Register error:', error);
@@ -85,23 +84,44 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch('http://localhost:8000/api/auth/logout/', {
+      await fetch(`${API_BASE_URL}/api/auth/logout/`, { // 修复：使用正确的 URL
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 重要：包含 session cookie
       });
     } catch (error) {
       console.error('Logout error:', error);
     }
   },
 
-  // 添加 token 验证
+  // 添加 session 检查方法（替代 token 验证）
+  checkSession: async (): Promise<AuthResponse> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/check-session/`, {
+        method: 'GET',
+        credentials: 'include', // 重要：包含 session cookie
+      });
+
+      if (!response.ok) {
+        throw new Error('Session check failed');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return {
+        status: 'error',
+        message: 'Session check failed'
+      };
+    }
+  },
+
+  // 保留 verifyToken 方法（如果需要的话）
   verifyToken: async (token: string): Promise<AuthResponse> => {
     try {
-      const response = await fetch('${API_BASE_URL}/api/auth/verify/', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

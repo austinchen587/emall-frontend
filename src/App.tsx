@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth } from './hooks/useAuth';
 import Login from './pages/Auth/login';
 import Dashboard from './pages/Dashboard';
+import EmallList from './pages/EmallList';
 import './App.css';
 
 // 保护路由组件
@@ -14,7 +15,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return (
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'center', 
+ justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh' 
       }}>
@@ -45,6 +46,12 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/emall-list" element={
+            <ProtectedRoute>
+              <EmallList />
+            </ProtectedRoute>
+          } />
+
           <Route path="/procurement" element={
             <ProtectedRoute>
               <div>采购管理页面 - 待实现</div>

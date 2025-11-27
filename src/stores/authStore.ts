@@ -27,41 +27,32 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
 
   login: async (credentials: LoginRequest) => {
-  set({ isLoading: true, error: null });
-  try {
-    const response = await authAPI.login(credentials);
-    
-    console.log('authStore 接收到的响应:', response);
-    
-    // 根据实际的响应格式处理
-    if (response.status === 'success') {
-      // 保存用户信息和 token
-      if (response.user) {
-        localStorage.setItem('user', JSON.stringify(response.user));
-      }
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-      }
+    set({ isLoading: true, error: null });
+    try {
+      const response = await authAPI.login(credentials);
       
-      set({
-        user: response.user || null,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null
+      console.log('authStore 接收到的响应:', response);
+      
+      if (response.status === 'success') {
+        // Session 认证不需要存储 token，只需设置用户状态
+        set({
+          user: response.user || null,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null
+        });
+      } else {
+        throw new Error(response.message || '登录失败');
+      }
+    } catch (error) {
+      console.error('登录错误:', error);
+      set({ 
+        isLoading: false, 
+        error: error instanceof Error ? error.message : '登录失败'
       });
-    } else {
-      // 如果 status 不是 success，抛出错误
-      throw new Error(response.message || '登录失败');
+      throw error;
     }
-  } catch (error) {
-    console.error('登录错误:', error);
-    set({ 
-      isLoading: false, 
-      error: error instanceof Error ? error.message : '登录失败'
-    });
-    throw error;
-  }
-},
+  },
 
   register: async (userData: RegisterRequest) => {
     set({ isLoading: true, error: null });
@@ -92,8 +83,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+      // Session 认证只需要清除前端状态，后端 session 会在服务器端失效
       set({
         user: null,
         isAuthenticated: false,
@@ -105,29 +95,31 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      const token = localStorage.getItem('token');
-      const userStr = localStorage.getItem('user');
+      // Session 认证：直接调用后端检查当前会话状态
+      const response = await authAPI.checkSession();
       
-      if (token && userStr) {
-        const user = JSON.parse(userStr);
-        // 验证 token 是否有效
-        const response = await authAPI.verifyToken(token);
-        
-        if (response.status === 'success') {
-          set({ user, isAuthenticated: true, isLoading: false });
-        } else {
-          // Token 无效，清除本地存储
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
-          set({ user: null, isAuthenticated: false, isLoading: false });
-        }
+      console.log('checkAuth 响应:', response);
+      
+      if (response.status === 'success' && response.user) {
+        set({
+          user: response.user,
+          isAuthenticated: true,
+          isLoading: false
+        });
       } else {
-        set({ isLoading: false });
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
       }
     } catch (error) {
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      set({ user: null, isAuthenticated: false, isLoading: false });
+      console.error('checkAuth错误:', error);
+      set({ 
+        user: null, 
+        isAuthenticated: false, 
+        isLoading: false 
+      });
     }
   },
 

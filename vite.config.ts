@@ -10,6 +10,7 @@ export default defineConfig({
     port: 3000,
     host:'0.0.0.0'
   },
+  
   // 添加路径别名配置
   resolve: {
     alias: {
