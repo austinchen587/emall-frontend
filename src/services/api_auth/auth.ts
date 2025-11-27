@@ -22,12 +22,13 @@ export interface AuthResponse {
 }
 
 // 模拟的 authAPI - 连接您的 Django 后端
+const API_BASE_URL = 'http://192.168.10.10:8000'; // 使用服务器 IP
 export const authAPI = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
       console.log('发送登录请求:', credentials);
       
-      const response = await fetch('http://localhost:8000/api/auth/login/', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export const authAPI = {
   // 同样修复 register 方法
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/register/', {
+      const response = await fetch('${API_BASE_URL}/api/auth/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ export const authAPI = {
   // 添加 token 验证
   verifyToken: async (token: string): Promise<AuthResponse> => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/verify/', {
+      const response = await fetch('${API_BASE_URL}/api/auth/verify/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

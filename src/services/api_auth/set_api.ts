@@ -13,7 +13,7 @@ const getCSRFToken = (): string | null => {
 };
 
 export const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: 'http://192.168.10.10:3000/api',
   timeout: 10000,
   withCredentials: false, // 恢复这个配置
   headers: {
