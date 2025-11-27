@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import Login from './pages/Auth/login';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 // 保护路由组件
@@ -40,7 +41,7 @@ function App() {
           {/* 需要认证的路由 */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <div>仪表板页面 - 待实现</div>
+              <Dashboard />
             </ProtectedRoute>
           } />
           

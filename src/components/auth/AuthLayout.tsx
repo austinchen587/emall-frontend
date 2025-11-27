@@ -7,15 +7,14 @@ import './AuthLayout.css';
 interface AuthLayoutProps {
   children?: React.ReactNode;
   title?: string;
-  onSuccess?: () => void;  // 新增 onSuccess 属性
+  // 移除 onSuccess 属性，因为跳转逻辑现在由 useEffect 处理
 }
 
 type AuthMode = 'login' | 'register';
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ 
   children, 
-  title = "磊极科技",
-  onSuccess 
+  title = "磊极科技"
 }) => {
   const [mode, setMode] = useState<AuthMode>('login');
 
@@ -27,12 +26,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           {children || (
             mode === 'login' ? (
               <LoginForm 
-                onSuccess={onSuccess || (() => window.location.href = '/dashboard')}
+                // 移除 onSuccess 属性
                 onSwitchToRegister={() => setMode('register')}
               />
             ) : (
               <RegisterForm 
-                onSuccess={onSuccess || (() => window.location.href = '/dashboard')}
+                // 移除 onSuccess 属性
                 onSwitchToLogin={() => setMode('login')}
               />
             )

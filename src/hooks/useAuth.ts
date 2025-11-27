@@ -13,8 +13,9 @@ export const useAuth = () => {
   } = useAuthStore();
 
   useEffect(() => {
+    // 只在组件挂载时检查一次认证状态
     checkAuth();
-  }, [checkAuth]);
+  }, []); // 空依赖数组
 
   return {
     isAuthenticated,

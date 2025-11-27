@@ -4,11 +4,11 @@ import { useAuthStore } from '../../stores/authStore';
 import './RegisterForm.css';
 
 interface RegisterFormProps {
-  onSuccess: () => void;
   onSwitchToLogin: () => void;
+  // 移除 onSuccess 属性
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -60,7 +60,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
 
     try {
       await register(formData);
-      onSuccess();
+      // 移除 onSuccess() 调用，因为认证状态更新后会自动跳转
+      // 注册成功后，authStore 会更新状态，login.tsx 中的 useEffect 会检测到并跳转
     } catch (error: any) {
       setErrors({
         submit: error.response?.data?.message || error.message || '注册失败'

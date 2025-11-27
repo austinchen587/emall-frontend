@@ -9,9 +9,12 @@ const Login: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const hasNavigated = useRef(false); // 防止重复跳转
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !hasNavigated.current) {
+      hasNavigated.current = true;
+      console.log('检测到已认证，跳转到 dashboard');
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
@@ -60,9 +63,7 @@ const Login: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleAuthSuccess = () => {
-    navigate('/dashboard', { replace: true });
-  };
+  // 移除 handleAuthSuccess 函数，因为现在由 useEffect 处理跳转
 
   if (isLoading) {
     return (
@@ -81,17 +82,15 @@ const Login: React.FC = () => {
     );
   }
 
+  // 如果已经认证，直接返回 null（会被路由重定向）
   if (isAuthenticated) {
     return null;
   }
 
   return (
     <div className="login-page" ref={containerRef}>
-      {/* 让 AuthLayout 完全控制表单和切换逻辑 */}
-      <AuthLayout 
-        title="磊极科技"
-        onSuccess={handleAuthSuccess}
-      />
+      {/* 移除 onSuccess 属性 */}
+      <AuthLayout title="磊极科技" />
     </div>
   );
 };
