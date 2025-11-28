@@ -26,7 +26,7 @@ export interface EmallItem {
   region: string;
   project_name: string;
   project_number: string;
-  commodity_names: string;
+  commodity_names: string[] | null;  // 改为数组类型
   parameter_requirements: string[] | null;
   purchase_quantities: string[] | null;
   control_amounts: string[] | null;

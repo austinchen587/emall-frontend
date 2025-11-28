@@ -59,9 +59,15 @@ const EmallList: React.FC = () => {
   };
   // 处理项目编号点击事件
   const handleProjectNumberClick = (item: EmallItem) => {
+    console.log('点击项目编号:', item.project_number);
+    console.log('项目数据:', item);
     setSelectedProject(item);
     setIsModalOpen(true);
+    console.log('isModalOpen 设置为:', true); // 添加调试
   };
+  // 在渲染部分检查
+ console.log('当前 isModalOpen:', isModalOpen);
+ console.log('当前 selectedProject:', selectedProject);
   // 关闭弹窗
   const handleCloseModal = () => {
     setIsModalOpen(false);

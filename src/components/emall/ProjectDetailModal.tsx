@@ -1,7 +1,7 @@
 // src/components/emall/ProjectDetailModal.tsx
 import React from 'react';
 import { EmallItem } from '../../services/types';
-import './ProjectDetailModal.css'; // 添加这行
+import './ProjectDetailModal.css';
 
 interface ProjectDetailModalProps {
   isOpen: boolean;
@@ -14,7 +14,13 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   onClose, 
   project 
 }) => {
-  if (!isOpen || !project) return null;
+  console.log('Modal 组件渲染 - isOpen:', isOpen, 'project:', project);
+
+  // 如果 modal 不打开或没有项目数据，直接返回 null
+  if (!isOpen || !project) {
+    console.log('Modal 条件不满足，不渲染');
+    return null;
+  }
 
   // 格式化金额显示
   const formatCurrency = (amount: number | null) => {
@@ -29,12 +35,19 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   // 格式化日期显示
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('zh-CN');
+    try {
+      return new Date(dateString).toLocaleDateString('zh-CN');
+    } catch (error) {
+      return dateString; // 如果日期格式不正确，返回原字符串
+    }
   };
 
-  
+  // 检查数组数据
+  const hasArrayData = (array: any[] | null | undefined): boolean => {
+    return Array.isArray(array) && array.length > 0;
+  };
 
-  // 渲染表格数据
+  // 渲染商品信息表格 - 移除序号列
   const renderCommodityTable = () => {
     const commodityNames = project.commodity_names || [];
     const parameterRequirements = project.parameter_requirements || [];
@@ -59,11 +72,11 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         <table className="commodity-table">
           <thead>
             <tr>
-              <th className="bg-light-blue">商品名称</th>
-              <th className="bg-light-blue">参数要求</th>
-              <th className="bg-light-blue">购买数量</th>
-              <th className="bg-light-blue">控制金额(元)</th>
-              <th className="bg-light-blue">建议品牌</th>
+              <th>商品名称</th>
+              <th>参数要求</th>
+              <th>购买数量</th>
+              <th>控制金额</th>
+              <th>建议品牌</th>
             </tr>
           </thead>
           <tbody>
@@ -82,7 +95,7 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
     );
   };
 
-  // 渲染商务要求表格
+  // 渲染商务要求表格 - 移除序号列
   const renderBusinessTable = () => {
     const businessItems = project.business_items || [];
     const businessRequirements = project.business_requirements || [];
@@ -98,8 +111,8 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         <table className="business-table">
           <thead>
             <tr>
-              <th className="bg-light-blue">商务项目</th>
-              <th className="bg-light-blue">商务要求</th>
+              <th>商务项目</th>
+              <th>商务要求</th>
             </tr>
           </thead>
           <tbody>
@@ -136,12 +149,33 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
     );
   };
 
+  // 渲染相关链接
+  const renderRelatedLinks = () => {
+    const links = project.related_links || [];
+    
+    if (links.length === 0) {
+      return <div className="no-data">暂无相关链接</div>;
+    }
+
+    return (
+      <div className="related-links">
+        {links.map((link, index) => (
+          <div key={index} className="link-item">
+            <span className="link-icon">🔗</span>
+            <a href={link} target="_blank" rel="noopener noreferrer" className="link-url">
+              {link}
+            </a>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 className="modal-title">
-            <i className="icon-document"></i>
             项目详情 - {project.project_title}
           </h3>
           <button className="close-btn" onClick={onClose}>
@@ -150,135 +184,96 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         </div>
         
         <div className="modal-body custom-scrollbar">
-          {/* 基本信息卡片 */}
-          <div className="card mb-4">
-            <div className="card-header bg-light-blue">
-              <h6 className="mb-0">
-                <i className="icon-info"></i>
-                基本信息
-              </h6>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-6">
-                  <table className="info-table">
-                    <tbody>
-                      <tr>
-                        <th className="text-muted">采购单位</th>
-                        <td className="fw-bold">{project.purchasing_unit || '-'}</td>
-                      </tr>
-                      <tr>
-                        <th className="text-muted">项目编号</th>
-                        <td className="font-monospace">{project.project_number || '-'}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div className="col-md-6">
-                  <table className="info-table">
-                    <tbody>
-                      <tr>
-                        <th className="text-muted">预算控制</th>
-                        <td className="fw-bold text-success">
-                          {formatCurrency(project.total_price_numeric)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="text-muted">地区</th>
-                        <td>
-                          <span className="badge bg-secondary">
-                            {project.region || '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+          {/* 基本信息 */}
+          <div className="info-section">
+            <h4>基本信息</h4>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>采购单位</label>
+                <span>{project.purchasing_unit || '-'}</span>
+              </div>
+              <div className="info-item">
+                <label>项目编号</label>
+                <span className="project-number">{project.project_number || '-'}</span>
+              </div>
+              <div className="info-item">
+                <label>项目名称</label>
+                <span>{project.project_name || project.project_title || '-'}</span>
+              </div>
+              <div className="info-item">
+                <label>所在地区</label>
+                <span className="region-badge">{project.region || '-'}</span>
+              </div>
+              <div className="info-item">
+                <label>总控制价格</label>
+                <span className="price-amount">{formatCurrency(project.total_price_numeric)}</span>
+              </div>
+              <div className="info-item">
+                <label>价格控制</label>
+                <span>{project.total_price_control || '-'}</span>
               </div>
             </div>
           </div>
-          
-          {/* 时间信息卡片 */}
-          <div className="card mb-4">
-            <div className="card-header bg-light-green">
-              <h6 className="mb-0">
-                <i className="icon-clock"></i>
-                时间信息
-              </h6>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-4 text-center">
-                  <div className="time-block text-success">
-                    <div className="time-icon">📅</div>
-                    <div className="time-label">发布日期</div>
-                    <div className="time-value fw-bold">{formatDate(project.publish_date)}</div>
-                  </div>
-                </div>
-                <div className="col-md-4 text-center">
-                  <div className="time-block text-primary">
-                    <div className="time-icon">▶️</div>
-                    <div className="time-label">报价开始</div>
-                    <div className="time-value fw-bold">{formatDate(project.quote_start_time)}</div>
-                  </div>
-                </div>
-                <div className="col-md-4 text-center">
-                  <div className="time-block text-warning">
-                    <div className="time-icon">⏹️</div>
-                    <div className="time-label">报价截止</div>
-                    <div className="time-value fw-bold">{formatDate(project.quote_end_time)}</div>
-                  </div>
-                </div>
+
+          {/* 时间信息 */}
+          <div className="info-section">
+            <h4>时间信息</h4>
+            <div className="time-grid">
+              <div className="time-item">
+                <span className="time-label">发布日期</span>
+                <span className="time-value">{formatDate(project.publish_date)}</span>
+              </div>
+              <div className="time-item">
+                <span className="time-label">报价开始</span>
+                <span className="time-value">{formatDate(project.quote_start_time)}</span>
+              </div>
+              <div className="time-item">
+                <span className="time-label">报价截止</span>
+                <span className="time-value">{formatDate(project.quote_end_time)}</span>
               </div>
             </div>
           </div>
-          
-          {/* 商品信息表格 */}
-          <div className="section mb-4">
-            <h6 className="section-title bg-primary">
-              <i className="icon-table"></i>
-              商品信息
-            </h6>
-            {renderCommodityTable()}
-          </div>
-          
-          {/* 商务要求表格 */}
-          <div className="section mb-4">
-            <h6 className="section-title bg-primary">
-              <i className="icon-table"></i>
-              商务要求
-            </h6>
-            {renderBusinessTable()}
-          </div>
-          
+
+          {/* 商品信息 */}
+          {hasArrayData(project.commodity_names) && (
+            <div className="info-section">
+              <h4>商品信息</h4>
+              {renderCommodityTable()}
+            </div>
+          )}
+
+          {/* 商务要求 */}
+          {hasArrayData(project.business_items) && (
+            <div className="info-section">
+              <h4>商务要求</h4>
+              {renderBusinessTable()}
+            </div>
+          )}
+
+          {/* 相关链接 */}
+          {hasArrayData(project.related_links) && (
+            <div className="info-section">
+              <h4>相关链接</h4>
+              {renderRelatedLinks()}
+            </div>
+          )}
+
           {/* 下载文件 */}
-          <div className="section mb-4">
-            <h6 className="section-title bg-primary">
-              <i className="icon-download"></i>
-              下载文件
-            </h6>
-            {renderDownloadFiles()}
-          </div>
-          
+          {hasArrayData(project.download_files) && (
+            <div className="info-section">
+              <h4>下载文件</h4>
+              {renderDownloadFiles()}
+            </div>
+          )}
+
           {/* 操作按钮 */}
-          <div className="text-center mt-4 pt-3 border-top">
+          <div className="action-buttons">
             {project.url && (
-              <a 
-                href={project.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn btn-primary"
-              >
-                <i className="icon-external"></i>
+              <a href={project.url} target="_blank" rel="noopener noreferrer" className="btn-primary">
                 查看原链接
               </a>
             )}
-            <button 
-              type="button" 
-              className="btn btn-outline-secondary ms-2" 
-              onClick={onClose}
-            >
-              <i className="icon-close"></i>
+            <button type="button" className="btn-secondary" onClick={onClose}>
               关闭
             </button>
           </div>
