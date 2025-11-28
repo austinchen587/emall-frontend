@@ -523,3 +523,119 @@
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
 }
+
+
+
+
+/* 选择项目列样式 */
+.select-cell {
+  width: 60px;
+  text-align: center;
+  vertical-align: middle;
+}
+.select-checkbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.procurement-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+/* 采购进度列样式 */
+.progress-cell {
+  width: 100px;
+  text-align: center;
+  vertical-align: middle;
+}
+.progress-btn {
+  padding: 6px 12px;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.progress-btn:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+/* 根据状态设置不同颜色 */
+.progress-btn[data-status="not_started"] {
+  border-color: #6b7280;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.progress-btn[data-status="in_progress"] {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #f59e0b;
+}
+.progress-btn[data-status="successful"] {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #10b981;
+}
+.progress-btn[data-status="failed"] {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #ef4444;
+}
+.progress-btn[data-status="cancelled"] {
+  border-color: #9ca3af;
+  background: #f9fafb;
+  color: #9ca3af;
+}
+/* 更新表格列宽 */
+.emall-table th.col-select,
+.emall-table td.select-cell {
+  width: 60px;
+}
+.emall-table th.col-progress,
+.emall-table td.progress-cell {
+  width: 100px;
+}
+/* 调整其他列宽以适应新列 */
+.emall-table th.col-title,
+.emall-table td.project-title-cell {
+  max-width: 350px;
+  min-width: 250px;
+}
+.emall-table th.col-number,
+.emall-table td.project-number-cell {
+  min-width: 100px;
+}
+
+
+.progress-btn[data-status="not_started"] {
+  border-color: #6b7280;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.progress-btn[data-status="in_progress"] {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #f59e0b;
+}
+.progress-btn[data-status="successful"] {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #10b981;
+}
+.progress-btn[data-status="failed"] {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #ef4444;
+}
+.progress-btn[data-status="cancelled"] {
+  border-color: #9ca3af;
+  background: #f9fafb;
+  color: #9ca3af;
+}

@@ -40,6 +40,9 @@ export interface EmallItem {
   quote_start_time: string;
   quote_end_time: string;
   url?: string; // 使用模型中的url字段
+  // 新增字段
+  is_selected?: boolean;
+  bidding_status?: string;
 }
 export interface EmallListResponse {
   count: number;
@@ -56,4 +59,53 @@ export interface EmallFilterParams {
   ordering?: string;
   page?: number;
   page_size?: number;
+}
+
+
+
+export interface ProcurementProgressData {
+  procurement_id: number;
+  procurement_title: string;
+  procurement_number: string;
+  bidding_status: string;
+  bidding_status_display: string;
+  client_contact: string;
+  client_phone: string;
+  client_contacts: ClientContact[];
+  total_budget: number;
+  suppliers_info: Supplier[];
+  remarks_history: ProcurementRemark[];
+  created_at?: string;
+  updated_at?: string;
+}
+export interface ClientContact {
+  name: string;
+  phone: string;
+}
+export interface Supplier {
+  id: number;
+  name: string;
+  source: string;
+  contact: string;
+  store_name: string;
+  commodities: Commodity[];
+  total_quote: number;
+  profit: number;
+  is_selected: boolean;
+}
+export interface Commodity {
+  id?: number;
+  name: string;
+  specification: string;
+  price: number;
+  quantity: number;
+  product_url: string;
+  total?: number;
+}
+export interface ProcurementRemark {
+  id: number;
+  remark_content: string;
+  created_by: string;
+  created_at: string;
+  created_at_display: string;
 }

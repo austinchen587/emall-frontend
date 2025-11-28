@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { emallApi } from '../../services/api_emall';
 import { EmallItem, EmallFilterParams } from '../../services/types';
 import ProjectDetailModal from '../../components/emall/ProjectDetailModal';
+import ProcurementProgressModal from '../../components/emall/ProcurementProgressModal'; // 新增导入
 import './EmallList.css';
 
 const EmallList: React.FC = () => {
@@ -13,6 +14,11 @@ const EmallList: React.FC = () => {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [selectedProject, setSelectedProject] = useState<EmallItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 新增采购进度相关状态
+  const [isProcurementModalOpen, setIsProcurementModalOpen] = useState(false);
+  const [selectedProcurementId, setSelectedProcurementId] = useState<number | null>(null);
+  const [selectedProcurementTitle, setSelectedProcurementTitle] = useState<string>('');
   
   // 筛选状态
   const [filters, setFilters] = useState<EmallFilterParams>({
@@ -25,38 +31,89 @@ const EmallList: React.FC = () => {
     page_size: 20
   });
 
+  // 处理选择采购状态
+  const handleSelectProcurement = async (item: EmallItem, isSelected: boolean) => {
+    try {
+      // 调用后端API更新选择状态
+      await emallApi.toggleProcurementSelection(item.id, isSelected);
+      
+      // 更新本地状态
+      setEmallItems(prev => prev.map(emallItem => 
+        emallItem.id === item.id 
+          ? { ...emallItem, is_selected: isSelected }
+          : emallItem
+      ));
+    } catch (error) {
+      console.error('更新采购选择状态失败:', error);
+      alert('操作失败，请重试');
+    }
+  };
+  // 在 EmallList.tsx 中，修改 handleProgressClick 函数，添加类型保护
+const handleProgressClick = (item: EmallItem) => {
+  // 添加类型检查
+  if (!item.is_selected) {
+    console.warn('项目未被选中，无法查看采购进度');
+    return;
+  }
+  
+  setSelectedProcurementId(item.id);
+  setSelectedProcurementTitle(item.project_title);
+  setIsProcurementModalOpen(true);
+};
+// 修改竞标状态显示函数，处理 undefined 情况
+const getBiddingStatusDisplay = (status?: string) => {
+  const statusMap: { [key: string]: string } = {
+    'not_started': '未开始',
+    'in_progress': '进行中',
+    'successful': '竞标成功',
+    'failed': '竞标失败',
+    'cancelled': '已取消'
+  };
+  return status ? statusMap[status] || '未开始' : '未开始';
+};
+
   useEffect(() => {
     fetchEmallList();
   }, [filters]);
 
   const fetchEmallList = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // 清理空值参数
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => 
-          value !== '' && value !== undefined && value !== null
-        )
-      );
-      
-      const response = await emallApi.getEmallList(cleanFilters);
-      
-      if (response.data.results) {
-        setEmallItems(response.data.results);
-        setTotalCount(response.data.count || response.data.results.length);
-      } else {
-        setEmallItems(response.data as any);
-        setTotalCount((response.data as any).length);
-      }
-    } catch (err: any) {
-      console.error('获取采购数据失败:', err);
-      setError(err.response?.data?.detail || err.response?.data?.message || '获取数据失败，请稍后重试');
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const cleanFilters = Object.fromEntries(
+      Object.entries(filters).filter(([_, value]) => 
+        value !== '' && value !== undefined && value !== null
+      )
+    );
+    
+    const response = await emallApi.getEmallList(cleanFilters);
+    
+    let items = [];
+    if (response.data.results) {
+      items = response.data.results;
+      setTotalCount(response.data.count || response.data.results.length);
+    } else {
+      items = response.data as any;
+      setTotalCount((response.data as any).length);
     }
-  };
+    
+    // 为每个项目添加默认值
+    const processedItems = items.map((item: EmallItem) => ({
+      ...item,
+      is_selected: item.is_selected || false,
+      bidding_status: item.bidding_status || 'not_started'
+    }));
+    
+    setEmallItems(processedItems);
+    
+  } catch (err: any) {
+    console.error('获取采购数据失败:', err);
+    setError(err.response?.data?.detail || err.response?.data?.message || '获取数据失败，请稍后重试');
+  } finally {
+    setLoading(false);
+  }
+};
   // 处理项目编号点击事件
   const handleProjectNumberClick = (item: EmallItem) => {
     console.log('点击项目编号:', item.project_number);
@@ -246,7 +303,6 @@ const EmallList: React.FC = () => {
           </div>
         </div>
       </div>
-
       {error && (
         <div className="error-message">
           <div className="error-content">
@@ -258,10 +314,9 @@ const EmallList: React.FC = () => {
           </div>
         </div>
       )}
-
       <div className="table-wrapper">
         <div className="table-header">
-          
+          <div className="table-info">显示 {emallItems.length} 个项目，共 {totalCount} 个</div>
         </div>
         
         <div className="emall-table-container">
@@ -274,6 +329,8 @@ const EmallList: React.FC = () => {
                 <th className="col-price">总控制价格</th>
                 <th className="col-date">发布时间</th>
                 <th className="col-date">截止时间</th>
+                <th className="col-select">选择项目</th>
+                <th className="col-progress">采购进度</th>
               </tr>
             </thead>
             <tbody>
@@ -284,6 +341,7 @@ const EmallList: React.FC = () => {
                 return (
                   <React.Fragment key={item.id}>
                     <tr className={`emall-row ${isExpanded ? 'expanded' : ''}`}>
+                      {/* 项目标题 */}
                       <td className="project-title-cell">
                         <div className="title-content">
                           {isValidUrl(item.url) ? (
@@ -316,34 +374,70 @@ const EmallList: React.FC = () => {
                           )}
                         </div>
                       </td>
+                      
+                      {/* 项目编号 */}
                       <td className="project-number-cell">
                         <code 
-                            className="project-number clickable"
-                            onClick={() => handleProjectNumberClick(item)}
-                            title="点击查看项目详情"
-                            >
-                            {item.project_number || '-'}
-                            </code>
-                        
+                          className="project-number clickable"
+                          onClick={() => handleProjectNumberClick(item)}
+                          title="点击查看项目详情"
+                        >
+                          {item.project_number || '-'}
+                        </code>
                       </td>
+                      
+                      {/* 采购单位 */}
                       <td className="purchasing-unit-cell">
                         <span className="unit-text">{item.purchasing_unit}</span>
                       </td>
+                      
+                      {/* 总控制价格 */}
                       <td className="price-cell">
                         <span className="price-value">
                           {formatCurrency(item.total_price_numeric)}
                         </span>
                       </td>
+                      
+                      {/* 发布时间 */}
                       <td className="date-cell">
                         <span className="date-value">{formatDate(item.publish_date)}</span>
                       </td>
+                      
+                      {/* 截止时间 */}
                       <td className="date-cell">
                         <span className="date-value">{formatDate(item.quote_end_time)}</span>
                       </td>
+                      
+                      {/* 选择项目 */}
+                      <td className="select-cell">
+                        <div className="select-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={item.is_selected || false}
+                            onChange={(e) => handleSelectProcurement(item, e.target.checked)}
+                            className="procurement-checkbox"
+                          />
+                        </div>
+                      </td>
+                      
+                      {/* 采购进度 */}
+                      <td className="progress-cell">
+                        {item.is_selected && item.bidding_status && (
+                          <button
+                            className="progress-btn"
+                            onClick={() => handleProgressClick(item)}
+                            title="查看采购进度"
+                            data-status={item.bidding_status}
+                          >
+                            {getBiddingStatusDisplay(item.bidding_status)}
+                          </button>
+                        )}
+                      </td>
                     </tr>
+                    
                     {isExpanded && (
                       <tr className="detail-row">
-                        <td colSpan={6}>
+                        <td colSpan={8}>
                           <div className="project-details">
                             <div className="detail-section">
                               <h4>项目详情</h4>
@@ -408,14 +502,26 @@ const EmallList: React.FC = () => {
           </div>
         )}
       </div>
+      
       {/* 项目详情弹窗 */}
       <ProjectDetailModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         project={selectedProject}
       />
+      
+      {/* 采购进度弹窗 */}
+      <ProcurementProgressModal
+        isOpen={isProcurementModalOpen}
+        onClose={() => setIsProcurementModalOpen(false)}
+        procurementId={selectedProcurementId!}
+        procurementTitle={selectedProcurementTitle}
+      />
     </div>
   );
 };
+
+
+
 
 export default EmallList;
