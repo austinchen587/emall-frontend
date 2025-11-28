@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { emallApi } from '../../services/api_emall';
 import { EmallItem, EmallFilterParams } from '../../services/types';
+import ProjectDetailModal from '../../components/emall/ProjectDetailModal';
 import './EmallList.css';
 
 const EmallList: React.FC = () => {
@@ -10,6 +11,8 @@ const EmallList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [selectedProject, setSelectedProject] = useState<EmallItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // 筛选状态
   const [filters, setFilters] = useState<EmallFilterParams>({
@@ -53,6 +56,16 @@ const EmallList: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+  // 处理项目编号点击事件
+  const handleProjectNumberClick = (item: EmallItem) => {
+    setSelectedProject(item);
+    setIsModalOpen(true);
+  };
+  // 关闭弹窗
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProject(null);
   };
 
   // 处理筛选条件变化
@@ -298,7 +311,14 @@ const EmallList: React.FC = () => {
                         </div>
                       </td>
                       <td className="project-number-cell">
-                        <code className="project-number">{item.project_number || '-'}</code>
+                        <code 
+                            className="project-number clickable"
+                            onClick={() => handleProjectNumberClick(item)}
+                            title="点击查看项目详情"
+                            >
+                            {item.project_number || '-'}
+                            </code>
+                        
                       </td>
                       <td className="purchasing-unit-cell">
                         <span className="unit-text">{item.purchasing_unit}</span>
@@ -382,6 +402,12 @@ const EmallList: React.FC = () => {
           </div>
         )}
       </div>
+      {/* 项目详情弹窗 */}
+      <ProjectDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        project={selectedProject}
+      />
     </div>
   );
 };

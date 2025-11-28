@@ -22,7 +22,7 @@ export interface AuthResponse {
 }
 
 // 模拟的 authAPI - 连接您的 Django 后端
-const API_BASE_URL = 'http://192.168.10.10:8000'; // 使用服务器 IP
+const API_BASE_URL = 'http://192.168.10.6:8000'; // 使用服务器 IP
 export const authAPI = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {

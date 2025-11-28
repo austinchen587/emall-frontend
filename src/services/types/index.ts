@@ -27,6 +27,14 @@ export interface EmallItem {
   project_name: string;
   project_number: string;
   commodity_names: string;
+  parameter_requirements: string[] | null;
+  purchase_quantities: string[] | null;
+  control_amounts: string[] | null;
+  suggested_brands: string[] | null;
+  business_items: string[] | null;
+  business_requirements: string[] | null;
+  related_links: string[] | null;
+  download_files: string[] | null;
   total_price_control: string;
   total_price_numeric: number | null;
   quote_start_time: string;

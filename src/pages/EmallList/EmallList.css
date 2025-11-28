@@ -510,3 +510,16 @@
     justify-content: center;
   }
 }
+
+
+.project-number.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.project-number.clickable:hover {
+  background: #4299e1 !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
