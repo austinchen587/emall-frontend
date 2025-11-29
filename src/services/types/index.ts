@@ -59,6 +59,7 @@ export interface EmallFilterParams {
   ordering?: string;
   page?: number;
   page_size?: number;
+  show_selected_only?: boolean; // 添加这个字段
 }
 
 

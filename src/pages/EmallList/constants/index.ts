@@ -5,8 +5,9 @@ export const DEFAULT_FILTERS = {
   project_number: '',
   total_price_condition: '',
   search: '',
+  show_selected_only: false, // 新增
   page: 1,
-  page_size: 20
+  page_size: 100 // 改为100条/页
 };
 
 export const STATUS_DISPLAY_MAP: Record<string, string> = {

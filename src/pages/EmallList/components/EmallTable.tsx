@@ -2,6 +2,7 @@
 import React from 'react';
 import { EmallItem } from '../../../services/types';
 import EmallTableRow from './EmallTableRow';
+import Pagination from './Pagination';
 
 interface EmallTableProps {
   emallItems: EmallItem[];
@@ -18,6 +19,10 @@ interface EmallTableProps {
   getBiddingStatusDisplay: (status?: string) => string;
   loading: boolean;
   totalCount: number;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
 }
 
 const EmallTable: React.FC<EmallTableProps> = ({
@@ -34,12 +39,20 @@ const EmallTable: React.FC<EmallTableProps> = ({
   isTextLong,
   getBiddingStatusDisplay,
   loading,
-  totalCount
+  totalCount,
+  currentPage,
+  pageSize,
+  onPageChange,
+  onPageSizeChange
 }) => {
+  const totalPages = Math.ceil(totalCount / pageSize);
+
   return (
     <div className="table-wrapper">
       <div className="table-header">
-        <div className="table-info">显示 {emallItems.length} 个项目，共 {totalCount} 个</div>
+        <div className="table-info">
+          显示 {emallItems.length} 个项目，共 {totalCount} 个
+        </div>
       </div>
       
       <div className="emall-table-container">
@@ -95,6 +108,17 @@ const EmallTable: React.FC<EmallTableProps> = ({
           </div>
           加载更多数据...
         </div>
+      )}
+      
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+        />
       )}
     </div>
   );

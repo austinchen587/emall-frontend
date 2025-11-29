@@ -47,7 +47,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <label className="filter-label">采购单位</label>
           <input
             type="text"
-            value={filters.purchasing_unit || ''}
+           value={filters.purchasing_unit || ''}
             onChange={(e) => onFilterChange('purchasing_unit', e.target.value)}
             placeholder="输入采购单位名称..."
             className="filter-input"
@@ -85,6 +85,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             placeholder="输入任意关键词搜索..."
             className="filter-input"
           />
+        </div>
+        
+        {/* 新增：只看选择项目复选框 */}
+        <div className="filter-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="checkbox"
+            id="show_selected_only"
+            checked={filters.show_selected_only || false}
+            onChange={(e) => onFilterChange('show_selected_only', e.target.checked)}
+            style={{ width: '16px', height: '16px' }}
+          />
+          <label htmlFor="show_selected_only" className="filter-label" style={{ margin: 0 }}>
+            只看选择项目
+          </label>
         </div>
       </div>
     </div>

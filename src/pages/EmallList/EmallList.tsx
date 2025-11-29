@@ -40,6 +40,15 @@ const EmallList: React.FC = () => {
     fetchEmallList();
   }, [fetchEmallList]);
 
+  // 分页处理
+  const handlePageChange = (page: number) => {
+    handleFilterChange('page', page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    handleFilterChange('page_size', size);
+  };
+
   // 事件处理函数
   const handleProgressClick = (item: any) => {
     if (!item.is_selected) {
@@ -114,9 +123,17 @@ const EmallList: React.FC = () => {
         onProjectTitleClick={handleProjectTitleClick}
         onSelectProcurement={handleSelectProcurement}
         onProgressClick={handleProgressClick}
-        {...utils}
+        formatCurrency={utils.formatCurrency}
+        formatDate={utils.formatDate}
+        isValidUrl={utils.isValidUrl}
+        isTextLong={utils.isTextLong}
+        getBiddingStatusDisplay={utils.getBiddingStatusDisplay}
         loading={loading}
         totalCount={totalCount}
+        currentPage={filters.page || 1}
+        pageSize={filters.page_size || 100}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
       
       {/* 模态框 */}
