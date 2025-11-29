@@ -313,6 +313,7 @@
   border-bottom: 1px solid #f1f5f9;
   vertical-align: top;
   transition: background-color 0.2s ease;
+  color: #2d3748; /* 确保表格内容文字颜色 */
 }
 
 .commodity-table tr:hover td,

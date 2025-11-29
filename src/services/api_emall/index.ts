@@ -13,7 +13,7 @@ export const emallApi = {
    * 获取单个采购项目详情
    */
   getEmallDetail: (id: number): Promise<{ data: EmallItem }> => 
-    apiClient.get(`/emall/detail/${id}/`),
+    apiClient.get(`/procurements/${id}/`),
   
   /**
    * 创建采购项目
