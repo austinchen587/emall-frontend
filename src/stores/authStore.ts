@@ -1,6 +1,6 @@
 // src/stores/authStore.ts
 import { create } from 'zustand';
-import { authAPI, LoginRequest, RegisterRequest } from '@/services/api_auth/auth';
+import { authAPI, LoginRequest, RegisterRequest } from '../services/api_auth/auth';
 
 interface User {
   id: number;
@@ -16,7 +16,7 @@ interface AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<void>;
+  checkAuth: () => Promise<{ user: User | null; isAuthenticated: boolean }>;
   clearError: () => void;
 }
 
@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error:',error);
     } finally {
       // Session 认证只需要清除前端状态，后端 session 会在服务器端失效
       set({
@@ -104,14 +104,16 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({
           user: response.user,
           isAuthenticated: true,
-          isLoading: false
+ isLoading: false
         });
+        return { user: response.user, isAuthenticated: true };
       } else {
         set({
           user: null,
           isAuthenticated: false,
           isLoading: false
         });
+        return { user: null, isAuthenticated: false };
       }
     } catch (error) {
       console.error('checkAuth错误:', error);
@@ -120,6 +122,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: false, 
         isLoading: false 
       });
+      return { user: null, isAuthenticated: false };
     }
   },
 
