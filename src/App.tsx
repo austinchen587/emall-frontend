@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import EmallList from './pages/EmallList';
 import './App.css';
 
-// 保护路由组件
+// 完全保护的路由组件
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return (
       <div style={{ 
         display: 'flex', 
- justifyContent: 'center', 
+        justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh' 
       }}>
@@ -31,6 +31,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// 部分保护的路由 - 允许访问但某些功能需要认证
+const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
+
 function App() {
   return (
     <Router>
@@ -39,17 +44,18 @@ function App() {
           {/* 登录页 */}
           <Route path="/login" element={<Login />} />
           
-          {/* 需要认证的路由 */}
+          {/* 需要完全认证的路由 */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           } />
           
+          {/* EmallList 公开访问 */}
           <Route path="/emall-list" element={
-            <ProtectedRoute>
+            <PublicRoute>
               <EmallList />
-            </ProtectedRoute>
+            </PublicRoute>
           } />
 
           <Route path="/procurement" element={
@@ -64,9 +70,9 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* 默认重定向到登录页 */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* 默认重定向 */}
+          <Route path="/" element={<Navigate to="/emall-list" replace />} />
+          <Route path="*" element={<Navigate to="/emall-list" replace />} />
         </Routes>
       </div>
     </Router>

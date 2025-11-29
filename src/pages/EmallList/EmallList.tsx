@@ -1,191 +1,65 @@
 // src/pages/EmallList/EmallList.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { emallApi } from '../../services/api_emall';
-import { EmallItem, EmallFilterParams } from '../../services/types';
+import React, { useEffect } from 'react';
 import ProjectDetailModal from '../../components/emall/ProjectDetailModal';
 import ProcurementProgressModal from '../../components/emall/ProcurementProgressModal';
 import FilterSection from './components/FilterSection';
 import EmallTable from './components/EmallTable';
+import { useEmallData } from './hooks/useEmallData';
+import { useModalState } from './hooks/useModalState';
+import { useExpandedRows } from './hooks/useExpandedRows';
 import './EmallList.css';
 
 const EmallList: React.FC = () => {
-  const [emallItems, setEmallItems] = useState<EmallItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [selectedProject, setSelectedProject] = useState<EmallItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isProcurementModalOpen, setIsProcurementModalOpen] = useState(false);
-  const [selectedProcurementId, setSelectedProcurementId] = useState<number | null>(null);
-  const [selectedProcurementTitle, setSelectedProcurementTitle] = useState<string>('');
-  
-  const [filters, setFilters] = useState<EmallFilterParams>({
-    project_title: '',
-    purchasing_unit: '',
-    project_number: '',
-    total_price_condition: '',
-    search: '',
-    page: 1,
-    page_size: 20
-  });
+  const {
+    emallItems,
+    loading,
+    error,
+    totalCount,
+    filters,
+    fetchEmallList,
+    handleSelectProcurement,
+    handleFilterChange,
+    resetFilters,
+    utils
+  } = useEmallData();
 
-  // 数据获取 - 直接获取，不需要认证检查
+  const {
+    modalState,
+    openProjectDetail,
+    openProcurementProgress,
+    closeModals
+  } = useModalState();
+
+  const {
+    expandedRows,
+    toggleRowExpansion
+  } = useExpandedRows();
+
+  // 副作用 - 监听过滤器变化
   useEffect(() => {
     fetchEmallList();
-  }, [filters]);
-
-  const fetchEmallList = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => 
-          value !== '' && value !== undefined && value !== null
-        )
-      );
-      
-      const response = await emallApi.getEmallList(cleanFilters);
-      
-      let items = [];
-      if (response.data.results) {
-        items = response.data.results;
-        setTotalCount(response.data.count || response.data.results.length);
-      } else {
-        items = response.data as any;
-        setTotalCount((response.data as any).length);
-      }
-      
-      const processedItems = items.map((item: EmallItem) => ({
-        ...item,
-        is_selected: item.is_selected || false,
-        bidding_status: item.bidding_status || 'not_started'
-      }));
-      
-      setEmallItems(processedItems);
-      
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.response?.data?.message || '获取数据失败，请稍后重试');
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-
-  // 工具函数
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null || amount === undefined) return '-';
-    return new Intl.NumberFormat('zh-CN', {
-      style: 'currency',
-      currency: 'CNY',
-      minimumFractionDigits: 2
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('zh-CN');
-  };
-
-  const isValidUrl = (url: string | undefined): boolean => {
-    if (!url) return false;
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const isTextLong = (text: string) => {
-    return text ? text.length > 50 : false;
-  };
-
-  const getBiddingStatusDisplay = (status?: string) => {
-    const statusMap: { [key: string]: string } = {
-      'not_started': '未开始',
-      'in_progress': '进行中',
-      'successful': '竞标成功',
-      'failed': '竞标失败',
-      'cancelled': '已取消'
-    };
-    return status ? statusMap[status] || '未开始' : '未开始';
-  };
+  }, [fetchEmallList]);
 
   // 事件处理函数
-  const handleFilterChange = (key: keyof EmallFilterParams, value: any) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value,
-      page: 1
-    }));
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      project_title: '',
-      purchasing_unit: '',
-      project_number: '',
-      total_price_condition: '',
-      search: '',
-      page: 1,
-      page_size: 20
-    });
-  };
-
-  const handleSelectProcurement = async (item: EmallItem, isSelected: boolean) => {
-    try {
-      await emallApi.toggleProcurementSelection(item.id, isSelected);
-      setEmallItems(prev => prev.map(emallItem => 
-        emallItem.id === item.id 
-          ? { ...emallItem, is_selected: isSelected }
-          : emallItem
-      ));
-    } catch (error) {
-      console.error('更新采购选择状态失败:', error);
-      alert('操作失败，请重试');
-    }
-  };
-
-  const handleProgressClick = (item: EmallItem) => {
+  const handleProgressClick = (item: any) => {
     if (!item.is_selected) {
-      console.warn('项目未被选中，无法查看采购进度');
+      alert('项目未被选中，无法查看采购进度');
       return;
     }
-    setSelectedProcurementId(item.id);
-    setSelectedProcurementTitle(item.project_title);
-    setIsProcurementModalOpen(true);
+    openProcurementProgress(item.id, item.project_title);
   };
 
-  const handleProjectNumberClick = (item: EmallItem) => {
-    setSelectedProject(item);
-    setIsModalOpen(true);
+  const handleProjectNumberClick = (item: any) => {
+    openProjectDetail(item);
   };
 
-  const handleProjectTitleClick = (item: EmallItem) => {
+  const handleProjectTitleClick = (item: any) => {
     if (item.url) {
       window.open(item.url, '_blank', 'noopener,noreferrer');
     }
   };
 
-  const toggleRowExpansion = (id: number) => {
-    setExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProject(null);
-  };
-
-  // 渲染逻辑 - 移除认证检查
+  // 渲染加载状态
   if (loading && emallItems.length === 0) {
     return (
       <div className="emall-container">
@@ -199,6 +73,7 @@ const EmallList: React.FC = () => {
 
   return (
     <div className="emall-container">
+      {/* 头部信息 */}
       <div className="emall-header">
         <div className="header-content">
           <h1>采购项目列表</h1>
@@ -209,6 +84,7 @@ const EmallList: React.FC = () => {
         </div>
       </div>
       
+      {/* 过滤器区域 */}
       <FilterSection
         filters={filters}
         onFilterChange={handleFilterChange}
@@ -216,6 +92,7 @@ const EmallList: React.FC = () => {
         onSearch={fetchEmallList}
       />
       
+      {/* 错误提示 */}
       {error && (
         <div className="error-message">
           <div className="error-content">
@@ -228,6 +105,7 @@ const EmallList: React.FC = () => {
         </div>
       )}
       
+      {/* 数据表格 */}
       <EmallTable
         emallItems={emallItems}
         expandedRows={expandedRows}
@@ -236,26 +114,23 @@ const EmallList: React.FC = () => {
         onProjectTitleClick={handleProjectTitleClick}
         onSelectProcurement={handleSelectProcurement}
         onProgressClick={handleProgressClick}
-        formatCurrency={formatCurrency}
-        formatDate={formatDate}
-        isValidUrl={isValidUrl}
-        isTextLong={isTextLong}
-        getBiddingStatusDisplay={getBiddingStatusDisplay}
+        {...utils}
         loading={loading}
         totalCount={totalCount}
       />
       
+      {/* 模态框 */}
       <ProjectDetailModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        project={selectedProject}
+        isOpen={modalState.projectDetail.isOpen}
+        onClose={closeModals}
+        project={modalState.projectDetail.project}
       />
       
       <ProcurementProgressModal
-        isOpen={isProcurementModalOpen}
-        onClose={() => setIsProcurementModalOpen(false)}
-        procurementId={selectedProcurementId!}
-        procurementTitle={selectedProcurementTitle}
+        isOpen={modalState.procurementProgress.isOpen}
+        onClose={closeModals}
+        procurementId={modalState.procurementProgress.id!}
+        procurementTitle={modalState.procurementProgress.title}
       />
     </div>
   );

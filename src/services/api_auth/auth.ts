@@ -32,6 +32,7 @@ export const authAPI = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest', // 添加这个头
         },
         credentials: 'include', // 重要：包含 session cookie
         body: JSON.stringify(credentials),
@@ -99,21 +100,36 @@ export const authAPI = {
   // 添加 session 检查方法（替代 token 验证）
   checkSession: async (): Promise<AuthResponse> => {
     try {
+      console.log('检查会话状态...');
       const response = await fetch(`${API_BASE_URL}/api/auth/check-session/`, {
         method: 'GET',
         credentials: 'include', // 重要：包含 session cookie
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
       });
+      console.log('会话检查响应状态:', response.status);
+      
+      if (response.status === 401) {
+        // 未认证是正常情况
+        return {
+          status: 'error',
+          message: '未认证'
+        };
+      }
 
       if (!response.ok) {
         throw new Error('Session check failed');
       }
 
       const data = await response.json();
+      console.log('会话检查数据:', data);
       return data;
     } catch (error) {
+      console.error('Session check error:', error);
       return {
         status: 'error',
-        message: 'Session check failed'
+        message: error instanceof Error ? error.message : '会话检查失败'
       };
     }
   },
