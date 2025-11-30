@@ -8,68 +8,70 @@ interface FileLinksSectionProps {
 }
 
 const FileLinksSection: React.FC<FileLinksSectionProps> = ({ project }) => {
-  const renderDownloadFiles = () => {
+  const renderDownloadFilesWithLinks = () => {
     const files = getSafeArray(project.download_files);
+    const links = getSafeArray(project.related_links);
     
-    if (files.length === 0) {
+    console.log('下载文件数据:', files);
+    console.log('相关链接数据:', links);
+
+    // 如果都没有数据
+    if (files.length === 0 && links.length === 0) {
       return <div className="no-data">暂无下载文件</div>;
     }
 
+    // 如果文件数量多于链接数量，用文件数量作为基准
+    const itemCount = Math.max(files.length, links.length);
+
     return (
       <div className="download-files">
-        {files.map((file, index) => (
-          <div key={index} className="file-item">
-            <span className="file-icon">📎</span>
-            <span className="file-name">{file}</span>
-          </div>
-        ))}
+        {Array.from({ length: itemCount }).map((_, index) => {
+          const fileName = files[index] || `文件${index + 1}`;
+          const fileLink = links[index] || '#';
+          const hasLink = links[index] !== undefined;
+
+          return (
+            <div key={index} className="file-item">
+              <span className="file-icon">📎</span>
+              {hasLink ? (
+                <a 
+                  href={fileLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="file-link"
+                  title={`下载: ${fileName}`}
+                >
+                  {fileName}
+                </a>
+              ) : (
+                <span className="file-name" title={fileName}>
+                  {fileName}
+                </span>
+              )}
+              {hasLink && (
+                <span className="link-info" title={fileLink}>
+                  {fileLink.length > 40 ? `${fileLink.substring(0, 40)}...` : fileLink}
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
 
-  const renderRelatedLinks = () => {
-    const links = getSafeArray(project.related_links);
-    
-    if (links.length === 0) {
-      return <div className="no-data">暂无相关链接</div>;
-    }
+  // 只有当有下载文件或相关链接时才显示这个区块
+  const hasDownloadData = hasArrayData(project.download_files) || hasArrayData(project.related_links);
 
-    return (
-      <div className="related-links">
-        {links.map((link, index) => (
-          <div key={index} className="link-item">
-            <span className="link-icon">🔗</span>
-            <a 
-              href={link} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="link-url"
-              title={link}
-            >
-              {link.length > 50 ? `${link.substring(0, 50)}...` : link}
-            </a>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  if (!hasDownloadData) {
+    return null;
+  }
 
   return (
-    <>
-      {hasArrayData(project.related_links) && (
-        <div className="info-section">
-          <h4>相关链接</h4>
-          {renderRelatedLinks()}
-        </div>
-      )}
-      
-      {hasArrayData(project.download_files) && (
-        <div className="info-section">
-          <h4>下载文件</h4>
-          {renderDownloadFiles()}
-        </div>
-      )}
-    </>
+    <div className="info-section">
+      <h4>下载文件</h4>
+      {renderDownloadFilesWithLinks()}
+    </div>
   );
 };
 
