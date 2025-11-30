@@ -1,7 +1,7 @@
 // src/components/emall/ProcurementProgressModal.tsx
 import React, { useState, useEffect } from 'react';
 import { emallApi } from '../../services/api_emall';
-import { ProcurementProgressData, UpdateProgressData } from '../../services/types'; // 确保从这里导入
+import { ProcurementProgressData, UpdateProgressData, ClientContact } from '../../services/types';
 import ModalTabs from './ModalTabs';
 import OverviewTab from './tabs/OverviewTab';
 import BasicInfoTab from './tabs/BasicInfoTab';
@@ -29,10 +29,9 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   const [newRemark, setNewRemark] = useState('');
   const [remarkCreator, setRemarkCreator] = useState('系统管理员');
   
-  // 表单状态
+  // 表单状态 - 更新为多个联系人
   const [biddingStatus, setBiddingStatus] = useState('not_started');
-  const [clientContact, setClientContact] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
+  const [clientContacts, setClientContacts] = useState<ClientContact[]>([]);
   const [supplierSelection, setSupplierSelection] = useState<{[key: number]: boolean}>({});
 
   useEffect(() => {
@@ -49,8 +48,8 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
       
       // 初始化表单状态
       setBiddingStatus(response.data.bidding_status);
-      setClientContact(response.data.client_contact || '');
-      setClientPhone(response.data.client_phone || '');
+      // 使用新的 client_contacts 数组
+      setClientContacts(response.data.client_contacts || []);
       
       // 初始化供应商选择状态
       const selection: {[key: number]: boolean} = {};
@@ -71,8 +70,7 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
     try {
       const updateData: UpdateProgressData = {
         bidding_status: biddingStatus,
-        client_contact: clientContact,
-        client_phone: clientPhone,
+        client_contacts: clientContacts, // 更新为多个联系人数组
         supplier_selection: Object.entries(supplierSelection).map(([supplierId, isSelected]) => ({
           supplier_id: parseInt(supplierId),
           is_selected: isSelected
@@ -134,6 +132,11 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
     }
   };
 
+  // 添加联系人管理函数
+  const handleClientContactsChange = (contacts: ClientContact[]) => {
+    setClientContacts(contacts);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -164,11 +167,9 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                 <BasicInfoTab
                   data={progressData}
                   biddingStatus={biddingStatus}
-                  clientContact={clientContact}
-                  clientPhone={clientPhone}
+                  clientContacts={clientContacts} // 传递多个联系人
                   onBiddingStatusChange={setBiddingStatus}
-                  onClientContactChange={setClientContact}
-                  onClientPhoneChange={setClientPhone}
+                  onClientContactsChange={handleClientContactsChange} // 更新处理函数
                 />
               )}
 

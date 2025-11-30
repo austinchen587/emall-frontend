@@ -299,12 +299,15 @@
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.3s;
+  color: #000000;
 }
 
 .form-select:focus, .form-input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  /* 确保获得焦点时字体颜色也是黑色 */
+  color: #000000;
 }
 
 /* 供应商管理样式 */
@@ -605,4 +608,106 @@
   .creator-input {
     width: 100%;
   }
+}
+
+
+
+/* 联系人信息卡片样式 */
+.contact-info-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.contact-info-card h4 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 1.125rem;
+}
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.contact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.contact-label {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+.contact-value {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+
+/* 联系人相关样式 */
+.contacts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.btn-add-contact {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.contact-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+.contact-fields {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+}
+.contact-fields .form-input {
+  flex: 1;
+}
+.btn-remove-contact {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.btn-remove-contact:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+.contact-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.contact-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+.contact-info {
+  color: #64748b;
+}
+.no-contacts {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 20px;
 }
