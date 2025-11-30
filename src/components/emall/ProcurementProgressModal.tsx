@@ -27,9 +27,8 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newRemark, setNewRemark] = useState('');
-  const [remarkCreator, setRemarkCreator] = useState('系统管理员');
   
-  // 表单状态 - 更新为多个联系人
+  // 表单状态
   const [biddingStatus, setBiddingStatus] = useState('not_started');
   const [clientContacts, setClientContacts] = useState<ClientContact[]>([]);
   const [supplierSelection, setSupplierSelection] = useState<{[key: number]: boolean}>({});
@@ -48,7 +47,6 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
       
       // 初始化表单状态
       setBiddingStatus(response.data.bidding_status);
-      // 使用新的 client_contacts 数组
       setClientContacts(response.data.client_contacts || []);
       
       // 初始化供应商选择状态
@@ -68,20 +66,22 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   const handleSaveAllData = async () => {
     setSaving(true);
     try {
+      // 构建更新数据
       const updateData: UpdateProgressData = {
         bidding_status: biddingStatus,
-        client_contacts: clientContacts, // 更新为多个联系人数组
+        client_contacts: clientContacts,
         supplier_selection: Object.entries(supplierSelection).map(([supplierId, isSelected]) => ({
           supplier_id: parseInt(supplierId),
           is_selected: isSelected
-        })),
-        ...(newRemark.trim() && remarkCreator.trim() && {
-          new_remark: {
-            remark_content: newRemark,
-            created_by: remarkCreator
-          }
-        })
+        }))
       };
+
+      // 如果有新备注，添加到更新数据中
+      if (newRemark.trim()) {
+        updateData.new_remark = {
+          remark_content: newRemark
+        };
+      }
 
       await emallApi.updateProgressData(procurementId, updateData);
       
@@ -106,16 +106,15 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   };
 
   const handleAddRemark = async () => {
-    if (!newRemark.trim() || !remarkCreator.trim()) {
-      alert('请填写备注内容和创建人');
+    if (!newRemark.trim()) {
+      alert('请填写备注内容');
       return;
     }
 
     try {
       const updateData: UpdateProgressData = {
         new_remark: {
-          remark_content: newRemark,
-          created_by: remarkCreator
+          remark_content: newRemark
         }
       };
 
@@ -132,7 +131,6 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
     }
   };
 
-  // 添加联系人管理函数
   const handleClientContactsChange = (contacts: ClientContact[]) => {
     setClientContacts(contacts);
   };
@@ -167,9 +165,9 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                 <BasicInfoTab
                   data={progressData}
                   biddingStatus={biddingStatus}
-                  clientContacts={clientContacts} // 传递多个联系人
+                  clientContacts={clientContacts}
                   onBiddingStatusChange={setBiddingStatus}
-                  onClientContactsChange={handleClientContactsChange} // 更新处理函数
+                  onClientContactsChange={handleClientContactsChange}
                 />
               )}
 
@@ -185,9 +183,7 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                 <RemarksTab
                   data={progressData}
                   newRemark={newRemark}
-                  remarkCreator={remarkCreator}
                   onNewRemarkChange={setNewRemark}
-                  onRemarkCreatorChange={setRemarkCreator}
                   onAddRemark={handleAddRemark}
                 />
               )}

@@ -126,6 +126,6 @@ export interface UpdateProgressData {
 	supplier_selection?: SupplierSelection[];
 	new_remark?: {
 		remark_content: string;
-		created_by: string;
+		
 	};
 }

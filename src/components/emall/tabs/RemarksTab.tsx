@@ -1,22 +1,18 @@
 // src/components/emall/tabs/RemarksTab.tsx
 import React from 'react';
-import { ProcurementProgressData } from '../../../services/types'; // 修正导入路径
+import { ProcurementProgressData } from '../../../services/types';
 
 interface RemarksTabProps {
   data: ProcurementProgressData;
   newRemark: string;
-  remarkCreator: string;
   onNewRemarkChange: (remark: string) => void;
-  onRemarkCreatorChange: (creator: string) => void;
   onAddRemark: () => void;
 }
 
 const RemarksTab: React.FC<RemarksTabProps> = ({
   data,
   newRemark,
-  remarkCreator,
   onNewRemarkChange,
-  onRemarkCreatorChange,
   onAddRemark
 }) => {
   return (
@@ -32,31 +28,31 @@ const RemarksTab: React.FC<RemarksTabProps> = ({
             rows={3}
           />
           <div className="remark-controls">
-            <input
-              type="text"
-              value={remarkCreator}
-              onChange={(e) => onRemarkCreatorChange(e.target.value)}
-              placeholder="创建人"
-              className="creator-input"
-            />
             <button onClick={onAddRemark} className="btn-add-remark">
               添加备注
             </button>
+          </div>
+          <div className="remark-note">
+            <small>备注将自动记录您的用户名</small>
           </div>
         </div>
       </div>
 
       <div className="remarks-history">
         <h4>备注历史</h4>
-        {data.remarks_history.map(remark => (
-          <div key={remark.id} className="remark-history-item">
-            <div className="remark-meta">
-              <span className="creator">{remark.created_by}</span>
-              <span className="time">{remark.created_at_display}</span>
+        {data.remarks_history && data.remarks_history.length > 0 ? (
+          data.remarks_history.map(remark => (
+            <div key={remark.id} className="remark-history-item">
+              <div className="remark-meta">
+                <span className="creator">{remark.created_by}</span>
+                <span className="time">{remark.created_at_display}</span>
+              </div>
+              <p className="content">{remark.remark_content}</p>
             </div>
-            <p className="content">{remark.remark_content}</p>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="no-remarks">暂无备注</p>
+        )}
       </div>
     </div>
   );

@@ -32,19 +32,28 @@ export const authAPI = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest', // 添加这个头
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        credentials: 'include', // 重要：包含 session cookie
+        credentials: 'include',
         body: JSON.stringify(credentials),
       });
+      
       console.log('响应状态:', response.status, response.statusText);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
+      
       const data = await response.json();
       console.log('后端返回的数据:', data);
+      
+      // 修复：登录成功后设置username cookie
+      if (data.status === 'success' && data.user) {
+        // 设置username cookie，有效期24小时
+        document.cookie = `username=${encodeURIComponent(data.user.username)}; path=/; max-age=86400; SameSite=Lax`;
+        console.log('已设置username cookie:', data.user.username);
+      }
       
       return data;
       

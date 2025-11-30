@@ -1,4 +1,4 @@
-// src/stores/authStore.ts
+// src/stores/authStore.ts (最简版本)
 import { create } from 'zustand';
 import { authAPI, LoginRequest, RegisterRequest } from '../services/api_auth/auth';
 
@@ -16,10 +16,11 @@ interface AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<{ user: User | null; isAuthenticated: boolean }>;
+  checkAuth: () => Promise<void>;
   clearError: () => void;
 }
 
+// 最简单的版本，不使用 get 参数
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
@@ -31,21 +32,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await authAPI.login(credentials);
       
-      console.log('authStore 接收到的响应:', response);
-      
       if (response.status === 'success') {
-        // Session 认证不需要存储 token，只需设置用户状态
+        const userData = response.user || null;
         set({
-          user: response.user || null,
+          user: userData,
           isAuthenticated: true,
           isLoading: false,
           error: null
         });
+        
+        if (userData) {
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
       } else {
         throw new Error(response.message || '登录失败');
       }
     } catch (error) {
-      console.error('登录错误:', error);
       set({ 
         isLoading: false, 
         error: error instanceof Error ? error.message : '登录失败'
@@ -59,12 +61,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await authAPI.register(userData);
       if (response.status === 'success' && response.user) {
+        const userData = response.user;
         set({
-          user: response.user,
+          user: userData,
           isAuthenticated: true,
           isLoading: false,
           error: null
         });
+        
+        localStorage.setItem('user', JSON.stringify(userData));
       } else {
         throw new Error(response.message || '注册失败');
       }
@@ -81,39 +86,39 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:',error);
+      console.error('Logout error:', error);
     } finally {
-      // Session 认证只需要清除前端状态，后端 session 会在服务器端失效
       set({
         user: null,
         isAuthenticated: false,
         error: null
       });
+      
+      localStorage.removeItem('user');
+      document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   },
 
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      // Session 认证：直接调用后端检查当前会话状态
       const response = await authAPI.checkSession();
       
-      console.log('checkAuth 响应:', response);
-      
       if (response.status === 'success' && response.user) {
+        const userData = response.user;
         set({
-          user: response.user,
+          user: userData,
           isAuthenticated: true,
- isLoading: false
+          isLoading: false
         });
-        return { user: response.user, isAuthenticated: true };
+        
+        localStorage.setItem('user', JSON.stringify(userData));
       } else {
         set({
           user: null,
           isAuthenticated: false,
           isLoading: false
         });
-        return { user: null, isAuthenticated: false };
       }
     } catch (error) {
       console.error('checkAuth错误:', error);
@@ -122,9 +127,13 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: false, 
         isLoading: false 
       });
-      return { user: null, isAuthenticated: false };
     }
   },
 
   clearError: () => set({ error: null })
 }));
+
+// 导出 authStore 对象
+export const authStore = {
+  getState: () => useAuthStore.getState()
+};
