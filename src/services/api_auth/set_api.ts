@@ -35,6 +35,34 @@ const getUserFromStorage = (): { username: string } | null => {
   return null;
 };
 
+// 编码用户名（处理中文字符）
+const encodeUsernameForHeader = (username: string): string => {
+  try {
+    // 方法1: 使用 Base64 编码
+    return btoa(unescape(encodeURIComponent(username)));
+  } catch (error) {
+    console.warn('Base64 编码失败，尝试 URL 编码:', error);
+    // 方法2: 使用 URL 编码作为备选
+    return encodeURIComponent(username);
+  }
+};
+
+// 解码用户名（在后端使用）
+export const decodeUsernameFromHeader = (encodedUsername: string): string => {
+  try {
+    // 先尝试 Base64 解码
+    try {
+      return decodeURIComponent(escape(atob(encodedUsername)));
+    } catch {
+      // 如果 Base64 解码失败，尝试 URL 解码
+      return decodeURIComponent(encodedUsername);
+    }
+  } catch (error) {
+    console.warn('用户名解码失败，返回原始值:', error);
+    return encodedUsername;
+  }
+};
+
 export const apiClient = axios.create({
   baseURL: 'http://localhost:8000/api',
   timeout: 10000,
@@ -61,7 +89,7 @@ apiClient.interceptors.request.use(
       }
     }
     
-    // 添加用户名到请求头
+    // 添加用户名到请求头（处理中文字符编码）
     let username: string | null = null;
     
     // 1. 首先尝试从 cookie 获取
@@ -76,8 +104,10 @@ apiClient.interceptors.request.use(
     }
     
     if (username) {
-      config.headers['X-Username'] = username;
-      console.log('添加用户名到请求头:', username);
+      // 对中文字符进行编码处理
+      const encodedUsername = encodeUsernameForHeader(username);
+      config.headers['X-Username'] = encodedUsername;
+      console.log('添加编码后的用户名到请求头:', encodedUsername, '(原始:', username, ')');
     }
     
     return config;
