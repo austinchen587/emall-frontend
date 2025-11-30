@@ -7,7 +7,8 @@ export const DEFAULT_FILTERS = {
   search: '',
   show_selected_only: false, // 新增
   page: 1,
-  page_size: 100 // 改为100条/页
+  page_size: 100, // 改为100条/页
+  project_owner: '',
 };
 
 export const STATUS_DISPLAY_MAP: Record<string, string> = {

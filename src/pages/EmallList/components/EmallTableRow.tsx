@@ -10,6 +10,7 @@ interface EmallTableRowProps {
   onProjectTitleClick: (item: EmallItem) => void;
   onSelectProcurement: (item: EmallItem, isSelected: boolean) => void;
   onProgressClick: (item: EmallItem) => void;
+  onAddRemarkClick: (item: EmallItem) => void; // 新增：添加备注点击事件
   formatCurrency: (amount: number | null) => string;
   formatDate: (dateString: string) => string;
   isValidUrl: (url: string | undefined) => boolean;
@@ -25,6 +26,7 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
   onProjectTitleClick,
   onSelectProcurement,
   onProgressClick,
+  onAddRemarkClick, // 新增
   formatCurrency,
   formatDate,
   isValidUrl,
@@ -36,6 +38,7 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
   return (
     <React.Fragment>
       <tr className={`emall-row ${isExpanded ? 'expanded' : ''}`}>
+        {/* 原有列保持不变 */}
         <td className="project-title-cell">
           <div className="title-content">
             {isValidUrl(item.url) ? (
@@ -108,6 +111,39 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
           </div>
         </td>
         
+        {/* 新增：项目归属人列 */}
+        <td className="owner-cell">
+          <span className="owner-text">
+            {item.project_owner || '-'}
+          </span>
+        </td>
+        
+        {/* 新增：最新备注列 */}
+        <td className="remark-cell">
+          {item.latest_remark ? (
+            <div className="remark-content">
+              <div className="remark-text" title={item.latest_remark.content}>
+                {item.latest_remark.content.length > 20 
+                  ? `${item.latest_remark.content.substring(0, 20)}...`
+                  : item.latest_remark.content
+                }
+              </div>
+              <div className="remark-meta">
+                <span className="remark-author">{item.latest_remark.created_by}</span>
+                <span className="remark-time">{formatDate(item.latest_remark.created_at)}</span>
+              </div>
+            </div>
+          ) : (
+            <button 
+              className="add-remark-btn"
+              onClick={() => onAddRemarkClick(item)}
+              title="添加备注"
+            >
+              添加备注
+            </button>
+          )}
+        </td>
+        
         <td className="progress-cell">
           {item.is_selected && item.bidding_status && (
             <button
@@ -122,9 +158,10 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
         </td>
       </tr>
       
+      {/* 详情行保持不变 */}
       {isExpanded && (
         <tr className="detail-row">
-          <td colSpan={8}>
+          <td colSpan={10}> {/* 修改colSpan为10 */}
             <div className="project-details">
               <div className="detail-section">
                 <h4>项目详情</h4>
@@ -145,6 +182,18 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
                     <label>报价开始:</label>
                     <span>{formatDate(item.quote_start_time)}</span>
                   </div>
+                  {/* 在详情中显示完整备注信息 */}
+                  {item.latest_remark && (
+                    <div className="detail-item">
+                      <label>最新备注:</label>
+                      <div>
+                        <div>{item.latest_remark.content}</div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                          {item.latest_remark.created_by} - {formatDate(item.latest_remark.created_at)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               {item.url && (

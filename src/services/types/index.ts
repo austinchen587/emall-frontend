@@ -42,6 +42,12 @@ export interface EmallItem {
 	url?: string;
 	is_selected?: boolean;
 	bidding_status?: string;
+  project_owner?: string;
+  latest_remark?: {
+    content: string;
+    created_by: string;
+    created_at: string;
+  };
 }
 
 export interface EmallListResponse {

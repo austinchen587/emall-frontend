@@ -12,13 +12,14 @@ interface EmallTableProps {
   onProjectTitleClick: (item: EmallItem) => void;
   onSelectProcurement: (item: EmallItem, isSelected: boolean) => void;
   onProgressClick: (item: EmallItem) => void;
+  onAddRemarkClick: (item: EmallItem) => void;
   formatCurrency: (amount: number | null) => string;
   formatDate: (dateString: string) => string;
   isValidUrl: (url: string | undefined) => boolean;
   isTextLong: (text: string) => boolean;
   getBiddingStatusDisplay: (status?: string) => string;
   loading: boolean;
-  totalCount: number;
+ totalCount: number;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
@@ -33,6 +34,7 @@ const EmallTable: React.FC<EmallTableProps> = ({
   onProjectTitleClick,
   onSelectProcurement,
   onProgressClick,
+  onAddRemarkClick,
   formatCurrency,
   formatDate,
   isValidUrl,
@@ -66,6 +68,8 @@ const EmallTable: React.FC<EmallTableProps> = ({
               <th className="col-date">发布时间</th>
               <th className="col-date">截止时间</th>
               <th className="col-select">选择项目</th>
+              <th className="col-owner">项目归属人</th>
+              <th className="col-remark">最新备注</th>
               <th className="col-progress">采购进度</th>
             </tr>
           </thead>
@@ -80,6 +84,7 @@ const EmallTable: React.FC<EmallTableProps> = ({
                 onProjectTitleClick={onProjectTitleClick}
                 onSelectProcurement={onSelectProcurement}
                 onProgressClick={onProgressClick}
+                onAddRemarkClick={onAddRemarkClick}
                 formatCurrency={formatCurrency}
                 formatDate={formatDate}
                 isValidUrl={isValidUrl}

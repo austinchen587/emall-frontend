@@ -1,10 +1,13 @@
 /* src/pages/EmallList/EmallList.css */
 .emall-container {
   padding: 24px;
-  max-width: 1400px;
+  width: auto; /* 改为自动宽度 */
+  max-width: none;
   margin: 0 auto;
   background: #f8fafc;
   min-height: 100vh;
+  box-sizing: border-box;
+  display: inline-block; /* 关键：让容器根据内容自适应 */
 }
 
 /* 头部样式 */
@@ -176,6 +179,9 @@
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
+  width: auto; /* 自动宽度 */
+  min-width: 2000px; /* 设置最小宽度确保表格完整显示 */
+  box-sizing: border-box;
 }
 
 .table-header {
@@ -194,12 +200,27 @@
 
 .emall-table-container {
   overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
 }
 
 .emall-table {
-  width: 100%;
+  width: auto; /* 改为自动宽度 */
+  min-width: 100%; /* 最小宽度100%确保填满容器 */
   border-collapse: collapse;
-  min-width: 1000px;
+  table-layout: auto; /* 改为自动布局，列宽根据内容调整 */
+}
+
+/* 列宽优化 - 根据内容调整 */
+.emall-table th,
+.emall-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+  white-space: nowrap; /* 防止文本换行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .emall-table th {
@@ -593,24 +614,68 @@
   background: #f9fafb;
   color: #9ca3af;
 }
-/* 更新表格列宽 */
-.emall-table th.col-select,
-.emall-table td.select-cell {
-  width: 60px;
-}
-.emall-table th.col-progress,
-.emall-table td.progress-cell {
-  width: 100px;
-}
-/* 调整其他列宽以适应新列 */
+/* 调整列宽以适应更多字段 */
 .emall-table th.col-title,
 .emall-table td.project-title-cell {
-  max-width: 350px;
-  min-width: 250px;
+  max-width: 400px;
+  min-width: 300px;
 }
 .emall-table th.col-number,
 .emall-table td.project-number-cell {
-  min-width: 100px;
+  min-width: 120px;
+}
+.emall-table th.col-unit,
+.emall-table td.purchasing-unit-cell {
+  min-width: 220px;
+  max-width: 300px;
+}
+.emall-table th.col-price,
+.emall-table td.price-cell {
+  min-width: 140px;
+}
+.emall-table th.col-date,
+.emall-table td.date-cell {
+  min-width: 130px;
+}
+.emall-table th.col-select,
+.emall-table td.select-cell {
+  width: 80px; /* 稍微扩大 */
+}
+.emall-table th.col-owner,
+.emall-table td.owner-cell {
+  width: 140px; /* 从 120px 扩大到 140px */
+}
+.emall-table th.col-remark,
+.emall-table td.remark-cell {
+  width: 280px; /* 从 250px 扩大到 280px */
+}
+.emall-table th.col-progress,
+.emall-table td.progress-cell {
+  width: 120px; /* 从 100px 扩大到 120px */
+}
+/* 详情行的列跨度调整为10列 */
+
+/* 响应式设计调整 */
+@media (max-width: 1920px) {
+  .emall-container {
+    max-width: 95%;
+  }
+}
+@media (max-width: 1600px) {
+  .emall-container {
+    max-width: 100%;
+    padding: 16px;
+  }
+}
+@media (max-width: 1400px) {
+  .emall-table {
+    min-width: 1400px;
+  }
+}
+@media (max-width: 1200px) {
+  .emall-table {
+    min-width: 1200px;
+  }
 }
 
 
@@ -705,4 +770,86 @@
     flex-wrap: wrap;
     justify-content: center;
   }
+}
+
+
+* 在 EmallList.css 末尾添加新样式 */
+/* 项目归属人列样式 */
+.owner-cell {
+  min-width: 120px;
+  max-width: 150px;
+}
+.owner-text {
+  font-size: 14px;
+  color: #4a5568;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 备注列样式 */
+.remark-cell {
+  min-width: 200px;
+  max-width: 300px;
+}
+.remark-content {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.remark-content:hover {
+  background-color: #f7fafc;
+}
+.remark-text {
+  font-size: 13px;
+  color: #2d3748;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.remark-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #718096;
+}
+.remark-author {
+  font-weight: 500;
+}
+.remark-time {
+  opacity: 0.8;
+}
+.add-remark-btn {
+  padding: 4px 8px;
+  border: 1px dashed #cbd5e0;
+  background: #f7fafc;
+  color: #718096;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+  width: 100%;
+}
+.add-remark-btn:hover {
+  border-color: #4299e1;
+  color: #4299e1;
+  background: #ebf8ff;
+}
+/* 调整表格列宽 */
+.emall-table th.col-owner,
+.emall-table td.owner-cell {
+  width: 120px;
+}
+.emall-table th.col-remark,
+.emall-table td.remark-cell {
+  width: 250px;
+}
+/* 调整其他列宽以适应新列 */
+.emall-table th.col-title,
+.emall-table td.project-title-cell {
+  max-width: 300px;
+  min-width: 200px;
+}
+.emall-table th.col-number,
+.emall-table td.project-number-cell {
+  min-width: 90px;
 }

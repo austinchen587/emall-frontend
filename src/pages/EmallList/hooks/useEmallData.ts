@@ -14,56 +14,75 @@ export const useEmallData = () => {
 
   // 数据获取
   const fetchEmallList = useCallback(async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    const response = await emallApi.getEmallList(filters);
-    
-    console.log('🔍 API响应数据结构检查:', {
-      dataType: typeof response.data,
-      isArray: Array.isArray(response.data),
-      keys: Object.keys(response.data || {}),
-      hasResults: 'results' in response.data,
-      resultsCount: response.data?.results?.length,
-      totalSize: JSON.stringify(response.data).length
-    });
-    let items: EmallItem[] = [];
-    let count = 0;
-    
-    if (Array.isArray(response.data)) {
-      items = response.data;
-      count = response.data.length;
-    } else if (response.data?.results) {
-      items = response.data.results;
-      count = response.data.count || items.length;
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await emallApi.getEmallList(filters);
+      
+      console.log('🔍 API响应数据结构检查:', {
+        dataType: typeof response.data,
+        isArray: Array.isArray(response.data),
+        keys: Object.keys(response.data || {}),
+        hasResults: 'results' in response.data,
+        resultsCount: response.data?.results?.length,
+        totalSize: JSON.stringify(response.data).length
+      });
+      
+      let items: EmallItem[] = [];
+      let count = 0;
+      
+      if (Array.isArray(response.data)) {
+        items = response.data;
+        count = response.data.length;
+      } else if (response.data?.results) {
+        items = response.data.results;
+        count = response.data.count || items.length;
+      }
+      
+      // 🔍 调试 project_owner 和 is_selected 字段
+      if (items.length > 0) {
+        console.log('🔍 字段调试 - 前3个项目:');
+        items.slice(0, 3).forEach((item, index) => {
+          console.log(`项目 ${index + 1}:`, {
+            id: item.id,
+            project_title: item.project_title,
+            has_project_owner: 'project_owner' in item,
+            project_owner: item.project_owner,
+            project_owner_type: typeof item.project_owner,
+            has_is_selected: 'is_selected' in item,
+            is_selected: item.is_selected,
+            is_selected_type: typeof item.is_selected,
+            bidding_status: item.bidding_status,
+            all_keys: Object.keys(item)
+          });
+        });
+      }
+      
+      const processedItems = items.map((item: EmallItem) => ({
+        ...item,
+        is_selected: Boolean(item.is_selected),
+        bidding_status: item.bidding_status || 'not_started',
+        project_owner: item.project_owner ? item.project_owner : '未分配', // 修复这里
+        // 如果后端返回的字段名不同，需要映射
+        latest_remark: item.latest_remark ? {
+          content: item.latest_remark.content || '',
+          created_by: item.latest_remark.created_by || '',
+          created_at: item.latest_remark.created_at || ''
+        } : undefined
+      }));
+      
+      setEmallItems(processedItems);
+      setTotalCount(count);
+      
+    } catch (err) {
+      console.error('获取采购列表失败:', err);
+      setError(err instanceof Error ? err.message : '获取数据失败');
+    } finally {
+      setLoading(false);
     }
-    // 检查具体项目的 is_selected 字段
-    if (items.length > 0) {
-      const sampleItems = items.slice(0, 3);
-      console.log('📊 前3个项目详情:', sampleItems.map(item => ({
-        id: item.id,
-        project_title: item.project_title,
-        has_is_selected: 'is_selected' in item,
-        is_selected: item.is_selected,
-        bidding_status: item.bidding_status
-      })));
-    }
-    const processedItems = items.map((item: EmallItem) => ({
-      ...item,
-      is_selected: Boolean(item.is_selected),
-      bidding_status: item.bidding_status || 'not_started'
-    }));
-    setEmallItems(processedItems);
-    setTotalCount(count);
-    
-  } catch (err) {
-    // 错误处理
-  } finally {
-    setLoading(false);
-  }
-}, [filters]);
+  }, [filters]);
 
-  // 选择项目处理 - 修复版本
+  // 选择项目处理
   const handleSelectProcurement = useCallback(async (item: EmallItem, isSelected: boolean) => {
     try {
       // 先更新本地状态，提供即时反馈

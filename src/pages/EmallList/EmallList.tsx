@@ -35,12 +35,10 @@ const EmallList: React.FC = () => {
     toggleRowExpansion
   } = useExpandedRows();
 
-  // 副作用 - 监听过滤器变化
   useEffect(() => {
     fetchEmallList();
   }, [fetchEmallList]);
 
-  // 分页处理
   const handlePageChange = (page: number) => {
     handleFilterChange('page', page);
   };
@@ -49,7 +47,12 @@ const EmallList: React.FC = () => {
     handleFilterChange('page_size', size);
   };
 
-  // 事件处理函数
+  // 新增：添加备注处理
+  const handleAddRemarkClick = (item: any) => {
+  // 移除选择项目的限制
+  openProcurementProgress(item.id, item.project_title);
+};
+
   const handleProgressClick = (item: any) => {
     if (!item.is_selected) {
       alert('项目未被选中，无法查看采购进度');
@@ -68,7 +71,6 @@ const EmallList: React.FC = () => {
     }
   };
 
-  // 渲染加载状态
   if (loading && emallItems.length === 0) {
     return (
       <div className="emall-container">
@@ -82,7 +84,6 @@ const EmallList: React.FC = () => {
 
   return (
     <div className="emall-container">
-      {/* 头部信息 */}
       <div className="emall-header">
         <div className="header-content">
           <h1>采购项目列表</h1>
@@ -93,7 +94,6 @@ const EmallList: React.FC = () => {
         </div>
       </div>
       
-      {/* 过滤器区域 */}
       <FilterSection
         filters={filters}
         onFilterChange={handleFilterChange}
@@ -101,7 +101,6 @@ const EmallList: React.FC = () => {
         onSearch={fetchEmallList}
       />
       
-      {/* 错误提示 */}
       {error && (
         <div className="error-message">
           <div className="error-content">
@@ -114,7 +113,6 @@ const EmallList: React.FC = () => {
         </div>
       )}
       
-      {/* 数据表格 */}
       <EmallTable
         emallItems={emallItems}
         expandedRows={expandedRows}
@@ -123,6 +121,7 @@ const EmallList: React.FC = () => {
         onProjectTitleClick={handleProjectTitleClick}
         onSelectProcurement={handleSelectProcurement}
         onProgressClick={handleProgressClick}
+        onAddRemarkClick={handleAddRemarkClick} // 新增
         formatCurrency={utils.formatCurrency}
         formatDate={utils.formatDate}
         isValidUrl={utils.isValidUrl}
@@ -136,7 +135,6 @@ const EmallList: React.FC = () => {
         onPageSizeChange={handlePageSizeChange}
       />
       
-      {/* 模态框 */}
       <ProjectDetailModal
         isOpen={modalState.projectDetail.isOpen}
         onClose={closeModals}
