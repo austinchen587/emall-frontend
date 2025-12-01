@@ -1,6 +1,18 @@
 // src/pages/EmallList/components/EmallTableRow.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EmallItem } from '../../../services/types';
+
+// 修改 UnifiedRemark 接口定义，与API响应结构保持一致
+interface UnifiedRemark {
+  id: number;
+  remark_content: string;
+  created_by: string;
+  remark_type: string;
+  remark_type_display: string;
+  created_at: string;
+  created_at_display: string;
+  updated_at: string | null;
+}
 
 interface EmallTableRowProps {
   item: EmallItem;
@@ -10,7 +22,7 @@ interface EmallTableRowProps {
   onProjectTitleClick: (item: EmallItem) => void;
   onSelectProcurement: (item: EmallItem, isSelected: boolean) => void;
   onProgressClick: (item: EmallItem) => void;
-  onAddRemarkClick: (item: EmallItem) => void; // 新增：添加备注点击事件
+  onAddRemarkClick: (item: EmallItem) => void;
   formatCurrency: (amount: number | null) => string;
   formatDate: (dateString: string) => string;
   isValidUrl: (url: string | undefined) => boolean;
@@ -26,7 +38,7 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
   onProjectTitleClick,
   onSelectProcurement,
   onProgressClick,
-  onAddRemarkClick, // 新增
+  onAddRemarkClick,
   formatCurrency,
   formatDate,
   isValidUrl,
@@ -34,11 +46,83 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
   getBiddingStatusDisplay
 }) => {
   const isTitleLong = isTextLong(item.project_title);
+  const [unifiedRemark, setUnifiedRemark] = useState<UnifiedRemark | null>(null);
+  const [loadingRemark, setLoadingRemark] = useState(false);
+
+  // 获取统一备注
+  const fetchUnifiedRemark = async (procurementId: number) => {
+    if (!procurementId) return;
+    
+    setLoadingRemark(true);
+    try {
+      const response = await fetch(`/api/emall/purchasing/procurement/${procurementId}/get_unified_remarks/`);
+      if (response.ok) {
+        const data = await response.json();
+        // 修改数据解析逻辑，获取remarks数组的第一个元素
+        if (data.success && data.remarks && data.remarks.length > 0) {
+          setUnifiedRemark(data.remarks[0]);
+        } else {
+          setUnifiedRemark(null);
+        }
+      }
+    } catch (error) {
+      console.error('获取统一备注失败:', error);
+    } finally {
+      setLoadingRemark(false);
+    }
+  };
+
+  // 当项目未被选中且没有统一备注时，获取统一备注
+  useEffect(() => {
+    if (!item.is_selected && !unifiedRemark && item.id) {
+      fetchUnifiedRemark(item.id);
+    }
+  }, [item.is_selected, item.id]);
+
+  // 获取显示的备注内容
+  const getDisplayRemark = () => {
+    if (!item.is_selected) {
+      return unifiedRemark;
+    }
+    return item.latest_remark;
+  };
+
+  const displayRemark = getDisplayRemark();
+
+  // 安全地获取备注内容
+  const getRemarkContent = () => {
+    if (!displayRemark) return '';
+    
+    // 检查是否是 UnifiedRemark 类型
+    if ('remark_content' in displayRemark) {
+      return displayRemark.remark_content;
+    }
+    // 检查是否是 latest_remark 类型
+    if ('content' in displayRemark) {
+      return displayRemark.content;
+    }
+    return '';
+  };
+
+  // 安全地获取创建者
+  const getRemarkAuthor = () => {
+    if (!displayRemark) return '';
+    return displayRemark.created_by || '';
+  };
+
+  // 安全地获取创建时间
+  const getRemarkDate = () => {
+    if (!displayRemark) return '';
+    return displayRemark.created_at || '';
+  };
+
+  const remarkContent = getRemarkContent();
+  const remarkAuthor = getRemarkAuthor();
+  const remarkDate = getRemarkDate();
 
   return (
     <React.Fragment>
       <tr className={`emall-row ${isExpanded ? 'expanded' : ''}`}>
-        {/* 原有列保持不变 */}
         <td className="project-title-cell">
           <div className="title-content">
             {isValidUrl(item.url) ? (
@@ -111,26 +195,26 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
           </div>
         </td>
         
-        {/* 新增：项目归属人列 */}
         <td className="owner-cell">
           <span className="owner-text">
             {item.project_owner || '-'}
           </span>
         </td>
         
-        {/* 新增：最新备注列 */}
         <td className="remark-cell">
-          {item.latest_remark ? (
+          {loadingRemark ? (
+            <div className="remark-loading">加载中...</div>
+          ) : displayRemark ? (
             <div className="remark-content">
-              <div className="remark-text" title={item.latest_remark.content}>
-                {item.latest_remark.content.length > 20 
-                  ? `${item.latest_remark.content.substring(0, 20)}...`
-                  : item.latest_remark.content
+              <div className="remark-text" title={remarkContent}>
+                {remarkContent.length > 20 
+                  ? `${remarkContent.substring(0, 20)}...`
+                  : remarkContent
                 }
               </div>
               <div className="remark-meta">
-                <span className="remark-author">{item.latest_remark.created_by}</span>
-                <span className="remark-time">{formatDate(item.latest_remark.created_at)}</span>
+                <span className="remark-author">{remarkAuthor}</span>
+                <span className="remark-time">{formatDate(remarkDate)}</span>
               </div>
             </div>
           ) : (
@@ -158,10 +242,9 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
         </td>
       </tr>
       
-      {/* 详情行保持不变 */}
       {isExpanded && (
         <tr className="detail-row">
-          <td colSpan={10}> {/* 修改colSpan为10 */}
+          <td colSpan={10}>
             <div className="project-details">
               <div className="detail-section">
                 <h4>项目详情</h4>
@@ -182,14 +265,16 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
                     <label>报价开始:</label>
                     <span>{formatDate(item.quote_start_time)}</span>
                   </div>
-                  {/* 在详情中显示完整备注信息 */}
-                  {item.latest_remark && (
+                  {displayRemark && (
                     <div className="detail-item">
-                      <label>最新备注:</label>
+                      <label>备注信息:</label>
                       <div>
-                        <div>{item.latest_remark.content}</div>
+                        <div>{remarkContent}</div>
                         <div style={{ fontSize: '12px', color: '#666' }}>
-                          {item.latest_remark.created_by} - {formatDate(item.latest_remark.created_at)}
+                          {remarkAuthor} - {formatDate(remarkDate)}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#888' }}>
+                          {!item.is_selected ? '（统一备注）' : '（项目备注）'}
                         </div>
                       </div>
                     </div>

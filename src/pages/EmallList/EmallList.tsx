@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import ProjectDetailModal from '../../components/emall/ProjectDetailModal';
 import ProcurementProgressModal from '../../components/emall/ProcurementProgressModal';
+import AddRemarkModal from '../../components/emall/AddRemarkModal'; // 导入 AddRemarkModal
 import FilterSection from './components/FilterSection';
 import EmallTable from './components/EmallTable';
 import { useEmallData } from './hooks/useEmallData';
@@ -27,7 +28,10 @@ const EmallList: React.FC = () => {
     modalState,
     openProjectDetail,
     openProcurementProgress,
-    closeModals
+    closeModals,
+    // 添加新的模态框状态管理
+    openAddRemark,
+    closeAddRemark
   } = useModalState();
 
   const {
@@ -47,11 +51,16 @@ const EmallList: React.FC = () => {
     handleFilterChange('page_size', size);
   };
 
-  // 新增：添加备注处理
+  // 修复：添加备注处理函数
   const handleAddRemarkClick = (item: any) => {
-  // 移除选择项目的限制
-  openProcurementProgress(item.id, item.project_title);
-};
+    if (!item.is_selected) {
+      // 如果 is_selected 是 false，打开 AddRemarkModal
+      openAddRemark(item.id, item.project_title);
+    } else {
+      // 否则打开采购进度模态框
+      openProcurementProgress(item.id, item.project_title);
+    }
+  };
 
   const handleProgressClick = (item: any) => {
     if (!item.is_selected) {
@@ -69,6 +78,11 @@ const EmallList: React.FC = () => {
     if (item.url) {
       window.open(item.url, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  // 备注添加成功后的回调
+  const handleRemarkSuccess = () => {
+    fetchEmallList(); // 刷新列表数据
   };
 
   if (loading && emallItems.length === 0) {
@@ -121,7 +135,7 @@ const EmallList: React.FC = () => {
         onProjectTitleClick={handleProjectTitleClick}
         onSelectProcurement={handleSelectProcurement}
         onProgressClick={handleProgressClick}
-        onAddRemarkClick={handleAddRemarkClick} // 新增
+        onAddRemarkClick={handleAddRemarkClick}
         formatCurrency={utils.formatCurrency}
         formatDate={utils.formatDate}
         isValidUrl={utils.isValidUrl}
@@ -146,6 +160,15 @@ const EmallList: React.FC = () => {
         onClose={closeModals}
         procurementId={modalState.procurementProgress.id!}
         procurementTitle={modalState.procurementProgress.title}
+      />
+      
+      {/* 添加 AddRemarkModal */}
+      <AddRemarkModal
+        isOpen={modalState.addRemark.isOpen}
+        onClose={closeAddRemark}
+        procurementId={modalState.addRemark.id!}
+        procurementTitle={modalState.addRemark.title}
+        onSuccess={handleRemarkSuccess}
       />
     </div>
   );

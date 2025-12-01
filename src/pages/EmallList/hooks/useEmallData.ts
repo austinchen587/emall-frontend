@@ -62,7 +62,7 @@ export const useEmallData = () => {
         ...item,
         is_selected: Boolean(item.is_selected),
         bidding_status: item.bidding_status || 'not_started',
-        project_owner: item.project_owner ? item.project_owner : '未分配', // 修复这里
+        project_owner: item.project_owner ? item.project_owner : '未分配',
         // 如果后端返回的字段名不同，需要映射
         latest_remark: item.latest_remark ? {
           content: item.latest_remark.content || '',

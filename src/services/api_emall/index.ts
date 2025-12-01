@@ -1,5 +1,5 @@
 // src/services/api_emall/index.ts
-import apiClient from '../api_auth/set_api'; // 使用你现有的apiClient
+import apiClient from '../api_auth/set_api';
 import { EmallListResponse, EmallItem, EmallFilterParams, ProcurementProgressData } from '../types';
 
 export const emallApi = {
@@ -76,6 +76,42 @@ export const emallApi = {
    */
   updateSupplier: (supplierId: number, supplierData: any): Promise<any> => 
     apiClient.put(`/emall/purchasing/supplier/${supplierId}/update/`, supplierData),
+
+  /**
+   * 添加备注（使用 UnifiedProcurementRemark）
+   */
+  addRemark: (procurementId: number, remarkContent: string): Promise<any> => 
+    apiClient.post(`/emall/purchasing/procurement/${procurementId}/add-remark/`, {
+      remark_content: remarkContent
+    }),
+
+  /**
+   * 获取项目备注列表
+   */
+  getRemarks: (procurementId: number): Promise<any> => 
+    apiClient.get(`/emall/purchasing/procurement/${procurementId}/remarks/`),
+
+  /**
+   * 删除备注
+   */
+  deleteRemark: (remarkId: number): Promise<any> => 
+    apiClient.delete(`/emall/purchasing/remark/${remarkId}/delete/`),
+  // 添加统一备注
+  addUnifiedRemark: (procurementId: number, remarkContent: string) => {
+    return apiClient.post(`/emall/purchasing/procurement/${procurementId}/add_unified_remarks/`, {
+      remark_content: remarkContent
+    });
+  },
+  
+  // 获取统一备注列表
+  getUnifiedRemarks: (procurementId: number) => {
+    return apiClient.get(`/emall/purchasing/procurement/${procurementId}/get_unified_remarks/`);
+  },
+  
+  // 删除统一备注
+  deleteUnifiedRemark: (remarkId: number) => {
+    return apiClient.delete(`/emall/remarks/${remarkId}/delete_unified_remark/`);
+  }
 };
 
 export default emallApi;

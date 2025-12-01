@@ -48,6 +48,11 @@ export interface EmallItem {
     created_by: string;
     created_at: string;
   };
+  unified_remark?: {
+    content: string;
+    created_by: string;
+    created_at: string;
+  };
 }
 
 export interface EmallListResponse {
@@ -132,6 +137,5 @@ export interface UpdateProgressData {
 	supplier_selection?: SupplierSelection[];
 	new_remark?: {
 		remark_content: string;
-		
 	};
 }

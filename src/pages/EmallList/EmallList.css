@@ -3,7 +3,7 @@
   padding: 24px;
   width: auto; /* 改为自动宽度 */
   max-width: none;
-  margin: 0 auto;
+  margin: 0;
   background: #f8fafc;
   min-height: 100vh;
   box-sizing: border-box;
