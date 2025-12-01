@@ -1,0 +1,85 @@
+/* src/pages/EmallList/components/TableStyles.css */
+/* 表格头部样式 */
+.emall-table th {
+  background: #edf2f7;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #2d3748;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.emall-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.emall-row:hover {
+  background: #f7fafc;
+}
+
+.emall-row.expanded {
+  background: #f0fff4;
+  border-left: 4px solid #48bb78;
+}
+
+/* 列宽定义 */
+.emall-table th.col-title,
+.emall-table td.project-title-cell {
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.emall-table th.col-number,
+.emall-table td.project-number-cell {
+  min-width: 120px;
+}
+
+.emall-table th.col-unit,
+.emall-table td.purchasing-unit-cell {
+  min-width: 200px;
+  max-width: 300px;
+  color: #2d3748;
+}
+
+.emall-table th.col-price,
+.emall-table td.price-cell {
+  min-width: 120px;
+}
+
+.emall-table th.col-date,
+.emall-table td.date-cell {
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.emall-table th.col-select,
+.emall-table td.select-cell {
+  width: 60px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.emall-table th.col-owner,
+.emall-table td.owner-cell {
+  width: 140px;
+  min-width: 120px;
+  max-width: 150px;
+}
+
+.emall-table th.col-remark,
+.emall-table td.remark-cell {
+  width: 280px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.emall-table th.col-progress,
+.emall-table td.progress-cell {
+  width: 120px;
+  text-align: center;
+  vertical-align: middle;
+}

@@ -1,0 +1,130 @@
+/* src/pages/EmallList/components/FilterSection.css */
+.filter-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filter-header h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 18px;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.filter-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #4a5568;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-input {
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* 按钮样式 */
+.search-btn, .reset-btn, .export-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.search-btn {
+  background: #4299e1;
+  color: white;
+}
+
+.search-btn:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+.reset-btn {
+  background: #a0aec0;
+  color: white;
+}
+
+.reset-btn:hover {
+  background: #718096;
+  transform: translateY(-1px);
+}
+
+.export-btn {
+  background: #48bb78;
+  color: white;
+}
+
+.export-btn:hover {
+  background: #38a169;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-controls {
+    justify-content: center;
+  }
+  
+  .filter-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}

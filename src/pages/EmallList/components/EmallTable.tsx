@@ -3,6 +3,10 @@ import React from 'react';
 import { EmallItem } from '../../../services/types';
 import EmallTableRow from './EmallTableRow';
 import Pagination from './Pagination';
+import './EmallTable.css';
+import './TableStyles.css';
+import './TableRowStyles.css';
+import './ActionButtons.css';
 
 interface EmallTableProps {
   emallItems: EmallItem[];

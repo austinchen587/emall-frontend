@@ -1,6 +1,7 @@
 // src/pages/EmallList/components/FilterSection.tsx
 import React from 'react';
 import { EmallFilterParams } from '../../../services/types';
+import './FilterSection.css';
 
 interface FilterSectionProps {
   filters: EmallFilterParams;

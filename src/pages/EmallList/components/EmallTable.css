@@ -1,0 +1,60 @@
+/* src/pages/EmallList/components/EmallTable.css */
+.table-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  width: auto;
+  
+  box-sizing: border-box;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-info {
+  color: #718096;
+  font-size: 14px;
+}
+
+.emall-table-container {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
+
+.emall-table {
+  width: auto;
+  min-width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .table-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 1400px) {
+  .emall-table {
+    min-width: 1400px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .emall-table {
+    min-width: 1200px;
+  }
+}

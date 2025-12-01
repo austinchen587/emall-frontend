@@ -9,6 +9,7 @@ import { useEmallData } from './hooks/useEmallData';
 import { useModalState } from './hooks/useModalState';
 import { useExpandedRows } from './hooks/useExpandedRows';
 import './EmallList.css';
+import './components/Header.css';
 
 const EmallList: React.FC = () => {
   const {

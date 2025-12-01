@@ -1,5 +1,6 @@
 // src/pages/EmallList/components/Pagination.tsx
 import React from 'react';
+import './Pagination.css';
 
 interface PaginationProps {
   currentPage: number;

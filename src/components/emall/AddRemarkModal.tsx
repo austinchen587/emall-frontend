@@ -7,13 +7,13 @@ interface AddRemarkModalProps {
   onClose: () => void;
   procurementId: number;
   procurementTitle: string;
-  onSuccess?: () => void;
+  onSuccess?: (procurementId: number, newRemark: any) => void; // 修改这里，传递新备注数据
 }
 
 const AddRemarkModal: React.FC<AddRemarkModalProps> = ({
   isOpen,
   onClose,
-  procurementId,
+ procurementId,
   procurementTitle,
   onSuccess
 }) => {
@@ -40,11 +40,19 @@ const AddRemarkModal: React.FC<AddRemarkModalProps> = ({
     setError('');
 
     try {
-      // 使用统一的备注API，而不是采购进度相关的API
       const response = await emallApi.addUnifiedRemark(procurementId, remarkContent.trim());
       
       if (response.data && response.data.success) {
-        onSuccess?.();
+        // 传递新备注数据给父组件
+        if (onSuccess) {
+          onSuccess(procurementId, {
+            content: remarkContent.trim(),
+            created_by: '当前用户', // 这里可以从用户状态获取或API返回
+            created_at: new Date().toISOString(),
+            // 可以根据API实际返回的数据添加更多字段
+            ...response.data.data // 如果有额外数据
+          });
+        }
         onClose();
       } else {
         setError(response.data?.error || '添加备注失败');
