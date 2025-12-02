@@ -30,7 +30,7 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   const [newRemark, setNewRemark] = useState('');
   
   // 表单状态
-  const [biddingStatus, setBiddingStatus] = useState('not_started');
+ const [biddingStatus, setBiddingStatus] = useState('not_started');
   const [clientContacts, setClientContacts] = useState<ClientContact[]>([]);
   const [supplierSelection, setSupplierSelection] = useState<{[key: number]: boolean}>({});
 
@@ -177,6 +177,8 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                   data={progressData}
                   supplierSelection={supplierSelection}
                   onSupplierSelectionChange={handleSupplierSelectionChange}
+                  procurementId={procurementId} // 修正：使用已有的 procurementId
+                  onSupplierUpdate={loadProgressData} // 修正：使用已有的 loadProgressData
                 />
               )}
 

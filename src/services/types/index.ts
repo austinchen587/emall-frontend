@@ -100,6 +100,7 @@ export interface SupplierInfo {
 	id: number;
 	name: string;
 	source: string;
+	
 	contact: string;
 	store_name: string;
 	total_quote: number;
