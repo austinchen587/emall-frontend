@@ -8,6 +8,7 @@ import BasicInfoTab from './tabs/BasicInfoTab';
 import SuppliersTab from './tabs/SuppliersTab';
 import RemarksTab from './tabs/RemarksTab';
 import './ProcurementProgressModal.css';
+import './ModalTabs.css';
 
 interface ProcurementProgressModalProps {
   isOpen: boolean;

@@ -1,5 +1,6 @@
 // src/components/emall/ModalTabs.tsx
 import React from 'react';
+import './ModalTabs.css';
 
 interface ModalTabsProps {
   activeTab: 'overview' | 'basic' | 'suppliers' | 'remarks';

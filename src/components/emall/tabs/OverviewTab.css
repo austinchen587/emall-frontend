@@ -1,0 +1,192 @@
+/* src/components/emall/tabs/OverviewTab.css */
+.overview-tab {
+  padding: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.contact-info-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.contact-info-card h4 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 1.125rem;
+}
+
+.contact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.contact-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.contact-info {
+  color: #64748b;
+}
+
+.no-contacts {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 20px;
+}
+
+.suppliers-overview {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.suppliers-overview h4 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 1.125rem;
+}
+
+.suppliers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.supplier-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 16px;
+  transition: all 0.3s;
+}
+
+.supplier-card.selected {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.supplier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.supplier-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.selected-badge {
+  background: #10b981;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.supplier-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.profit.positive {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.profit.negative {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.remarks-preview {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.remarks-preview h4 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 1.125rem;
+}
+
+.remark-item {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 0;
+}
+
+.remark-item:last-child {
+  border-bottom: none;
+}
+
+.remark-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.remark-creator {
+  font-weight: 600;
+  color: #3b82f6;
+  font-size: 0.875rem;
+}
+
+.remark-time {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.remark-content {
+  margin: 0;
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

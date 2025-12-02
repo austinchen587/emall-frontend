@@ -1,0 +1,115 @@
+/* src/components/emall/tabs/RemarksTab.css */
+.remarks-tab {
+  padding: 24px;
+}
+
+.add-remark-section {
+  margin-bottom: 32px;
+}
+
+.add-remark-section h4 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+}
+
+.remark-form {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.remark-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.remark-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.btn-add-remark {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-add-remark:hover {
+  background: #059669;
+}
+
+.remark-note {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.remarks-history {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.remarks-history h4 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+}
+
+.remark-history-item {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 16px 0;
+}
+
+.remark-history-item:last-child {
+  border-bottom: none;
+}
+
+.remark-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.remark-meta .creator {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.remark-meta .time {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.remark-history-item .content {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.no-remarks {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .remark-controls {
+    flex-direction: column;
+  }
+}

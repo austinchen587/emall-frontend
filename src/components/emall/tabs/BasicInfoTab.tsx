@@ -2,6 +2,8 @@
 import React from 'react';
 import { ProcurementProgressData, ClientContact } from '../../../services/types';
 
+import './BasicInfoTab.css';
+
 interface BasicInfoTabProps {
 	data: ProcurementProgressData;
 	biddingStatus: string;

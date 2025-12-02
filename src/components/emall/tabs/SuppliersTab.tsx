@@ -2,6 +2,7 @@
 import React from 'react';
 import { ProcurementProgressData } from '../../../services/types'; 
 import { formatCurrency } from '../utils';
+import './SuppliersTab.css';
 
 interface SuppliersTabProps {
   data: ProcurementProgressData;

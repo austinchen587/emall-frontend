@@ -2,6 +2,7 @@
 import React from 'react';
 import { ProcurementProgressData } from '../../../services/types';
 import { formatCurrency } from '../utils';
+import './OverviewTab.css';
 
 interface OverviewTabProps {
 	data: ProcurementProgressData;

@@ -1,6 +1,7 @@
 // src/components/emall/tabs/RemarksTab.tsx
 import React from 'react';
 import { ProcurementProgressData } from '../../../services/types';
+import './RemarksTab.css';
 
 interface RemarksTabProps {
   data: ProcurementProgressData;
