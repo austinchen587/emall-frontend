@@ -76,6 +76,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             className="filter-input"
           />
         </div>
+        {/* 新增：项目归属人筛选 */}
+        <div className="filter-group">
+          <label className="filter-label">项目归属人</label>
+          <input
+            type="text"
+            value={filters.project_owner || ''}
+            onChange={(e) => onFilterChange('project_owner', e.target.value)}
+            placeholder="输入归属人姓名..."
+            className="filter-input"
+          />
+        </div>
         
         <div className="filter-group">
           <label className="filter-label">全局搜索</label>

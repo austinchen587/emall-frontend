@@ -17,8 +17,20 @@ export const useEmallData = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await emallApi.getEmallList(filters);
       
+      // 🔧 修复：清理参数，移除首尾空白字符（包括制表符）
+      const cleanedFilters = {
+        ...filters,
+        project_owner: filters.project_owner ? filters.project_owner.trim() : '',
+        project_title: filters.project_title ? filters.project_title.trim() : '',
+        purchasing_unit: filters.purchasing_unit ? filters.purchasing_unit.trim() : '',
+        project_number: filters.project_number ? filters.project_number.trim() : '',
+        search: filters.search ? filters.search.trim() : ''
+      };
+      
+      const response = await emallApi.getEmallList(cleanedFilters);
+      
+      console.log('🔍 API请求参数:', cleanedFilters);
       console.log('🔍 API响应数据结构检查:', {
         dataType: typeof response.data,
         isArray: Array.isArray(response.data),
@@ -39,21 +51,18 @@ export const useEmallData = () => {
         count = response.data.count || items.length;
       }
       
-      // 🔍 调试 project_owner 和 is_selected 字段
-      if (items.length > 0) {
-        console.log('🔍 字段调试 - 前3个项目:');
+      // 🔍 调试 project_owner 筛选结果
+      if (cleanedFilters.project_owner) {
+        console.log('🔍 项目归属人筛选调试:');
+        console.log('搜索条件:', cleanedFilters.project_owner);
+        console.log('匹配到的项目数量:', items.length);
+        console.log('匹配到的项目ID:', items.map(item => item.id));
         items.slice(0, 3).forEach((item, index) => {
-          console.log(`项目 ${index + 1}:`, {
+          console.log(`匹配项目 ${index + 1}:`, {
             id: item.id,
             project_title: item.project_title,
-            has_project_owner: 'project_owner' in item,
             project_owner: item.project_owner,
-            project_owner_type: typeof item.project_owner,
-            has_is_selected: 'is_selected' in item,
-            is_selected: item.is_selected,
-            is_selected_type: typeof item.is_selected,
-            bidding_status: item.bidding_status,
-            all_keys: Object.keys(item)
+            is_selected: item.is_selected
           });
         });
       }
@@ -63,7 +72,6 @@ export const useEmallData = () => {
         is_selected: Boolean(item.is_selected),
         bidding_status: item.bidding_status || 'not_started',
         project_owner: item.project_owner ? item.project_owner : '未分配',
-        // 如果后端返回的字段名不同，需要映射
         latest_remark: item.latest_remark ? {
           content: item.latest_remark.content || '',
           created_by: item.latest_remark.created_by || '',

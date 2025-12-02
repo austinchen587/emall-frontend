@@ -72,6 +72,7 @@ export interface EmallFilterParams {
 	page?: number;
 	page_size?: number;
 	show_selected_only?: boolean;
+	project_owner?: string; // 新增项目归属人筛选
 }
 
 // 采购进度数据类型定义 - 使用统一的接口
