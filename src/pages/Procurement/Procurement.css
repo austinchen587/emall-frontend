@@ -167,10 +167,13 @@
 
 .latest-remark {
   max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-height: 60px;           /* 限制最大高度 */
+  overflow-y: auto;           /* 垂直滚动 */
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
   color: #64748b;
+  padding: 4px;
 }
 
 .no-data {
