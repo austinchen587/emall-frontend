@@ -5,6 +5,7 @@ import { useAuth } from './hooks/useAuth';
 import Login from './pages/Auth/login';
 import Dashboard from './pages/Dashboard/Dashboard';  // 修改这里
 import EmallList from './pages/EmallList';
+import Procurement from './pages/Procurement/Procurement'; // 已导入
 import './App.css';
 
 // 完全保护的路由组件
@@ -60,7 +61,7 @@ function App() {
 
           <Route path="/procurement" element={
             <ProtectedRoute>
-              <div>采购管理页面 - 待实现</div>
+              <Procurement /> {/* 这里使用 Procurement 组件 */}
             </ProtectedRoute>
           } />
           
