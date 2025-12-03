@@ -1,0 +1,91 @@
+/* src/pages/Dashboard/components/StatsCards.css */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stats-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.stats-card.blue {
+  border-left: 4px solid #3b82f6;
+}
+
+.stats-card.green {
+  border-left: 4px solid #10b981;
+}
+
+.stats-card.purple {
+  border-left: 4px solid #8b5cf6;
+}
+
+.stats-card.orange {
+  border-left: 4px solid #f59e0b;
+}
+
+.stats-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.stats-content {
+  flex: 1;
+}
+
+.stats-value {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.stats-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* 加载状态样式 */
+.stats-card.loading {
+  border-left: 4px solid #e5e7eb;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.stats-value.skeleton {
+  height: 28px;
+  width: 80px;
+  margin-bottom: 0.5rem;
+}
+
+.stats-label.skeleton {
+  height: 14px;
+  width: 60px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

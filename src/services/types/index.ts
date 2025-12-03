@@ -1,4 +1,7 @@
 // src/services/types/index.ts
+export * from './dashboard';
+
+
 export interface User {
   id: number
   name: string
