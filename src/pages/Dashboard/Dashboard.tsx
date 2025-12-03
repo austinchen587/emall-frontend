@@ -1,4 +1,4 @@
-// src/pages/Dashboard/index.tsx
+// src/pages/Dashboard/Dashboard.tsx
 import React, { useState } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -54,95 +54,105 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-container">
       {/* 欢迎区域 */}
-      <div className="welcome-section">
-        <h1 className="welcome-title">欢迎回来, {user?.username || '用户'}!</h1>
-        <p className="welcome-subtitle">采购项目数据分析面板</p>
+      <div className="dashboard-welcome-section">
+        <h1 className="dashboard-welcome-title">欢迎回来, {user?.username || '用户'}!</h1>
+        <p className="dashboard-welcome-subtitle">采购项目数据分析面板</p>
       </div>
 
-      {/* 数据分析区域 */}
-      <div className="analytics-section">
-        <div className="analytics-header">
-          <h2>项目统计概览</h2>
-          <div className="analytics-controls">
-            <select 
-              value={selectedOwner}
-              onChange={(e) => setSelectedOwner(e.target.value)}
-              className="owner-select"
-            >
-              {ownerOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <button onClick={refetch} className="refresh-btn">
-              🔄 刷新
-            </button>
-          </div>
-        </div>
-
-        {error && (
-          <div className="error-message">
-            ❌ {error}
-            <button onClick={refetch} className="retry-btn">
-              重试
-            </button>
-          </div>
-        )}
-
-        {/* 统计卡片 */}
-        {data?.stats && (
-          <StatsCards stats={data.stats} loading={loading} />
-        )}
-
-        {/* 状态统计图表 */}
-        <div className="charts-grid">
-          <div className="chart-column">
-            {data?.statusStats && (
-              <StatusCharts 
-                statusStats={data.statusStats} 
-                title="整体状态分布"
-                loading={loading}
-              />
-            )}
-          </div>
-          <div className="chart-column">
-            {data?.ownerStats && (
-              <StatusCharts 
-                statusStats={data.ownerStats} 
-                title={`${selectedOwner}的状态分布`}
-                loading={loading}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 功能导航 */}
-      <div className="navigation-section">
-        <h2>功能导航</h2>
-        <div className="nav-grid">
-          {navigationItems.map((item, index) => (
-            <div 
-              key={index} 
-              className="nav-card"
-              onClick={() => navigate(item.path)}
-            >
-              <div className="nav-icon">{item.icon}</div>
-              <div className="nav-content">
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
+      {/* 主要内容区域 - 导航和统计并列 */}
+      <div className="dashboard-main-content">
+        {/* 功能导航 */}
+        <div className="dashboard-navigation-section">
+          <h2>功能导航</h2>
+          <div className="dashboard-nav-grid">
+            {navigationItems.map((item, index) => (
+              <div 
+                key={index} 
+                className="dashboard-nav-card"
+                onClick={() => navigate(item.path)}
+              >
+                <div className="dashboard-nav-icon">{item.icon}</div>
+                <div className="dashboard-nav-content">
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 数据分析区域 */}
+        <div className="dashboard-analytics-section">
+          <div className="dashboard-analytics-header">
+            <h2>项目统计概览</h2>
+          </div>
+
+          {/* 筛选控件 - 均匀分布 */}
+          <div className="dashboard-filter-section">
+            <span className="dashboard-filter-label">筛选条件:</span>
+            <div className="dashboard-filter-controls">
+              <select 
+                value={selectedOwner}
+                onChange={(e) => setSelectedOwner(e.target.value)}
+                className="dashboard-owner-select"
+              >
+                {ownerOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <button onClick={refetch} className="dashboard-refresh-btn">
+                🔄 刷新数据
+              </button>
             </div>
-          ))}
+          </div>
+
+          {error && (
+            <div className="dashboard-error-message">
+              ❌ {error}
+              <button onClick={refetch} className="dashboard-retry-btn">
+                重试
+              </button>
+            </div>
+          )}
+
+          {/* 统计卡片 */}
+          <div className="dashboard-stats-section">
+            {data?.stats && (
+              <StatsCards stats={data.stats} loading={loading} />
+            )}
+          </div>
+
+          {/* 状态统计图表 - 并排显示 */}
+          <div className="dashboard-charts-grid">
+            <div className="dashboard-chart-column">
+              {data?.statusStats && (
+                <StatusCharts 
+                  statusStats={data.statusStats} 
+                  title="整体状态分布"
+                  loading={loading}
+                />
+              )}
+            </div>
+            <div className="dashboard-chart-column">
+              {data?.ownerStats && (
+                <StatusCharts 
+                  statusStats={data.ownerStats} 
+                  title={`${selectedOwner}的状态分布`}
+                  loading={loading}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 登出按钮 */}
-      <div className="logout-section">
+      <div className="dashboard-logout-section">
         <button 
           onClick={handleLogout}
-          className="logout-btn"
+          className="dashboard-logout-btn"
         >
           退出登录
         </button>
