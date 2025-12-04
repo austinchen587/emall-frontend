@@ -28,5 +28,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": false
   },
-  "include": ["src", "src/lib", "../../lib", "lib"],
+  "include": ["src", "src/lib", "../../lib", "src/lib"],
 }

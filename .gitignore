@@ -152,7 +152,3 @@ docker-compose.override.yml
 # Ignore if you have a custom Dockerfile for production that you don't want to overwrite
 # Dockerfile.prod
 
-
-# Vite config
-vite.config.ts
-vite.config.js
