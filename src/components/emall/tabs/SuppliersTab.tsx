@@ -116,8 +116,17 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
               </div>
               <div className="detail-item">
                 <span>总报价: {formatCurrency(supplier.total_quote)}</span>
-                <span>利润: {formatCurrency(supplier.profit)}</span>
+                <span className={`profit ${supplier.profit >= 0 ? 'positive' : 'negative'}`}>
+                  利润: {formatCurrency(supplier.profit)}
+                </span>
               </div>
+              
+              {/* 添加利润计算说明 */}
+              {supplier.is_selected && (
+                <div className="profit-explanation">
+                  <small>利润 = 总预算 - 所有被选中供应商报价总和</small>
+                </div>
+              )}
               
               <div className="commodities-list">
                 <h5>商品信息</h5>

@@ -82,7 +82,14 @@
   font-size: 1.125rem;
 }
 
+.suppliers-comparison {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
 .suppliers-list {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -128,14 +135,56 @@
   color: #64748b;
 }
 
-.profit.positive {
-  color: #10b981;
-  font-weight: 600;
+.profit-section {
+  width: 300px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
 }
 
-.profit.negative {
-  color: #ef4444;
-  font-weight: 600;
+.profit-summary h5 {
+  margin-top: 0;
+  color: #495057;
+}
+
+.profit-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  padding: 10px;
+  background: white;
+  border-radius: 4px;
+}
+
+.profit-value {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.profit-value.positive {
+  color: #28a745;
+}
+
+.profit-value.negative {
+  color: #dc3545;
+}
+
+.profit-breakdown {
+  font-size: 0.9em;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.profit-breakdown div {
+  margin-bottom: 5px;
+}
+
+.profit-explanation {
+  font-size: 0.8em;
+  color: #868e96;
+  font-style: italic;
 }
 
 .remarks-preview {
@@ -188,5 +237,13 @@
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .suppliers-comparison {
+    flex-direction: column;
+  }
+  
+  .profit-section {
+    width: 100%;
   }
 }
