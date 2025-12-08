@@ -1,137 +1,127 @@
 // src/components/auth/LoginForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
-import { validateForm, validationRules } from '../../utils/validation';
 import './LoginForm.css';
-
-interface FormData {
-  username: string;
-  password: string;
-}
 
 interface LoginFormProps {
   onSwitchToRegister?: () => void;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
-  const [formData, setFormData] = useState<FormData>({
-    username: '',
-    password: ''
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitError, setSubmitError] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const navigate = useNavigate();
   
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, error: authError, isAuthenticated } = useAuthStore();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    if (errors[name]) {
-      const validator = validationRules[name];
-      if (validator) {
-        const error = validator(value);
-        setErrors(prev => ({
-          ...prev,
-          [name]: error || ''
-        }));
-      }
+  // 监听认证状态变化，登录成功后跳转
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('登录成功，跳转到 dashboard');
+      navigate('/dashboard');
     }
+  }, [isAuthenticated, navigate]);
+
+  const validateForm = () => {
+    const newErrors: { username?: string; password?: string } = {};
+    
+    // 用户名验证：不能为空
+    if (!username.trim()) {
+      newErrors.username = '用户名不能为空';
+    }
+    
+    // 密码验证：至少6个字符
+    if (password.length < 6) {
+      newErrors.password = '密码至少需要6个字符';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 防止重复提交
-    if (isSubmitting || isLoading) {
-      console.log('防止重复提交');
-      return;
-    }
-    
-    setSubmitError('');
-    setIsSubmitting(true);
-    
-    const formErrors = validateForm(formData,validationRules);
-    setErrors(formErrors);
-    
-    if (Object.keys(formErrors).length > 0) {
-      setIsSubmitting(false);
+    if (!validateForm()) {
       return;
     }
     
     try {
-      console.log('开始登录...');
-      await login(formData);
-      console.log('登录成功，状态应该已更新');
-      // 不再调用 onSuccess()，因为 useEffect 会处理跳转
-    } catch (error: any) {
-      console.error('登录失败:', error);
-      setSubmitError(error.response?.data?.message || '登录失败，请重试');
-    } finally {
-      setIsSubmitting(false);
+      await login({ username, password });
+      // 跳转逻辑现在由 useEffect 处理
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
-  // 更新按钮禁用状态
-  const isButtonDisabled = isLoading || isSubmitting;
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+    
+    // 实时验证
+    if (!value.trim()) {
+      setErrors(prev => ({ ...prev, username: '用户名不能为空' }));
+    } else {
+      setErrors(prev => ({ ...prev, username: undefined }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    
+    // 实时验证
+    if (value.length > 0 && value.length < 6) {
+      setErrors(prev => ({ ...prev, password: '密码至少需要6个字符' }));
+    } else {
+      setErrors(prev => ({ ...prev, password: undefined }));
+    }
+  };
 
   return (
     <div className="login-form">
-      <h2>用户登录</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="username">用户名</label>
           <input
-            type="text"
             id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
+            type="text"
+            value={username}
+            onChange={handleUsernameChange}
+            placeholder="用户名"
             className={errors.username ? 'error' : ''}
-            disabled={isButtonDisabled}
+            required
           />
-          {errors.username && <span className="error-text">{errors.username}</span>}
+          {errors.username && <span className="error-message">{errors.username}</span>}
         </div>
-
+        
         <div className="form-group">
-          <label htmlFor="password">密码</label>
           <input
             type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
+            value={password}
+            onChange={handlePasswordChange}
+            placeholder="密码 (至少6个字符)"
             className={errors.password ? 'error' : ''}
-            disabled={isButtonDisabled}
+            minLength={6}
+            required
           />
-          {errors.password && <span className="error-text">{errors.password}</span>}
+          {errors.password && <span className="error-message">{errors.password}</span>}
         </div>
-
-        {submitError && <div className="submit-error">{submitError}</div>}
-
-        <button 
-          type="submit" 
-          disabled={isButtonDisabled}
-          className="login-button"
-        >
-          {isButtonDisabled ? '登录中...' : '登录'}
+        
+        {authError && <div className="submit-error">{authError}</div>}
+        
+        <button type="submit" disabled={isLoading} className="login-button">
+          {isLoading ? '登录中...' : '登录'}
         </button>
-
-        {onSwitchToRegister && (
-          <div className="switch-auth">
-            <span>没有账号？</span>
-            <button 
-              type="button" 
-              onClick={onSwitchToRegister} 
-              className="switch-button"
-              disabled={isButtonDisabled}
-            >
-              立即注册
-            </button>
-          </div>
-        )}
       </form>
+      
+      <div className="switch-auth">
+        <span>还没有账号？</span>
+        <button type="button" onClick={onSwitchToRegister} className="switch-button">
+          立即注册
+        </button>
+      </div>
     </div>
   );
 };
