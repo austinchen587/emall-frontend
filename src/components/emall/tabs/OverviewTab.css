@@ -133,6 +133,29 @@
   justify-content: space-between;
   font-size: 0.875rem;
   color: #64748b;
+  margin-bottom: 8px;
+}
+
+/* 新增：供应商审计信息 */
+.supplier-audit {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 8px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.audit-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.audit-label {
+  font-weight: 500;
+}
+
+.audit-value {
+  color: #64748b;
 }
 
 .profit-section {
@@ -245,5 +268,10 @@
   
   .profit-section {
     width: 100%;
+  }
+  
+  .audit-line {
+    flex-direction: column;
+    gap: 2px;
   }
 }

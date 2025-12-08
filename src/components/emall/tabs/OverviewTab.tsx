@@ -16,6 +16,23 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
 
   const totalProfit = data.total_budget - totalSelectedQuote;
 
+  // 格式化时间显示
+  const formatDateTime = (dateString: string | null | undefined) => {
+    if (!dateString) return '未知时间';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '未知时间';
+    }
+  };
+
   return (
     <div className="overview-tab">
       <div className="stats-grid">
@@ -65,6 +82,30 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
                 </div>
                 <div className="supplier-details">
                   <span>报价: {formatCurrency(supplier.total_quote)}</span>
+                </div>
+                
+                {/* 新增：供应商审计信息 */}
+                <div className="supplier-audit">
+                  <div className="audit-line">
+                    <span className="audit-label">创建人:</span>
+                    <span className="audit-value">{supplier.purchaser_created_by || '未知用户'}</span>
+                  </div>
+                  <div className="audit-line">
+                    <span className="audit-label">创建时间:</span>
+                    <span className="audit-value">{formatDateTime(supplier.purchaser_created_at)}</span>
+                  </div>
+                  {supplier.purchaser_updated_by && (
+                    <div className="audit-line">
+                      <span className="audit-label">更新人:</span>
+                      <span className="audit-value">{supplier.purchaser_updated_by}</span>
+                    </div>
+                  )}
+                  {supplier.purchaser_updated_at && (
+                    <div className="audit-line">
+                      <span className="audit-label">更新时间:</span>
+                      <span className="audit-value">{formatDateTime(supplier.purchaser_updated_at)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

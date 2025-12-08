@@ -55,6 +55,23 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
     return data.suppliers_info.find(supplier => supplier.id === id) || null;
   };
 
+  // 格式化时间显示
+  const formatDateTime = (dateString: string | null | undefined) => {
+    if (!dateString) return '未知时间';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '未知时间';
+    }
+  };
+
   return (
     <div className="suppliers-tab">
       {/* 编辑供应商模态框 */}
@@ -110,39 +127,139 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
             </div>
             
             <div className="supplier-details">
-              <div className="detail-item">
-                <span>渠道: {supplier.source}</span>
-                <span>联系方式: {supplier.contact}</span>
-              </div>
-              <div className="detail-item">
-                <span>总报价: {formatCurrency(supplier.total_quote)}</span>
-                <span className={`profit ${supplier.profit >= 0 ? 'positive' : 'negative'}`}>
-                  利润: {formatCurrency(supplier.profit)}
-                </span>
-              </div>
-              
-              {/* 添加利润计算说明 */}
-              {supplier.is_selected && (
-                <div className="profit-explanation">
-                  <small>利润 = 总预算 - 所有被选中供应商报价总和</small>
+              {/* 重新梳理的基本信息布局 */}
+              <div className={`supplier-basic-info ${supplier.is_selected ? 'profit-info' : ''}`}>
+                <div className="info-group">
+                  <span className="info-label">渠道</span>
+                  <span className="info-value">{supplier.source || '未填写'}</span>
                 </div>
-              )}
+                <div className="info-group">
+                  <span className="info-label">联系方式</span>
+                  <span className="info-value">{supplier.contact || '未填写'}</span>
+                </div>
+                <div className="info-group">
+                  <span className="info-label">总报价</span>
+                  <span className="info-value">{formatCurrency(supplier.total_quote)}</span>
+                </div>
+                <div className="info-group">
+                  <span className="info-label">利润</span>
+                  <span className={`info-value profit-value ${supplier.profit >= 0 ? '' : 'negative'}`}>
+                    {formatCurrency(supplier.profit)}
+                  </span>
+                </div>
+                
+                {/* 利润计算说明 */}
+                {supplier.is_selected && (
+                  <div className="profit-explanation">
+                    <small>利润 = 总预算 - 所有被选中供应商报价总和</small>
+                  </div>
+                )}
+              </div>
               
+              {/* 商品信息 */}
               <div className="commodities-list">
                 <h5>商品信息</h5>
-                {supplier.commodities.map((commodity, index) => (
-                  <div key={index} className="commodity-item">
-                    <span>{commodity.name}</span>
-                    <span>{commodity.specification}</span>
-                    <span>{commodity.quantity} × {formatCurrency(commodity.price)}</span>
-                    {commodity.product_url && (
-                      <span>
-                        <a href={commodity.product_url} target="_blank" rel="noopener noreferrer">
-                          商品链接
-                        </a>
-                      </span>
+                <div className="commodities-grid">
+                  {supplier.commodities.map((commodity, index) => (
+                    <div key={index} className="commodity-card">
+                      <div className="commodity-header">
+                        <span className="commodity-name">{commodity.name}</span>
+                        <span className="commodity-price">
+                          {commodity.quantity} × {formatCurrency(commodity.price)}
+                        </span>
+                      </div>
+                      <div className="commodity-details">
+                        <span className="commodity-spec">{commodity.specification || '无规格说明'}</span>
+                        {commodity.product_url && (
+                          <a 
+                            href={commodity.product_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="commodity-link"
+                          >
+                            商品链接
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 采购审计信息 */}
+              <div className="purchaser-audit-info">
+                <div className="audit-section">
+                  <h6>采购信息</h6>
+                  <div className="audit-details">
+                    <div className="audit-item">
+                      <span className="audit-label">创建人:</span>
+                      <span className="audit-value">{supplier.purchaser_created_by || '未知用户'}</span>
+                    </div>
+                    <div className="audit-item">
+                      <span className="audit-label">创建时间:</span>
+                      <span className="audit-value">{formatDateTime(supplier.purchaser_created_at)}</span>
+                    </div>
+                    {supplier.purchaser_updated_by && (
+                      <div className="audit-item">
+                        <span className="audit-label">更新人:</span>
+                        <span className="audit-value">{supplier.purchaser_updated_by}</span>
+                      </div>
+                    )}
+                    {supplier.purchaser_updated_at && (
+                      <div className="audit-item">
+                        <span className="audit-label">更新时间:</span>
+                        <span className="audit-value">{formatDateTime(supplier.purchaser_updated_at)}</span>
+                      </div>
                     )}
                   </div>
+                </div>
+
+                {/* 供应商关系审计信息 */}
+                {supplier.supplier_relation_info && (
+                  <div className="audit-section">
+                    <h6>供应商关系信息</h6>
+                    <div className="audit-details">
+                      <div className="audit-item">
+                        <span className="audit-label">供应商创建人:</span>
+                        <span className="audit-value">{supplier.supplier_relation_info.purchaser_created_by || '未知用户'}</span>
+                      </div>
+                      <div className="audit-item">
+                        <span className="audit-label">供应商创建时间:</span>
+                        <span className="audit-value">{formatDateTime(supplier.supplier_relation_info?.purchaser_created_at)}</span>
+                      </div>
+                      {supplier.supplier_relation_info.purchaser_updated_by && (
+                        <div className="audit-item">
+                          <span className="audit-label">供应商更新人:</span>
+                          <span className="audit-value">{supplier.supplier_relation_info.purchaser_updated_by}</span>
+                        </div>
+                      )}
+                      {supplier.supplier_relation_info.purchaser_updated_at && (
+                        <div className="audit-item">
+                          <span className="audit-label">供应商更新时间:</span>
+                          <span className="audit-value">{formatDateTime(supplier.supplier_relation_info.purchaser_updated_at)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 商品审计信息 */}
+                {supplier.commodities.map((commodity, index) => (
+                  commodity.purchaser_created_by && (
+                    <div key={`commodity-audit-${index}`} className="audit-section commodity-audit">
+                      <h6>商品审计信息 - {commodity.name}</h6>
+                      <div className="audit-details">
+                        <div className="audit-item">
+                          <span className="audit-label">商品创建人:</span>
+                          <span className="audit-value">{commodity.purchaser_created_by || '未知用户'}</span>
+                        </div>
+                        <div className="audit-item">
+                          <span className="audit-label">商品创建时间:</span>
+                          <span className="audit-value">{formatDateTime(commodity.purchaser_created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
                 ))}
               </div>
             </div>

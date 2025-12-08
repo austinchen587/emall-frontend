@@ -1,7 +1,6 @@
 // src/services/types/index.ts
 export * from './dashboard';
 
-
 export interface User {
   id: number
   name: string
@@ -42,7 +41,7 @@ export interface EmallItem {
 	total_price_numeric: number | null;
 	quote_start_time: string;
 	quote_end_time: string;
-	url?: string;
+	url?:string;
 	is_selected?: boolean;
 	bidding_status?: string;
   project_owner?: string;
@@ -104,13 +103,18 @@ export interface SupplierInfo {
 	id: number;
 	name: string;
 	source: string;
-	
 	contact: string;
 	store_name: string;
 	total_quote: number;
 	profit: number;
 	is_selected: boolean;
 	commodities: CommodityInfo[];
+	// 新增采购审计字段
+	purchaser_created_by?: string;
+	purchaser_created_at?: string;
+	purchaser_updated_by?: string;
+	purchaser_updated_at?: string;
+	supplier_relation_info?: SupplierRelationInfo;
 }
 
 export interface CommodityInfo {
@@ -121,6 +125,18 @@ export interface CommodityInfo {
 	quantity: number;
 	product_url: string;
 	total?: number;
+	// 新增商品审计字段
+	purchaser_created_by?: string;
+	purchaser_created_at?: string;
+}
+
+export interface SupplierRelationInfo {
+	purchaser_created_by?: string;
+	purchaser_created_role?: string;
+	purchaser_created_at?: string;
+	purchaser_updated_by?: string;
+	purchaser_updated_role?: string;
+	purchaser_updated_at?: string;
 }
 
 export interface ProcurementRemark {
@@ -143,4 +159,24 @@ export interface UpdateProgressData {
 	new_remark?: {
 		remark_content: string;
 	};
+}
+
+// 新增：添加供应商请求数据类型
+export interface AddSupplierRequest {
+	name: string;
+	source: string;
+	contact_info: string;
+	store_name: string;
+	is_selected: boolean;
+	commodities: Omit<CommodityInfo, 'id' | 'total'>[];
+}
+
+// 新增：更新供应商请求数据类型
+export interface UpdateSupplierRequest {
+	name: string;
+	source: string;
+	contact_info: string;
+	store_name: string;
+	is_selected: boolean;
+	commodities: Omit<CommodityInfo, 'id' | 'total'>[];
 }
