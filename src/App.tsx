@@ -6,6 +6,7 @@ import Login from './pages/Auth/login'; // 确保这里的路径正确
 import Dashboard from './pages/Dashboard/Dashboard';
 import EmallList from './pages/EmallList';
 import Procurement from './pages/Procurement/Procurement';
+import SupplierManagementPage from './pages/SupplierManagement';
 import './App.css';
 
 // 角色权限检查函数
@@ -91,13 +92,10 @@ function App() {
           
           {/* 供应商管理 - 管理员和供应商管理员可访问 */}
           <Route path="/suppliers" element={
-            <ProtectedRoute requiredRoles={['admin', 'supplier_manager']}>
-              <div style={{ padding: '20px', textAlign: 'center' }}>
-                <h2>供应商管理</h2>
-                <p>功能开发中，敬请期待...</p>
-              </div>
-            </ProtectedRoute>
-          } />
+           <ProtectedRoute requiredRoles={['admin', 'supplier_manager']}>
+              <SupplierManagementPage />
+           </ProtectedRoute>
+           } />
           
           {/* 智能助手 - 管理员和采购人员可访问 */}
           <Route path="/chat" element={
