@@ -82,9 +82,9 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
             {selectedProject.project_name}
           </h2>
           <div className="project-stats">
-            <span>总预算: {formatCurrency(projectSuppliers?.project_info?.total_budget)}</span>
-            <span>已选报价: {formatCurrency(projectSuppliers?.project_info?.total_selected_quote)}</span>
-            <span>利润: {formatCurrency(projectSuppliers?.project_info?.total_profit)}</span>
+            <span>甲方总预算: {formatCurrency(projectSuppliers?.project_info?.total_budget)}</span>
+            <span>供应商采购成本: {formatCurrency(projectSuppliers?.project_info?.total_selected_quote)}</span>
+            <span>采购利润: {formatCurrency(projectSuppliers?.project_info?.total_profit)}</span>
           </div>
         </div>
         <div className="supplier-actions">

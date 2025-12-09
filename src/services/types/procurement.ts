@@ -5,12 +5,20 @@ export interface DailyProfitStat {
   total_price_control: number;
   supplier_name: string;
   total_quote: number;
-  profit: number;
-  latest_remark: string | null;
+  final_negotiated_quote?: number;
+  latest_remark?: string;
+}
+
+export interface UpdateFinalQuoteRequest {
+  project_name: string;
+  final_quote: number;
+  modified_by: string;
+  modified_role: string;
 }
 
 export interface ProcurementStatsResponse {
   success: boolean;
   data: DailyProfitStat[];
-  count: number;
+  count?: number;
+  error?: string;
 }
