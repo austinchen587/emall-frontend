@@ -2,6 +2,7 @@
 import React from 'react';
 import { ProcurementProgressData } from '../../../services/types';
 import { formatCurrency } from '../utils';
+import { useAuthStore } from '../../../stores/authStore';
 import './OverviewTab.css';
 
 interface OverviewTabProps {
@@ -9,8 +10,18 @@ interface OverviewTabProps {
 }
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
-  // 计算总利润和选中供应商总报价
-  const totalSelectedQuote = data.suppliers_info
+  // 从 authStore 获取用户角色
+  const userRole = useAuthStore((state) => state.user?.role || 'unassigned');
+
+  // 根据用户角色过滤供应商
+  const filteredSuppliers = userRole === 'admin' 
+    ? data.suppliers_info 
+    : data.suppliers_info.filter(supplier => 
+        supplier.supplier_relation_info?.purchaser_created_role === 'procurement_staff'
+      );
+
+  // 计算总利润和选中供应商总报价（使用过滤后的供应商）
+  const totalSelectedQuote = filteredSuppliers
     .filter(supplier => supplier.is_selected)
     .reduce((sum, supplier) => sum + supplier.total_quote, 0);
 
@@ -24,7 +35,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
       return date.toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+       day: '2-digit',
         hour: '2-digit',
         minute: '2-digit'
       });
@@ -41,7 +52,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
           <div className="stat-label">总预算</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{data.suppliers_info.length}</div>
+          <div className="stat-value">{filteredSuppliers.length}</div>
           <div className="stat-label">供应商数量</div>
         </div>
         <div className="stat-card">
@@ -68,13 +79,13 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* 供应商报价对比 - 修改后的布局 */}
+      {/* 供应商报价对比 */}
       <div className="suppliers-overview">
         <h4>供应商报价对比</h4>
         <div className="suppliers-comparison">
           {/* 左侧：供应商列表 */}
           <div className="suppliers-list">
-            {data.suppliers_info.map(supplier => (
+            {filteredSuppliers.map(supplier => (
               <div key={supplier.id} className={`supplier-card ${supplier.is_selected ? 'selected' : ''}`}>
                 <div className="supplier-header">
                   <span className="supplier-name">{supplier.name}</span>
@@ -84,7 +95,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
                   <span>报价: {formatCurrency(supplier.total_quote)}</span>
                 </div>
                 
-                {/* 新增：供应商审计信息 */}
+                {/* 供应商审计信息 */}
                 <div className="supplier-audit">
                   <div className="audit-line">
                     <span className="audit-label">创建人:</span>

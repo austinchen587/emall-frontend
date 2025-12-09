@@ -4,6 +4,7 @@ import { ProcurementProgressData } from '../../../services/types';
 import { formatCurrency } from '../utils';
 import EditSupplierModal from './suppliers/EditSupplierModal';
 import AddSupplierModal from './suppliers/AddSupplierModal';
+import { useAuthStore } from '../../../stores/authStore';
 import './SuppliersTab.css';
 
 interface SuppliersTabProps {
@@ -24,6 +25,16 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
   const [editingSupplier, setEditingSupplier] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
+  // 从 authStore获取用户角色
+  const userRole = useAuthStore((state) => state.user?.role || 'unassigned');
+
+  // 根据用户角色过滤供应商
+  const filteredSuppliers = userRole === 'admin' 
+    ? data.suppliers_info 
+    : data.suppliers_info.filter(supplier => 
+        supplier.supplier_relation_info?.purchaser_created_role === 'procurement_staff'
+      );
+
   const handleEditSupplier = (supplierId: number) => {
     setEditingSupplier(supplierId);
   };
@@ -31,7 +42,6 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
   const handleDeleteSupplier = async (supplierId: number) => {
     if (window.confirm('确定要删除这个供应商吗？此操作不可撤销！')) {
       try {
-        // 这里需要实现删除供应商的API调用
         console.log('删除供应商:', supplierId);
         onSupplierUpdate();
       } catch (error) {
@@ -52,7 +62,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
   };
 
   const getSupplierById = (id: number) => {
-    return data.suppliers_info.find(supplier => supplier.id === id) || null;
+    return filteredSuppliers.find(supplier => supplier.id === id) || null;
   };
 
   // 格式化时间显示
@@ -99,7 +109,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
       </div>
       
       <div className="suppliers-list">
-        {data.suppliers_info.map(supplier => (
+        {filteredSuppliers.map(supplier => (
           <div key={supplier.id} className="supplier-item">
             <div className="supplier-main">
               <div className="supplier-selection">
@@ -127,7 +137,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
             </div>
             
             <div className="supplier-details">
-              {/* 重新梳理的基本信息布局 */}
+              {/* 基本信息布局 */}
               <div className={`supplier-basic-info ${supplier.is_selected ? 'profit-info' : ''}`}>
                 <div className="info-group">
                   <span className="info-label">渠道</span>

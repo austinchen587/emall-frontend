@@ -1,9 +1,11 @@
 // src/pages/SupplierManagement/components/SupplierManagement.tsx
 import React, { useState } from 'react';
 import { Project, ProjectSuppliersResponse, Supplier } from '../../../services/api_supplier';
+import { EmallItem } from '../../../services/types';
 import SupplierTable from './SupplierTable';
 import AddSupplierModal from './AddSupplierModal';
 import EditSupplierModal from './EditSupplierModal';
+import ProjectDetailModal from '../../../components/emall/ProjectDetailModal';
 import './SupplierManagement.css';
 
 interface SupplierManagementProps {
@@ -21,6 +23,45 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [showProjectDetail, setShowProjectDetail] = useState(false);
+
+  // 将 Project 转换为 EmallItem
+  const convertProjectToEmallItem = (project: Project): EmallItem => {
+    // 安全地获取 total_budget
+    const totalBudget = projectSuppliers?.project_info?.total_budget;
+    
+    // 根据 EmallItem 接口定义创建对象
+    return {
+      id: project.id,
+      project_title: project.project_name,
+      project_name: project.project_name,
+      purchasing_unit: '',
+      publish_date: '',
+      region: '',
+      project_number: '',
+      commodity_names: null,
+      parameter_requirements: null,
+      purchase_quantities: null,
+      control_amounts: null,
+      suggested_brands: null,
+      business_items: null,
+      business_requirements: null,
+      related_links: null,
+      download_files: null,
+      total_price_control: projectSuppliers?.project_info?.total_budget?.toString() || '0',
+      total_price_numeric: typeof totalBudget === 'number' ? totalBudget : 0,
+      quote_start_time: '',
+      quote_end_time: '',
+      bidding_status: '未知状态',
+      project_owner: ''
+    };
+  };
+
+  // 安全的数值格式化函数
+  const formatCurrency = (value: number | undefined): string => {
+    if (typeof value !== 'number') return '¥0';
+    return `¥${value.toLocaleString()}`;
+  };
 
   if (!selectedProject) {
     return (
@@ -37,11 +78,13 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     <div className="supplier-management">
       <div className="supplier-header">
         <div className="project-info">
-          <h2>{selectedProject.project_name}</h2>
+          <h2 onClick={() => setShowProjectDetail(true)}>
+            {selectedProject.project_name}
+          </h2>
           <div className="project-stats">
-            <span>总预算: ¥{projectSuppliers?.project_info.total_budget.toLocaleString()}</span>
-            <span>已选报价: ¥{projectSuppliers?.project_info.total_selected_quote.toLocaleString()}</span>
-            <span>利润: ¥{projectSuppliers?.project_info.total_profit.toLocaleString()}</span>
+            <span>总预算: {formatCurrency(projectSuppliers?.project_info?.total_budget)}</span>
+            <span>已选报价: {formatCurrency(projectSuppliers?.project_info?.total_selected_quote)}</span>
+            <span>利润: {formatCurrency(projectSuppliers?.project_info?.total_profit)}</span>
           </div>
         </div>
         <div className="supplier-actions">
@@ -63,7 +106,7 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
 
       <SupplierTable
         suppliers={projectSuppliers?.suppliers || []}
-        projectId={selectedProject.id} // 添加这行
+        projectId={selectedProject.id}
         loading={loading}
         onEditSupplier={setEditingSupplier}
         onRefresh={onRefresh}
@@ -91,6 +134,12 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
           }}
         />
       )}
+
+      <ProjectDetailModal
+        isOpen={showProjectDetail}
+        onClose={() => setShowProjectDetail(false)}
+        project={convertProjectToEmallItem(selectedProject)}
+      />
     </div>
   );
 };

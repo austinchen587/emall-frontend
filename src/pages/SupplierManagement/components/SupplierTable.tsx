@@ -56,8 +56,18 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
     }
   };
 
+  // 获取创建人姓名首字母
+  const getInitials = (name: string) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
+
   if (loading) {
-    return <div className="loading">加载中...</div>;
+    return (
+      <div className="loading">
+        <div>加载供应商数据...</div>
+      </div>
+    );
   }
 
   if (suppliers.length === 0) {
@@ -69,36 +79,27 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
       <table>
         <thead>
           <tr>
-            <th style={{ width: '30px' }}></th>
-            <th>选择</th>
+            <th style={{ width: '40px' }}></th>
+            <th style={{ width: '60px' }}>选择</th>
             <th>供应商名称</th>
             <th>来源</th>
             <th>联系方式</th>
             <th>店铺名称</th>
             <th>总报价</th>
             <th>商品数量</th>
-            <th>操作</th>
+            <th>创建人</th>
+            <th style={{ width: '160px' }}>操作</th>
           </tr>
         </thead>
         <tbody>
           {suppliers.map(supplier => (
             <React.Fragment key={supplier.id}>
-              <tr 
-                className={supplier.is_selected ? 'selected' : ''}
-                style={{ cursor: 'pointer' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.01)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
+              <tr className={supplier.is_selected ? 'selected' : ''}>
                 <td>
                   <button 
                     className="expand-btn"
                     onClick={() => toggleSupplierDetails(supplier.id)}
+                    title={expandedSupplier === supplier.id ? '收起详情' : '展开详情'}
                   >
                     {expandedSupplier === supplier.id ? '−' : '+'}
                   </button>
@@ -108,24 +109,59 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
                     type="checkbox"
                     checked={supplier.is_selected}
                     onChange={() => handleToggleSelection(supplier.id, supplier.is_selected)}
+                    title={supplier.is_selected ? '取消选择' : '选择供应商'}
                   />
                 </td>
-                <td>{supplier.name}</td>
-                <td>{supplier.source || '-'}</td>
+                <td style={{ fontWeight: '600', color: '#1f2937' }}>{supplier.name}</td>
+                <td>
+                  <span style={{
+                    background: supplier.source === '手动添加' ? '#dbeafe' : '#f0fdf4',
+                    color: supplier.source === '手动添加' ? '#1e40af' : '#166534',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    {supplier.source || '-'}
+                  </span>
+                </td>
                 <td>{supplier.contact || '-'}</td>
                 <td>{supplier.store_name || '-'}</td>
-                <td>¥{supplier.total_quote.toLocaleString()}</td>
-                <td>{supplier.commodities.length}</td>
+                <td style={{ fontWeight: '600', color: '#dc2626' }}>
+                  ¥{supplier.total_quote.toLocaleString()}
+                </td>
+                <td>
+                  <span style={{
+                    background: '#f3f4f6',
+                    color: '#374151',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    {supplier.commodities.length} 件
+                  </span>
+                </td>
+                <td>
+                  <div className="creator-cell">
+                    <div className="creator-avatar" title={supplier.purchaser_created_by || '未知'}>
+                      {getInitials(supplier.purchaser_created_by || '未知')}
+                    </div>
+                    <span>{supplier.purchaser_created_by || '未知'}</span>
+                  </div>
+                </td>
                 <td>
                   <button 
                     className="btn-edit"
                     onClick={() => onEditSupplier(supplier)}
+                    title="编辑供应商信息"
                   >
                     编辑
                   </button>
                   <button 
                     className="btn-delete"
                     onClick={() => handleDeleteSupplier(supplier.id)}
+                    title="删除供应商"
                   >
                     删除
                   </button>
@@ -135,7 +171,7 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
               {/* 审计信息展开行 */}
               {expandedSupplier === supplier.id && (
                 <tr className="audit-info-row">
-                  <td colSpan={9}>
+                  <td colSpan={10}>
                     <div className="audit-info">
                       <h4>审计信息</h4>
                       <div className="audit-details">

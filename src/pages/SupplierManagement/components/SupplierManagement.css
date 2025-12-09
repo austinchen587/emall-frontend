@@ -50,6 +50,33 @@
   color: #2d3748;
   font-size: 24px;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  position: relative;
+  padding-bottom: 2px;
+}
+
+/* 项目名称超链接样式 */
+.project-info h2:hover {
+  color: #667eea;
+  transform: translateY(-1px);
+}
+
+/* 添加下划线动画效果 */
+.project-info h2::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.project-info h2:hover::after {
+  width: 100%;
 }
 
 .project-stats {
