@@ -263,3 +263,20 @@
   transform: none;
   box-shadow: none;
 }
+
+
+.disabled-field {
+  background-color: #f7fafc;
+  color: #718096;
+  cursor: not-allowed;
+  border: 1px solid #e2e8f0;
+}
+.audit-section {
+  margin: 20px 0;
+}
+.audit-info {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}

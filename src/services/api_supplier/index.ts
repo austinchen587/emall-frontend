@@ -18,6 +18,8 @@ export interface Commodity {
   price: number;
   quantity: number;
   product_url: string;
+  purchaser_created_by: string;
+  purchaser_created_at: string;
 }
 
 export interface Supplier {
@@ -31,8 +33,13 @@ export interface Supplier {
   commodities: Commodity[];
   purchaser_created_by: string;
   purchaser_created_at: string;
-  purchaser_updated_by: string;
-  purchaser_updated_at: string;
+  purchaser_updated_by?: string;
+  purchaser_updated_at?: string;
+  // 添加供应商关系审计字段
+  procurement_supplier_created_by: string;
+  procurement_supplier_created_at: string;
+  procurement_supplier_updated_by?: string;
+  procurement_supplier_updated_at?: string;
 }
 
 export interface ProjectSuppliersResponse {

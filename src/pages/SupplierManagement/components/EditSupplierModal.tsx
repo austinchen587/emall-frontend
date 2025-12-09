@@ -56,7 +56,9 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
       specification: '', 
       price: 0, 
       quantity: 1, 
-      product_url: '' 
+      product_url: '' ,
+      purchaser_created_by: '', // 添加审计字段
+    purchaser_created_at: ''  // 添加审计字段
     }]);
   };
 
@@ -122,6 +124,54 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
               <label>商品信息</label>
               <button type="button" onClick={addCommodity}>添加商品</button>
             </div>
+            {/* 在这里添加审计信息部分 */}
+<div className="audit-section">
+  <div className="section-header">
+    <label>审计信息</label>
+  </div>
+  <div className="audit-info">
+    <div className="form-row">
+      <div className="form-group">
+        <label>创建人</label>
+        <input
+          type="text"
+          value={supplier.purchaser_created_by || '未知'}
+          disabled
+          className="disabled-field"
+        />
+      </div>
+      <div className="form-group">
+        <label>创建时间</label>
+        <input
+          type="text"
+          value={supplier.purchaser_created_at ? new Date(supplier.purchaser_created_at).toLocaleString('zh-CN') : '未知'}
+          disabled
+          className="disabled-field"
+        />
+      </div>
+    </div>
+    <div className="form-row">
+      <div className="form-group">
+        <label>最后更新人</label>
+        <input
+          type="text"
+          value={supplier.purchaser_updated_by || '无'}
+          disabled
+          className="disabled-field"
+        />
+      </div>
+      <div className="form-group">
+        <label>最后更新时间</label>
+        <input
+          type="text"
+          value={supplier.purchaser_updated_at ? new Date(supplier.purchaser_updated_at).toLocaleString('zh-CN') : '无'}
+          disabled
+          className="disabled-field"
+        />
+      </div>
+    </div>
+  </div>
+</div>
             
             {commodities.map((commodity, index) => (
               <div key={commodity.id || `new-${index}`} className="commodity-item">
