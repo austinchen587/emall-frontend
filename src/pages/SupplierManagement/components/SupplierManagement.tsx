@@ -1,11 +1,12 @@
 // src/pages/SupplierManagement/components/SupplierManagement.tsx
-import React, { useState } from 'react';
-import { Project, ProjectSuppliersResponse, Supplier } from '../../../services/api_supplier';
+import React, { useState, useEffect } from 'react';
+import { Project, ProjectSuppliersResponse, Supplier, supplierAPI } from '../../../services/api_supplier';
 import { EmallItem } from '../../../services/types';
 import SupplierTable from './SupplierTable';
 import AddSupplierModal from './AddSupplierModal';
 import EditSupplierModal from './EditSupplierModal';
 import ProjectDetailModal from '../../../components/emall/ProjectDetailModal';
+import RemarksTab from '../../../components/emall/tabs/RemarksTab';
 import './SupplierManagement.css';
 
 interface SupplierManagementProps {
@@ -24,13 +25,16 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
+  const [showRemarksTab, setShowRemarksTab] = useState(false);
+  const [newRemark, setNewRemark] = useState('');
+  const [remarksData,setRemarksData] = useState<any>(null);
+  const [remarksLoading, setRemarksLoading] = useState(false);
+  const [latestRemark, setLatestRemark] = useState<any>(null); // 改为单个备注对象
 
   // 将 Project 转换为 EmallItem
   const convertProjectToEmallItem = (project: Project): EmallItem => {
-    // 安全地获取 total_budget
     const totalBudget = projectSuppliers?.project_info?.total_budget;
     
-    // 根据 EmallItem 接口定义创建对象
     return {
       id: project.id,
       project_title: project.project_name,
@@ -57,11 +61,57 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     };
   };
 
-  // 安全的数值格式化函数
   const formatCurrency = (value: number | undefined): string => {
     if (typeof value !== 'number') return '¥0';
     return `¥${value.toLocaleString()}`;
   };
+
+  // 加载备注数据
+  const loadRemarks = async () => {
+    if (!selectedProject) return;
+    
+    setRemarksLoading(true);
+    try {
+      const data = await supplierAPI.getRemarks(selectedProject.id);
+      setRemarksData(data);
+      // 设置最新备注（取第一条，即最新的）
+      setLatestRemark(data.remarks_history?.[0] || null);
+    } catch (error) {
+      console.error('加载备注失败:', error);
+      setRemarksData({ remarks_history: [] });
+      setLatestRemark(null);
+    } finally {
+      setRemarksLoading(false);
+    }
+  };
+
+  // 处理添加备注
+  const handleAddRemark = async () => {
+    if (!selectedProject || !newRemark.trim()) return;
+    
+    try {
+      await supplierAPI.addRemark(selectedProject.id, newRemark.trim());
+      await loadRemarks(); // 重新加载备注数据
+      setNewRemark('');
+    } catch (error) {
+      console.error('添加备注失败:', error);
+      alert('添加备注失败，请重试');
+    }
+  };
+
+  // 当选择项目或显示备注弹窗时加载数据
+  useEffect(() => {
+    if (selectedProject) {
+      loadRemarks();
+    }
+  }, [selectedProject]);
+
+  //当显示备注弹窗时加载数据
+  useEffect(() => {
+    if (showRemarksTab && selectedProject) {
+      loadRemarks();
+    }
+  }, [showRemarksTab, selectedProject]);
 
   if (!selectedProject) {
     return (
@@ -96,6 +146,12 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
           </button>
           <button 
             className="btn btn-secondary"
+            onClick={() => setShowRemarksTab(true)}
+          >
+            添加备注
+          </button>
+          <button 
+            className="btn btn-secondary"
             onClick={onRefresh}
             disabled={loading}
           >
@@ -111,6 +167,45 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
         onEditSupplier={setEditingSupplier}
         onRefresh={onRefresh}
       />
+
+      {/* 最新备注显示区域 */}
+      <div className="latest-remarks-section">
+        <div className="section-header">
+          <h3>最新备注</h3>
+          <button 
+            className="btn-view-all"
+            onClick={() => setShowRemarksTab(true)}
+          >
+            查看全部
+          </button>
+        </div>
+        
+        {remarksLoading ? (
+          <div className="remarks-loading">加载中...</div>
+        ) : latestRemark ? (
+          <div className="remarks-list">
+            <div className="remark-item">
+              <div className="remark-content">
+                {latestRemark.remark_content}
+              </div>
+              <div className="remark-meta">
+                <span className="remark-author">{latestRemark.created_by}</span>
+                <span className="remark-time">{latestRemark.created_at_display}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="no-remarks">
+            <p>暂无备注</p>
+            <button 
+              className="btn-add-remark"
+              onClick={() => setShowRemarksTab(true)}
+            >
+              添加第一条备注
+            </button>
+          </div>
+        )}
+      </div>
 
       {showAddModal && (
         <AddSupplierModal
@@ -140,6 +235,29 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
         onClose={() => setShowProjectDetail(false)}
         project={convertProjectToEmallItem(selectedProject)}
       />
+
+      {/* 备注弹窗 */}
+      {showRemarksTab && (
+        <div className="remarks-modal-overlay">
+          <div className="remarks-modal-content">
+            <div className="remarks-modal-header">
+              <h3>项目备注 - {selectedProject.project_name}</h3>
+              <button className="close-btn" onClick={() => setShowRemarksTab(false)}>×</button>
+            </div>
+            <RemarksTab
+              data={remarksData || { remarks_history: [] }}
+              newRemark={newRemark}
+              onNewRemarkChange={setNewRemark}
+              onAddRemark={handleAddRemark}
+            />
+            {remarksLoading && (
+              <div className="remarks-loading">
+                加载中...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

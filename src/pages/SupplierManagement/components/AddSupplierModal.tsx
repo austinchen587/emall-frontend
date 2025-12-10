@@ -22,7 +22,7 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
     is_selected: false
   });
   const [commodities, setCommodities] = useState<Partial<Commodity>[]>([
-    { name: '', specification: '', price: 0, quantity: 1, product_url: '' }
+    { name: '', specification: '', price: undefined, quantity: undefined, product_url: '' }
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +45,7 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
   };
 
   const addCommodity = () => {
-    setCommodities([...commodities, { name: '', specification: '', price: 0, quantity: 1, product_url: '' }]);
+    setCommodities([...commodities, { name: '', specification: '', price: undefined, quantity: undefined, product_url: '' }]);
   };
 
   const updateCommodity = (index: number, field: string, value: any) => {
@@ -144,17 +144,18 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
                     <label>价格</label>
                     <input
                       type="number"
-                      step="0.01"
-                      value={commodity.price || 0}
-                      onChange={(e) => updateCommodity(index, 'price', parseFloat(e.target.value))}
+                      value={commodity.price || ''}
+                      onChange={(e) => updateCommodity(index, 'price', e.target.value ? parseFloat(e.target.value) : undefined)}
+                      placeholder="请输入价格"
                     />
                   </div>
                   <div className="form-group">
                     <label>数量</label>
                     <input
                       type="number"
-                      value={commodity.quantity || 1}
-                      onChange={(e) => updateCommodity(index, 'quantity', parseInt(e.target.value))}
+                      value={commodity.quantity || ''}
+                      onChange={(e) => updateCommodity(index, 'quantity', e.target.value ? parseInt(e.target.value) : undefined)}
+                      placeholder="请输入数量"
                     />
                   </div>
                 </div>

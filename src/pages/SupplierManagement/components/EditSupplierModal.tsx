@@ -54,11 +54,11 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
       id: 0, // 新商品ID为0，后端会识别为新增
       name: '', 
       specification: '', 
-      price: 0, 
-      quantity: 1, 
-      product_url: '' ,
-      purchaser_created_by: '', // 添加审计字段
-    purchaser_created_at: ''  // 添加审计字段
+      price: 0,
+      quantity: 0,
+      product_url: '',
+      purchaser_created_by: '',
+      purchaser_created_at: ''
     }]);
   };
 
@@ -124,54 +124,54 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
               <label>商品信息</label>
               <button type="button" onClick={addCommodity}>添加商品</button>
             </div>
-            {/* 在这里添加审计信息部分 */}
-<div className="audit-section">
-  <div className="section-header">
-    <label>审计信息</label>
-  </div>
-  <div className="audit-info">
-    <div className="form-row">
-      <div className="form-group">
-        <label>创建人</label>
-        <input
-          type="text"
-          value={supplier.purchaser_created_by || '未知'}
-          disabled
-          className="disabled-field"
-        />
-      </div>
-      <div className="form-group">
-        <label>创建时间</label>
-        <input
-          type="text"
-          value={supplier.purchaser_created_at ? new Date(supplier.purchaser_created_at).toLocaleString('zh-CN') : '未知'}
-          disabled
-          className="disabled-field"
-        />
-      </div>
-    </div>
-    <div className="form-row">
-      <div className="form-group">
-        <label>最后更新人</label>
-        <input
-          type="text"
-          value={supplier.purchaser_updated_by || '无'}
-          disabled
-          className="disabled-field"
-        />
-      </div>
-      <div className="form-group">
-        <label>最后更新时间</label>
-        <input
-          type="text"
-          value={supplier.purchaser_updated_at ? new Date(supplier.purchaser_updated_at).toLocaleString('zh-CN') : '无'}
-          disabled
-          className="disabled-field"
-        />
-      </div>
-    </div>
-  </div>
-</div>
+            
+            <div className="audit-section">
+              <div className="section-header">
+                <label>审计信息</label>
+              </div>
+              <div className="audit-info">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>创建人</label>
+                    <input
+                      type="text"
+                      value={supplier.purchaser_created_by || '未知'}
+                      disabled
+                      className="disabled-field"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>创建时间</label>
+                    <input
+                      type="text"
+                      value={supplier.purchaser_created_at ? new Date(supplier.purchaser_created_at).toLocaleString('zh-CN') : '未知'}
+                      disabled
+                      className="disabled-field"
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>最后更新人</label>
+                    <input
+                      type="text"
+                      value={supplier.purchaser_updated_by || '无'}
+                      disabled
+                      className="disabled-field"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>最后更新时间</label>
+                    <input
+                      type="text"
+                      value={supplier.purchaser_updated_at ? new Date(supplier.purchaser_updated_at).toLocaleString('zh-CN') : '无'}
+                      disabled
+                      className="disabled-field"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
             
             {commodities.map((commodity, index) => (
               <div key={commodity.id || `new-${index}`} className="commodity-item">
@@ -204,17 +204,18 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                     <label>价格</label>
                     <input
                       type="number"
-                      step="0.01"
-                      value={commodity.price}
-                      onChange={(e) => updateCommodity(index, 'price', parseFloat(e.target.value))}
+                      value={commodity.price === 0 ? '' : commodity.price}
+                      onChange={(e) => updateCommodity(index, 'price', e.target.value ? parseFloat(e.target.value) : 0)}
+                      placeholder="请输入价格"
                     />
                   </div>
                   <div className="form-group">
                     <label>数量</label>
                     <input
                       type="number"
-                      value={commodity.quantity}
-                      onChange={(e) => updateCommodity(index, 'quantity', parseInt(e.target.value))}
+                      value={commodity.quantity === 0 ? '' : commodity.quantity}
+                      onChange={(e) => updateCommodity(index, 'quantity', e.target.value ? parseInt(e.target.value) : 0)}
+                      placeholder="请输入数量"
                     />
                   </div>
                 </div>

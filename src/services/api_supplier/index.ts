@@ -24,22 +24,22 @@ export interface Commodity {
 
 export interface Supplier {
   id: number;
-  name: string;
-  source: string;
-  contact: string;
-  store_name: string;
-  is_selected: boolean;
-  total_quote: number;
-  commodities: Commodity[];
-  purchaser_created_by: string;
-  purchaser_created_at: string;
-  purchaser_updated_by?: string;
-  purchaser_updated_at?: string;
-  // 添加供应商关系审计字段
-  procurement_supplier_created_by: string;
-  procurement_supplier_created_at: string;
-  procurement_supplier_updated_by?: string;
-  procurement_supplier_updated_at?: string;
+	name: string;
+	source: string;
+	contact: string;
+	store_name: string;
+	is_selected: boolean;
+	total_quote: number;
+	commodities: Commodity[];
+	purchaser_created_by: string;
+	purchaser_created_at: string;
+	purchaser_updated_by?: string;
+	purchaser_updated_at?: string;
+	// 添加供应商关系审计字段
+	procurement_supplier_created_by: string;
+	procurement_supplier_created_at: string;
+	procurement_supplier_updated_by?: string;
+	procurement_supplier_updated_at?: string;
 }
 
 export interface ProjectSuppliersResponse {
@@ -57,6 +57,19 @@ export interface TimeFilterOption {
   value: string;
   label: string;
   expanded?: boolean;
+}
+
+// 添加备注相关接口
+export interface ProcurementRemark {
+  id: number;
+  remark_content: string;
+  created_by: string;
+  created_at: string;
+  created_at_display: string;
+}
+
+export interface RemarksResponse {
+  remarks_history: ProcurementRemark[];
 }
 
 export const supplierAPI = {
@@ -108,6 +121,26 @@ export const supplierAPI = {
       project_id: projectId,
       supplier_id: supplierId
     });
+    return response.data;
+  },
+
+  // 获取项目备注 - 使用新路径
+  getRemarks: async (procurementId: number): Promise<any> => {
+    const response = await apiClient.get(`/emall/purchasing/procurement/${procurementId}/progress/`);
+    return response.data;
+  },
+
+  // 添加备注 - 使用新路径
+  addRemark: async (procurementId: number, remarkContent: string): Promise<any> => {
+    const response = await apiClient.post(`/emall/purchasing/procurement/${procurementId}/add-remark/`, {
+      remark_content: remarkContent
+    });
+    return response.data;
+  },
+
+  // 删除备注 - 使用新路径
+  deleteRemark: async (remarkId: number): Promise<any> => {
+    const response = await apiClient.delete(`/emall/purchasing/remark/${remarkId}/delete/`);
     return response.data;
   }
 };
