@@ -7,6 +7,8 @@ export interface DailyProfitStat {
   total_quote: number;
   final_negotiated_quote?: number;
   latest_remark?: string;
+  selected_at: string | null;  // 添加缺失的字段
+  is_selected: boolean;        // 添加缺失的字段
 }
 
 export interface UpdateFinalQuoteRequest {

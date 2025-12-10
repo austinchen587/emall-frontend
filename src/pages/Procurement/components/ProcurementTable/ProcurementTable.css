@@ -1,0 +1,120 @@
+/* src/pages/Procurement/components/ProcurementTable/ProcurementTable.css */
+.procurement-table-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.procurement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.procurement-table th {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 20px;
+  text-align: left;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  position: relative;
+}
+
+.procurement-table th:hover {
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.procurement-table th::after {
+  content: "↕️";
+  margin-left: 8px;
+  opacity: 0.5;
+  font-size: 0.9em;
+}
+
+.procurement-table td {
+  padding: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.table-row:hover {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  transform: scale(1.01);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.project-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.project-owner {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.price-control, .total-quote {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+  color: #374151;
+}
+
+.profit {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.profit-positive {
+  color: #10b981;
+  background: linear-gradient(45deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profit-negative {
+  color: #ef4444;
+}
+
+.profit-neutral {
+  color: #64748b;
+}
+
+.latest-remark {
+  max-width: 250px;
+  max-height: 60px;
+  overflow-y: auto;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.5;
+  color: #64748b;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 13px;
+  border-left: 3px solid #3b82f6;
+}
+
+.no-data {
+  text-align: center;
+  padding: 80px 20px;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.no-data::before {
+  content: "📊";
+  font-size: 3em;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}

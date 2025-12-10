@@ -11,7 +11,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
-      <AuthLayout title="磊极科技">
+      <AuthLayout title="万柯国誉">
         <LoginForm onSwitchToRegister={handleSwitchToRegister} />
       </AuthLayout>
     </div>
