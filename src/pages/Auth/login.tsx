@@ -1,18 +1,31 @@
 // src/pages/Auth/login.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import LoginForm from '../../components/auth/LoginForm';
+import RegisterForm from '../../components/auth/RegisterForm';
 import './Login.css';
 
+type AuthMode = 'login' | 'register';
+
 const Login: React.FC = () => {
+  const [mode, setMode] = useState<AuthMode>('login');
+
   const handleSwitchToRegister = () => {
-    console.log('切换到注册页面');
+    setMode('register');
+  };
+
+  const handleSwitchToLogin = () => {
+    setMode('login');
   };
 
   return (
     <div className="login-page">
       <AuthLayout title="万柯国誉">
-        <LoginForm onSwitchToRegister={handleSwitchToRegister} />
+        {mode === 'login' ? (
+          <LoginForm onSwitchToRegister={handleSwitchToRegister} />
+        ) : (
+          <RegisterForm onSwitchToLogin={handleSwitchToLogin} />
+        )}
       </AuthLayout>
     </div>
   );

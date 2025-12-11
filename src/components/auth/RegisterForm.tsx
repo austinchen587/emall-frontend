@@ -1,11 +1,11 @@
 // src/components/auth/RegisterForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import './RegisterForm.css';
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
-  // 移除 onSuccess 属性
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
@@ -16,7 +16,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
     password_confirm: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { register, isLoading } = useAuthStore();
+  const navigate = useNavigate();
+  
+  const { register, isLoading, error: authError, isAuthenticated } = useAuthStore();
+
+  // 监听认证状态变化，注册成功后跳转
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('注册成功，跳转到 dashboard');
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,8 +70,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
 
     try {
       await register(formData);
-      // 移除 onSuccess() 调用，因为认证状态更新后会自动跳转
-      // 注册成功后，authStore 会更新状态，login.tsx 中的 useEffect 会检测到并跳转
+      // 注册成功后，authStore 会更新状态，useEffect 会检测到并跳转
     } catch (error: any) {
       setErrors({
         submit: error.response?.data?.message || error.message || '注册失败'
@@ -110,7 +119,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
           {errors.password && <span className="error-text">{errors.password}</span>}
         </div>
 
-        <div className="form-group">
+        <div className="formgroup">
           <label htmlFor="password_confirm">确认密码</label>
           <input
             type="password"
@@ -123,6 +132,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
           {errors.password_confirm && <span className="error-text">{errors.password_confirm}</span>}
         </div>
 
+        {authError && <div className="error-message">{authError}</div>}
         {errors.submit && <div className="error-message">{errors.submit}</div>}
 
         <button 
