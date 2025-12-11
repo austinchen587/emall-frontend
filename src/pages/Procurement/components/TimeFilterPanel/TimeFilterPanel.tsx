@@ -1,6 +1,7 @@
 // src/pages/Procurement/components/TimeFilterPanel/TimeFilterPanel.tsx
 import React from 'react';
 import { formatCurrency } from '../../utils/formatters';
+import { useAuthStore } from '../../../../stores/authStore'; // 导入认证store
 import './TimeFilterPanel.css';
 
 interface TimeFilterPanelProps {
@@ -9,7 +10,7 @@ interface TimeFilterPanelProps {
   summary: {
     projectCount: number;
     totalProfit: number;
-    noFinalQuoteCount: number;  // 新增字段
+    noFinalQuoteCount: number;
   };
 }
 
@@ -18,6 +19,9 @@ const TimeFilterPanel: React.FC<TimeFilterPanelProps> = ({
   onTimeRangeChange,
   summary
 }) => {
+  const { user } = useAuthStore();
+  const isProcurementStaff = user?.role === 'procurement_staff';
+  
   const timeRanges = [
     { value: 'today', label: '今天' },
     { value: 'yesterday', label: '昨天' },
@@ -51,14 +55,16 @@ const TimeFilterPanel: React.FC<TimeFilterPanelProps> = ({
           <div className="summary-value">{summary.projectCount}</div>
         </div>
         
-        <div className="summary-card">
-          <div className="summary-label">利润总计</div>
-          <div className="summary-value profit-total">
-            {formatCurrency(summary.totalProfit)}
+        {/* 只有非 procurement_staff 角色才显示利润总计 */}
+        {!isProcurementStaff && (
+          <div className="summary-card">
+            <div className="summary-label">利润总计</div>
+            <div className="summary-value profit-total">
+              {formatCurrency(summary.totalProfit)}
+            </div>
           </div>
-        </div>
+        )}
         
-        {/* 新增：未最终报价统计 */}
         <div className="summary-card">
           <div className="summary-label">未最终报价</div>
           <div className="summary-value no-final-quote">
