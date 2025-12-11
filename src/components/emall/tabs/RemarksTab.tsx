@@ -8,14 +8,24 @@ interface RemarksTabProps {
   newRemark: string;
   onNewRemarkChange: (remark: string) => void;
   onAddRemark: () => void;
+  isReadOnly?: boolean;
 }
 
 const RemarksTab: React.FC<RemarksTabProps> = ({
   data,
   newRemark,
   onNewRemarkChange,
-  onAddRemark
+  onAddRemark,
+  isReadOnly = false
 }) => {
+  const handleAddRemark = () => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法添加备注');
+      return;
+    }
+    onAddRemark();
+  };
+
   return (
     <div className="remarks-tab">
       <div className="add-remark-section">
@@ -27,14 +37,20 @@ const RemarksTab: React.FC<RemarksTabProps> = ({
             placeholder="请输入备注内容..."
             className="remark-textarea"
             rows={3}
+            disabled={isReadOnly}
           />
           <div className="remark-controls">
-            <button onClick={onAddRemark} className="btn-add-remark">
+            <button 
+              onClick={handleAddRemark} 
+              className="btn-add-remark"
+              disabled={isReadOnly}
+            >
               添加备注
             </button>
           </div>
           <div className="remark-note">
             <small>备注将自动记录您的用户名</small>
+            {isReadOnly && <small style={{color: '#f59e0b', marginLeft: '8px'}}>（只读模式）</small>}
           </div>
         </div>
       </div>

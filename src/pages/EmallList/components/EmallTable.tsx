@@ -23,11 +23,12 @@ interface EmallTableProps {
   isTextLong: (text: string) => boolean;
   getBiddingStatusDisplay: (status?: string) => string;
   loading: boolean;
- totalCount: number;
+  totalCount: number;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  isReadOnly?: boolean;
 }
 
 const EmallTable: React.FC<EmallTableProps> = ({
@@ -49,7 +50,8 @@ const EmallTable: React.FC<EmallTableProps> = ({
   currentPage,
   pageSize,
   onPageChange,
-  onPageSizeChange
+  onPageSizeChange,
+  isReadOnly = false
 }) => {
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -58,6 +60,7 @@ const EmallTable: React.FC<EmallTableProps> = ({
       <div className="table-header">
         <div className="table-info">
           显示 {emallItems.length} 个项目，共 {totalCount} 个
+          {isReadOnly && <span style={{marginLeft: '10px', color: '#f59e0b'}}>🔒 只读模式</span>}
         </div>
       </div>
       
@@ -94,6 +97,7 @@ const EmallTable: React.FC<EmallTableProps> = ({
                 isValidUrl={isValidUrl}
                 isTextLong={isTextLong}
                 getBiddingStatusDisplay={getBiddingStatusDisplay}
+                isReadOnly={isReadOnly}
               />
             ))}
           </tbody>

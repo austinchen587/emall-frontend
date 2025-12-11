@@ -124,3 +124,152 @@
   color: #4299e1;
   background: #ebf8ff;
 }
+
+
+/* src/pages/EmallList/components/ActionButtons.css */
+/* 选择项目列样式 */
+.select-checkbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.procurement-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.procurement-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 采购进度按钮样式 */
+.progress-btn {
+  padding: 6px 12px;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.progress-btn:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.progress-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 进度状态颜色 */
+.progress-btn[data-status="not_started"] {
+  border-color: #6b7280;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.progress-btn[data-status="in_progress"] {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #f59e0b;
+}
+
+.progress-btn[data-status="successful"] {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.progress-btn[data-status="failed"] {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.progress-btn[data-status="cancelled"] {
+  border-color: #9ca3af;
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+/* 项目归属人样式 */
+.owner-text {
+  font-size: 14px;
+  color: #4a5568;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 备注列样式 */
+.remark-content {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.remark-content:hover {
+  background-color: #f7fafc;
+}
+
+.remark-text {
+  font-size: 13px;
+  color: #2d3748;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+.remark-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #718096;
+}
+
+.remark-author {
+  font-weight: 500;
+}
+
+.remark-time {
+  opacity: 0.8;
+}
+
+.add-remark-btn {
+  padding: 4px 8px;
+  border: 1px dashed #cbd5e0;
+  background: #f7fafc;
+  color: #718096;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.add-remark-btn:hover:not(:disabled) {
+  border-color: #4299e1;
+  color: #4299e1;
+  background: #ebf8ff;
+}
+
+.add-remark-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.remark-loading {
+  font-size: 12px;
+  color: #718096;
+  text-align: center;
+}

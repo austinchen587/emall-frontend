@@ -9,12 +9,14 @@ import SuppliersTab from './tabs/SuppliersTab';
 import RemarksTab from './tabs/RemarksTab';
 import './ProcurementProgressModal.css';
 import './ModalTabs.css';
+import { useAuthStore } from '../../stores/authStore';
 
 interface ProcurementProgressModalProps {
   isOpen: boolean;
   onClose: () => void;
   procurementId: number;
   procurementTitle: string;
+  isReadOnly?: boolean; // 添加 isReadOnly 属性
 }
 
 const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
@@ -30,9 +32,13 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   const [newRemark, setNewRemark] = useState('');
   
   // 表单状态
- const [biddingStatus, setBiddingStatus] = useState('not_started');
+  const [biddingStatus, setBiddingStatus] = useState('not_started');
   const [clientContacts, setClientContacts] = useState<ClientContact[]>([]);
   const [supplierSelection, setSupplierSelection] = useState<{[key: number]: boolean}>({});
+
+  // 从 authStore 获取用户角色
+  const userRole = useAuthStore((state) => state.user?.role || 'unassigned');
+  const isReadOnly = userRole === 'supervisor';
 
   useEffect(() => {
     if (isOpen && procurementId) {
@@ -65,6 +71,11 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   };
 
   const handleSaveAllData = async () => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法保存数据');
+      return;
+    }
+
     setSaving(true);
     try {
       // 构建更新数据
@@ -100,6 +111,10 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   };
 
   const handleSupplierSelectionChange = (supplierId: number, isSelected: boolean) => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法选择供应商');
+      return;
+    }
     setSupplierSelection(prev => ({
       ...prev,
       [supplierId]: isSelected
@@ -107,6 +122,11 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   };
 
   const handleAddRemark = async () => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法添加备注');
+      return;
+    }
+
     if (!newRemark.trim()) {
       alert('请填写备注内容');
       return;
@@ -133,6 +153,10 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   };
 
   const handleClientContactsChange = (contacts: ClientContact[]) => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法修改联系人');
+      return;
+    }
     setClientContacts(contacts);
   };
 
@@ -144,11 +168,12 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
         <div className="modal-header">
           <h3 className="modal-title">
             📊 采购进度管理 - {procurementTitle}
+            {isReadOnly && <span style={{fontSize: '14px', marginLeft: '10px', opacity: 0.8}}>🔒 只读模式</span>}
           </h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
-        <ModalTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <ModalTabs activeTab={activeTab} onTabChange={setActiveTab} isReadOnly={isReadOnly} />
 
         <div className="modal-body">
           {loading ? (
@@ -169,6 +194,7 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                   clientContacts={clientContacts}
                   onBiddingStatusChange={setBiddingStatus}
                   onClientContactsChange={handleClientContactsChange}
+                  isReadOnly={isReadOnly}
                 />
               )}
 
@@ -177,8 +203,9 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                   data={progressData}
                   supplierSelection={supplierSelection}
                   onSupplierSelectionChange={handleSupplierSelectionChange}
-                  procurementId={procurementId} // 修正：使用已有的 procurementId
-                  onSupplierUpdate={loadProgressData} // 修正：使用已有的 loadProgressData
+                  procurementId={procurementId}
+                  onSupplierUpdate={loadProgressData}
+                  isReadOnly={isReadOnly}
                 />
               )}
 
@@ -188,6 +215,7 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                   newRemark={newRemark}
                   onNewRemarkChange={setNewRemark}
                   onAddRemark={handleAddRemark}
+                  isReadOnly={isReadOnly}
                 />
               )}
             </>
@@ -203,9 +231,9 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
           <button 
             className="btn-primary" 
             onClick={handleSaveAllData}
-            disabled={saving}
+            disabled={saving || isReadOnly}
           >
-            {saving ? '保存中...' : '保存所有更改'}
+            {saving ? '保存中...' : isReadOnly ? '只读模式' : '保存所有更改'}
           </button>
         </div>
       </div>

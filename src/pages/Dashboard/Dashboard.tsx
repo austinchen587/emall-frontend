@@ -56,7 +56,8 @@ const Dashboard: React.FC = () => {
         return baseItems;
       
       case 'procurement_staff':
-        // 采购人员显示特定模块
+      case 'supervisor': // 监事和采购人员看到相同的模块
+        // 采购人员和监事显示特定模块
         return baseItems.filter(item => 
           item.path === '/emall-list' || 
           item.path === '/procurement' || 
@@ -85,7 +86,9 @@ const Dashboard: React.FC = () => {
   const navigationItems = getNavigationItems();
 
   // 根据角色判断是否显示数据分析区域
-  const showAnalytics = user?.role === 'admin' || user?.role === 'procurement_staff';
+  const showAnalytics = user?.role === 'admin' || 
+                       user?.role === 'procurement_staff' || 
+                       user?.role === 'supervisor'; // 监事也显示数据分析
 
   return (
     <div className="dashboard-container">
@@ -95,6 +98,7 @@ const Dashboard: React.FC = () => {
         <p className="dashboard-welcome-subtitle">
           {user?.role === 'admin' && '系统管理面板'}
           {user?.role === 'procurement_staff' && '采购项目数据分析面板'}
+          {user?.role === 'supervisor' && '采购项目数据分析面板'} {/* 监事显示相同描述 */}
           {user?.role === 'supplier_manager' && '供应商管理面板'}
           {user?.role === 'unassigned' && '请联系管理员分配权限'}
         </p>
@@ -135,7 +139,7 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
-          {/* 数据分析区域 - 仅对管理员和采购人员显示 */}
+          {/* 数据分析区域 - 仅对管理员、采购人员和监事显示 */}
           {showAnalytics && (
             <div className="dashboard-analytics-section">
               <div className="dashboard-analytics-header">

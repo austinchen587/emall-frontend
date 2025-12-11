@@ -1,7 +1,7 @@
 // src/pages/Procurement/components/TimeFilterPanel/TimeFilterPanel.tsx
 import React from 'react';
 import { formatCurrency } from '../../utils/formatters';
-import { useAuthStore } from '../../../../stores/authStore'; // 导入认证store
+import { useAuthStore } from '../../../../stores/authStore';
 import './TimeFilterPanel.css';
 
 interface TimeFilterPanelProps {
@@ -21,6 +21,8 @@ const TimeFilterPanel: React.FC<TimeFilterPanelProps> = ({
 }) => {
   const { user } = useAuthStore();
   const isProcurementStaff = user?.role === 'procurement_staff';
+  const isSupervisor = user?.role === 'supervisor';
+  const hideProfit = isProcurementStaff || isSupervisor;
   
   const timeRanges = [
     { value: 'today', label: '今天' },
@@ -55,8 +57,7 @@ const TimeFilterPanel: React.FC<TimeFilterPanelProps> = ({
           <div className="summary-value">{summary.projectCount}</div>
         </div>
         
-        {/* 只有非 procurement_staff 角色才显示利润总计 */}
-        {!isProcurementStaff && (
+        {!hideProfit && (
           <div className="summary-card">
             <div className="summary-label">利润总计</div>
             <div className="summary-value profit-total">

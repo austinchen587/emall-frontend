@@ -20,7 +20,8 @@ const Procurement: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const userRole = user?.role || '';
   const isProcurementStaff = userRole === 'procurement_staff';
-  const canEditFinalQuote = !isProcurementStaff;
+  const isSupervisor = userRole === 'supervisor';
+  const canEditFinalQuote = !isProcurementStaff && !isSupervisor;
 
   if (loading || error) {
     return <LoadingError loading={loading} error={error} onRetry={loadDailyProfitStats} />;
@@ -54,6 +55,7 @@ const Procurement: React.FC = () => {
               finalQuotes={finalQuotes}
               savingQuotes={savingQuotes}
               isProcurementStaff={isProcurementStaff}
+              isSupervisor={isSupervisor}
               canEditFinalQuote={canEditFinalQuote}
               onSort={handleSort}
               onFinalQuoteChange={handleFinalQuoteChange}

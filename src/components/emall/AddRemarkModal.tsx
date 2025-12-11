@@ -8,6 +8,7 @@ interface AddRemarkModalProps {
   procurementId: number;
   procurementTitle: string;
   onSuccess?: (procurementId: number, newRemark: any) => void; // 修改这里，传递新备注数据
+  isReadOnly?: boolean; // 添加 isReadOnly 属性
 }
 
 const AddRemarkModal: React.FC<AddRemarkModalProps> = ({

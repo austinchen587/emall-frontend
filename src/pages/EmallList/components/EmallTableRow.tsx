@@ -4,7 +4,6 @@ import { EmallItem } from '../../../services/types';
 import './TableRowStyles.css';
 import './ActionButtons.css';
 
-// 修改 UnifiedRemark 接口定义，与API响应结构保持一致
 interface UnifiedRemark {
   id: number;
   remark_content: string;
@@ -30,6 +29,7 @@ interface EmallTableRowProps {
   isValidUrl: (url: string | undefined) => boolean;
   isTextLong: (text: string) => boolean;
   getBiddingStatusDisplay: (status?: string) => string;
+  isReadOnly?: boolean;
 }
 
 const EmallTableRow: React.FC<EmallTableRowProps> = ({
@@ -45,13 +45,13 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
   formatDate,
   isValidUrl,
   isTextLong,
-  getBiddingStatusDisplay
+  getBiddingStatusDisplay,
+  isReadOnly = false
 }) => {
   const isTitleLong = isTextLong(item.project_title);
   const [unifiedRemark, setUnifiedRemark] = useState<UnifiedRemark | null>(null);
   const [loadingRemark, setLoadingRemark] = useState(false);
 
-  // 获取统一备注
   const fetchUnifiedRemark = async (procurementId: number) => {
     if (!procurementId) return;
     
@@ -60,7 +60,6 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
       const response = await fetch(`/api/emall/purchasing/procurement/${procurementId}/get_unified_remarks/`);
       if (response.ok) {
         const data = await response.json();
-        // 修改数据解析逻辑，获取remarks数组的第一个元素
         if (data.success && data.remarks && data.remarks.length > 0) {
           setUnifiedRemark(data.remarks[0]);
         } else {
@@ -74,14 +73,12 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
     }
   };
 
-  // 当项目未被选中且没有统一备注时，获取统一备注
   useEffect(() => {
     if (!item.is_selected && !unifiedRemark && item.id) {
       fetchUnifiedRemark(item.id);
     }
   }, [item.is_selected, item.id]);
 
-  // 获取显示的备注内容
   const getDisplayRemark = () => {
     if (!item.is_selected) {
       return unifiedRemark;
@@ -91,28 +88,23 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
 
   const displayRemark = getDisplayRemark();
 
-  // 安全地获取备注内容
   const getRemarkContent = () => {
     if (!displayRemark) return '';
     
-    // 检查是否是 UnifiedRemark 类型
     if ('remark_content' in displayRemark) {
       return displayRemark.remark_content;
     }
-    // 检查是否是 latest_remark 类型
     if ('content' in displayRemark) {
       return displayRemark.content;
     }
     return '';
   };
 
-  // 安全地获取创建者
   const getRemarkAuthor = () => {
     if (!displayRemark) return '';
     return displayRemark.created_by || '';
   };
 
-  // 安全地获取创建时间
   const getRemarkDate = () => {
     if (!displayRemark) return '';
     return displayRemark.created_at || '';
@@ -121,6 +113,22 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
   const remarkContent = getRemarkContent();
   const remarkAuthor = getRemarkAuthor();
   const remarkDate = getRemarkDate();
+
+  const handleSelectProcurement = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法选择采购项目');
+      return;
+    }
+    onSelectProcurement(item, e.target.checked);
+  };
+
+  const handleAddRemark = () => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法添加备注');
+      return;
+    }
+    onAddRemarkClick(item);
+  };
 
   return (
     <React.Fragment>
@@ -191,8 +199,9 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
             <input
               type="checkbox"
               checked={item.is_selected || false}
-              onChange={(e) => onSelectProcurement(item, e.target.checked)}
+              onChange={handleSelectProcurement}
               className="procurement-checkbox"
+              disabled={isReadOnly}
             />
           </div>
         </td>
@@ -222,8 +231,9 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
           ) : (
             <button 
               className="add-remark-btn"
-              onClick={() => onAddRemarkClick(item)}
+              onClick={handleAddRemark}
               title="添加备注"
+              disabled={isReadOnly}
             >
               添加备注
             </button>

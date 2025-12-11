@@ -11,6 +11,7 @@ interface ProcurementTableProps {
   finalQuotes: Record<string, number>;
   savingQuotes: Record<string, boolean>;
   isProcurementStaff: boolean;
+  isSupervisor: boolean;
   canEditFinalQuote: boolean;
   onSort: (key: string) => void;
   onFinalQuoteChange: (projectName: string, value: string) => void;
@@ -22,13 +23,16 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
   finalQuotes,
   savingQuotes,
   isProcurementStaff,
+  isSupervisor,
   canEditFinalQuote,
-  onSort,
+ onSort,
   onFinalQuoteChange
 }) => {
   const handleSort = (key: string) => {
     onSort(key);
   };
+
+  const hideFinancialColumns = isProcurementStaff || isSupervisor;
 
   return (
     <div className="procurement-table-container">
@@ -47,13 +51,13 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
             <th onClick={() => handleSort('supplier_name')}>
               供应商 {sortConfig?.key === 'supplier_name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
             </th>
-            {!isProcurementStaff && (
+            {!hideFinancialColumns && (
               <th onClick={() => handleSort('total_quote')}>
                 采购成本 {sortConfig?.key === 'total_quote' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
               </th>
             )}
             <th>最终报价</th>
-            {!isProcurementStaff && (
+            {!hideFinancialColumns && (
               <th onClick={() => handleSort('profit')}>
                 利润 {sortConfig?.key === 'profit' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
               </th>
@@ -68,7 +72,7 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
               <td className="project-owner">{stat.project_owner}</td>
               <td className="price-control">{formatCurrency(stat.total_price_control)}</td>
               <td>{stat.supplier_name}</td>
-              {!isProcurementStaff && (
+              {!hideFinancialColumns && (
                 <td className="total-quote">{formatCurrency(stat.total_quote)}</td>
               )}
               <td>
@@ -80,7 +84,7 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
                   onChange={onFinalQuoteChange}
                 />
               </td>
-              {!isProcurementStaff && (
+              {!hideFinancialColumns && (
                 <td className={`profit ${getProfitClass(calculateProfit(stat, finalQuotes))}`}>
                   {formatProfit(calculateProfit(stat, finalQuotes))}
                 </td>

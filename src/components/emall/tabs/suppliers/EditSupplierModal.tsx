@@ -10,13 +10,15 @@ interface EditSupplierModalProps {
   supplier: SupplierInfo | null;
   procurementId: number;
   onSuccess: () => void;
+  isReadOnly?: boolean; // 添加 isReadOnly 属性
 }
 
 const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   isOpen,
   onClose,
   supplier,
-  onSuccess
+  onSuccess,
+  isReadOnly = false // 默认值设为 false
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -73,6 +75,8 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isReadOnly) return; // 只读模式下阻止输入
+    
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -85,6 +89,8 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   };
 
   const handleCommodityChange = (index: number, field: keyof CommodityInfo, value: string | number) => {
+    if (isReadOnly) return; // 只读模式下阻止输入
+    
     const updatedCommodities = [...commodities];
     updatedCommodities[index] = {
       ...updatedCommodities[index],
@@ -100,6 +106,10 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   };
 
   const addCommodity = () => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法添加商品');
+      return;
+    }
     setCommodities(prev => [...prev, {
       id: Date.now(),
       name: '',
@@ -111,11 +121,20 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   };
 
   const removeCommodity = (index: number) => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法删除商品');
+      return;
+    }
     setCommodities(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isReadOnly) {
+      alert('您只有查看权限，无法更新供应商');
+      return;
+    }
     
     if (!validateForm() || !supplier) return;
 
@@ -151,7 +170,10 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content supplier-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>编辑供应商信息</h3>
+          <h3>
+            编辑供应商信息
+            {isReadOnly && <span style={{fontSize: '14px', marginLeft: '10px', opacity: 0.8}}>🔒 只读模式</span>}
+          </h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -167,6 +189,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                   value={formData.name}
                   onChange={handleInputChange}
                   className={errors.name ? 'error' : ''}
+                  disabled={isReadOnly}
                 />
                 {errors.name && <span className="error-text">{errors.name}</span>}
               </div>
@@ -178,6 +201,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                   value={formData.source}
                   onChange={handleInputChange}
                   placeholder="如：淘宝、京东、线下等"
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -191,6 +215,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                   value={formData.contact}
                   onChange={handleInputChange}
                   placeholder="电话/微信/QQ"
+                  disabled={isReadOnly}
                 />
               </div>
               <div className="form-group">
@@ -201,6 +226,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                   value={formData.store_name}
                   onChange={handleInputChange}
                   placeholder="线上店铺或公司名称"
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -212,6 +238,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                   name="is_selected"
                   checked={formData.is_selected}
                   onChange={handleInputChange}
+                  disabled={isReadOnly}
                 />
                 选择此供应商作为主要供应商
               </label>
@@ -221,7 +248,12 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
           <div className="form-section">
             <div className="section-header">
               <h4>商品信息</h4>
-              <button type="button" className="btn-secondary" onClick={addCommodity}>
+              <button 
+                type="button" 
+                className="btn-secondary" 
+                onClick={addCommodity}
+                disabled={isReadOnly}
+              >
                 添加商品
               </button>
             </div>
@@ -243,6 +275,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                       type="button" 
                       className="btn-danger"
                       onClick={() => removeCommodity(index)}
+                      disabled={isReadOnly}
                     >
                       删除
                     </button>
@@ -257,6 +290,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                           value={commodity.name}
                           onChange={(e) => handleCommodityChange(index, 'name', e.target.value)}
                           className={errors[`commodity_${index}_name`] ? 'error' : ''}
+                          disabled={isReadOnly}
                         />
                         {errors[`commodity_${index}_name`] && (
                           <span className="error-text">{errors[`commodity_${index}_name`]}</span>
@@ -269,6 +303,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                           value={commodity.specification}
                           onChange={(e) => handleCommodityChange(index, 'specification', e.target.value)}
                           placeholder="型号、尺寸、配置等"
+                          disabled={isReadOnly}
                         />
                       </div>
                       <div className="form-group">
@@ -278,6 +313,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                           value={commodity.product_url}
                           onChange={(e) => handleCommodityChange(index, 'product_url', e.target.value)}
                           placeholder="https://..."
+                          disabled={isReadOnly}
                         />
                       </div>
                     </div>
@@ -292,6 +328,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                           step="0.01"
                           min="0"
                           className={errors[`commodity_${index}_price`] ? 'error' : ''}
+                          disabled={isReadOnly}
                         />
                         {errors[`commodity_${index}_price`] && (
                           <span className="error-text">{errors[`commodity_${index}_price`]}</span>
@@ -305,6 +342,7 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                           onChange={(e) => handleCommodityChange(index, 'quantity', e.target.value)}
                           min="1"
                           className={errors[`commodity_${index}_quantity`] ? 'error' : ''}
+                          disabled={isReadOnly}
                         />
                         {errors[`commodity_${index}_quantity`] && (
                           <span className="error-text">{errors[`commodity_${index}_quantity`]}</span>
@@ -325,11 +363,13 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
 
           <div className="modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose}>
-              取消
+              关闭
             </button>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? '更新中...' : '更新供应商信息'}
-            </button>
+            {!isReadOnly && (
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? '更新中...' : '更新供应商信息'}
+              </button>
+            )}
           </div>
         </form>
       </div>

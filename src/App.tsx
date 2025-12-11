@@ -38,7 +38,7 @@ const ProtectedRoute: React.FC<{
     return <Navigate to="/login" replace />;
   }
 
-  // 检查角色权限
+  //检查角色权限
   if (requiredRoles.length > 0 && user && !hasPermission(user.role, requiredRoles)) {
     return (
       <div style={{ 
@@ -76,16 +76,16 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* 采购项目列表 - 管理员和采购人员可访问 */}
+          {/* 采购项目列表 - 管理员、采购人员和监事可访问 */}
           <Route path="/emall-list" element={
-            <ProtectedRoute requiredRoles={['admin', 'procurement_staff']}>
+            <ProtectedRoute requiredRoles={['admin', 'procurement_staff', 'supervisor']}>
               <EmallList />
             </ProtectedRoute>
           } />
 
-          {/* 采购管理 - 管理员和采购人员可访问 */}
+          {/* 采购管理 - 管理员、采购人员和监事可访问 */}
           <Route path="/procurement" element={
-            <ProtectedRoute requiredRoles={['admin', 'procurement_staff']}>
+            <ProtectedRoute requiredRoles={['admin', 'procurement_staff', 'supervisor']}>
               <Procurement />
             </ProtectedRoute>
           } />
@@ -97,9 +97,9 @@ function App() {
            </ProtectedRoute>
            } />
           
-          {/* 智能助手 - 管理员和采购人员可访问 */}
+          {/* 智能助手 - 管理员、采购人员和监事可访问 */}
           <Route path="/chat" element={
-            <ProtectedRoute requiredRoles={['admin', 'procurement_staff']}>
+            <ProtectedRoute requiredRoles={['admin', 'procurement_staff', 'supervisor']}>
               <div>聊天页面 - 待实现</div>
             </ProtectedRoute>
           } />

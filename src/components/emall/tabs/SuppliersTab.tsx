@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { ProcurementProgressData } from '../../../services/types'; 
 import { formatCurrency } from '../utils';
+// 移除有问题的导入，使用默认导出
 import EditSupplierModal from './suppliers/EditSupplierModal';
 import AddSupplierModal from './suppliers/AddSupplierModal';
 import { useAuthStore } from '../../../stores/authStore';
@@ -13,6 +14,7 @@ interface SuppliersTabProps {
   onSupplierSelectionChange: (supplierId: number, isSelected: boolean) => void;
   procurementId: number;
   onSupplierUpdate: () => void;
+  isReadOnly?: boolean;
 }
 
 const SuppliersTab: React.FC<SuppliersTabProps> = ({
@@ -20,7 +22,8 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
   supplierSelection,
   onSupplierSelectionChange,
   procurementId,
-  onSupplierUpdate
+  onSupplierUpdate,
+  isReadOnly = false
 }) => {
   const [editingSupplier, setEditingSupplier] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -36,10 +39,18 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
       );
 
   const handleEditSupplier = (supplierId: number) => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法编辑供应商');
+      return;
+    }
     setEditingSupplier(supplierId);
   };
 
   const handleDeleteSupplier = async (supplierId: number) => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法删除供应商');
+      return;
+    }
     if (window.confirm('确定要删除这个供应商吗？此操作不可撤销！')) {
       try {
         console.log('删除供应商:', supplierId);
@@ -52,6 +63,10 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
   };
 
   const handleAddSupplier = () => {
+    if (isReadOnly) {
+      alert('您只有查看权限，无法添加供应商');
+      return;
+    }
     setShowAddModal(true);
   };
 
@@ -85,13 +100,16 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
   return (
     <div className="suppliers-tab">
       {/* 编辑供应商模态框 */}
-      <EditSupplierModal
-        isOpen={editingSupplier !== null}
-        onClose={() => setEditingSupplier(null)}
-        supplier={editingSupplier ? getSupplierById(editingSupplier) : null}
-        procurementId={procurementId}
-        onSuccess={handleSupplierUpdateSuccess}
-      />
+      {editingSupplier && (
+        <EditSupplierModal
+          isOpen={editingSupplier !== null}
+          onClose={() => setEditingSupplier(null)}
+          supplier={getSupplierById(editingSupplier)}
+          procurementId={procurementId}
+          onSuccess={handleSupplierUpdateSuccess}
+          isReadOnly={isReadOnly}
+        />
+      )}
 
       {/* 添加供应商模态框 */}
       <AddSupplierModal
@@ -99,11 +117,16 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
         onClose={() => setShowAddModal(false)}
         procurementId={procurementId}
         onSuccess={handleSupplierUpdateSuccess}
+        isReadOnly={isReadOnly}
       />
 
       <div className="suppliers-header">
         <h4>供应商列表</h4>
-        <button className="btn-primary" onClick={handleAddSupplier}>
+        <button 
+          className="btn-primary" 
+          onClick={handleAddSupplier}
+          disabled={isReadOnly}
+        >
           添加供应商
         </button>
       </div>
@@ -116,7 +139,14 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
                 <input
                   type="checkbox"
                   checked={supplierSelection[supplier.id] || false}
-                  onChange={(e) => onSupplierSelectionChange(supplier.id, e.target.checked)}
+                  onChange={(e) => {
+                    if (isReadOnly) {
+                      alert('您只有查看权限，无法选择供应商');
+                      return;
+                    }
+                    onSupplierSelectionChange(supplier.id, e.target.checked);
+                  }}
+                  disabled={isReadOnly}
                 />
                 <span className="supplier-name">{supplier.name}</span>
               </div>
@@ -124,12 +154,14 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({
                 <button 
                   className="btn-edit" 
                   onClick={() => handleEditSupplier(supplier.id)}
+                  disabled={isReadOnly}
                 >
                   编辑
                 </button>
                 <button 
                   className="btn-delete" 
                   onClick={() => handleDeleteSupplier(supplier.id)}
+                  disabled={isReadOnly}
                 >
                   删除
                 </button>

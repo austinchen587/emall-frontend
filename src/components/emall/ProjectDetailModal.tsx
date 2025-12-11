@@ -10,6 +10,7 @@ interface ProjectDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   project: EmallItem | null;
+  isReadOnly?: boolean; // 添加 isReadOnly 属性
 }
 
 const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ 
