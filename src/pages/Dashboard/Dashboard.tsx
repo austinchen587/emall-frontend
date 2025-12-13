@@ -43,8 +43,14 @@ const Dashboard: React.FC = () => {
         path: '/suppliers'
       },
       { 
+        icon: '📊', 
+        title: '已报价项目管理', 
+        description: '集中管理竞价与反拍项目',
+        path: '/quoted-projects'
+      },
+      { 
         icon: '💬', 
-        title: '智能助手', 
+        title: 'AI助手', 
         description: 'AI助手帮助处理业务',
         path: '/chat'
       },
@@ -65,9 +71,9 @@ const Dashboard: React.FC = () => {
         );
       
       case 'supplier_manager':
-        // 供应商管理员显示特定模块
+        // 供应商管理员显示供应商管理和报价项目管理模块
         return baseItems.filter(item => 
-          item.path === '/suppliers'
+          item.path === '/suppliers' || item.path === '/chat'
         );
       
       case 'unassigned':

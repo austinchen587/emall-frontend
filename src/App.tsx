@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import EmallList from './pages/EmallList';
 import Procurement from './pages/Procurement/Procurement';
 import SupplierManagementPage from './pages/SupplierManagement';
+import QuotedProjectsPage from './quoted-projects/QuotedProjectsPage';
 import './App.css';
 
 // 角色权限检查函数
@@ -101,6 +102,13 @@ function App() {
           <Route path="/chat" element={
             <ProtectedRoute requiredRoles={['admin', 'procurement_staff', 'supervisor']}>
               <div>聊天页面 - 待实现</div>
+            </ProtectedRoute>
+          } />
+          
+          {/* 报价项目 - 管理员、采购人员和监事可访问 */}
+          <Route path="/quoted-projects" element={
+            <ProtectedRoute requiredRoles={['admin', 'procurement_staff', 'supervisor']}>
+              <QuotedProjectsPage />
             </ProtectedRoute>
           } />
           
