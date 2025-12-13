@@ -1,39 +1,38 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuotedProjects } from './hooks';
 import { QuotedProjectType } from '../services/types/quoted_projects';
 import './QuotedProjectsPage.css';
+import ProjectsTable from './ProjectsTable';
+import ProjectDetailModal from '../components/emall/ProjectDetailModal';
+import { typeLabels, detailStatusColors } from './constants';
 
-const typeLabels: Record<QuotedProjectType, string> = {
-  bidding: '竞价项目',
-  reverse: '反拍项目',
-};
+const typeOptions: { type: QuotedProjectType; label: string }[] = [
+  { type: 'bidding', label: '竞价' },
+  { type: 'reverse', label: '反拍' }
+];
 
-// 根据 detail_status 设置颜色
-const detailStatusColors: Record<string, string> = {
-  '已失效': '#f5222d',
-  '已成交': '#52c41a',
-  '已报价': '#1890ff',
-  '未成交': '#fa8c16',
-  '未报价': '#8c8c8c',
-  '结果评审中': '#722ed1',
-  '默认': '#8c8c8c'
-};
+const statusOrder = [
+  '已成交', '已报价', '结果评审中', '未成交', '未报价', '已失效'
+];
 
 export default function QuotedProjectsPage() {
   const [type, setType] = useState<QuotedProjectType>('bidding');
   const { data = [], loading } = useQuotedProjects(type);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [showProjectDetail, setShowProjectDetail] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
 
-  // 分类统计
   const statusCategories = useMemo(() => {
     const map: Record<string, number> = {};
     (data as any[]).forEach(item => {
       map[item.status_category] = (map[item.status_category] || 0) + 1;
     });
-    return Object.entries(map).map(([status, count]) => ({ status, count }));
+    // 保证顺序
+    return statusOrder
+      .filter(status => map[status])
+      .map(status => ({ status, count: map[status] }));
   }, [data]);
 
-  // 过滤数据
   const filtered = useMemo(
     () =>
       selectedStatus
@@ -71,62 +70,51 @@ export default function QuotedProjectsPage() {
         <h1 className="page-title">报价项目管理</h1>
         <div className="page-subtitle">查看和管理所有报价项目</div>
       </header>
-
-      <div className="quoted-projects-content">
-        {/* 左侧导航 */}
-        <aside className="projects-sidebar">
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">项目类型</h3>
-            <div className="type-selector">
-              {(['bidding', 'reverse'] as QuotedProjectType[]).map(t => (
-                <button
-                  key={t}
-                  className={`type-button ${type === t ? 'active' : ''}`}
-                  onClick={() => { setType(t); setSelectedStatus(null); }}
-                >
-                  <span className="type-icon">
-                    {t === 'bidding' ? '💰' : '🔄'}
-                  </span>
-                  {typeLabels[t]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="sidebar-divider"></div>
-
-          <div className="sidebar-section">
-            <div className="sidebar-header">
-              <h3 className="sidebar-title">状态筛选</h3>
-              <button 
-                className="clear-filter"
-                onClick={() => setSelectedStatus(null)}
-                disabled={!selectedStatus}
+      <div className="quoted-projects-content" style={{ display: 'flex' }}>
+        {/* 左侧分类栏 */}
+        <aside className="category-sidebar">
+          <div className="category-group">
+            {typeOptions.map(opt => (
+              <div
+                key={opt.type}
+                className={`category-item${type === opt.type ? ' active' : ''}`}
+                onClick={() => {
+                  setType(opt.type);
+                  setSelectedStatus(null);
+                }}
               >
-                清除
-              </button>
+                {opt.label}
+              </div>
+            ))}
+          </div>
+          <div className="category-group sub-category-group">
+            <div
+              className={!selectedStatus ? 'category-item active' : 'category-item'}
+              onClick={() => setSelectedStatus(null)}
+            >
+              全部 <span className="count">{data.length}</span>
             </div>
-            <div className="status-filters">
-              {statusCategories.map(({ status, count }) => (
-                <button
-                  key={status}
-                  className={`status-filter ${selectedStatus === status ? 'active' : ''}`}
-                  onClick={() => setSelectedStatus(status)}
-                >
-                  <span 
-                    className="status-dot" 
-                    style={{ backgroundColor: getDetailStatusColor(status) }}
-                  ></span>
-                  <span className="status-label">{status}</span>
-                  <span className="status-count">{count}</span>
-                </button>
-              ))}
-            </div>
+            {statusCategories.map(cat => (
+              <div
+                key={cat.status}
+                className={
+                  selectedStatus === cat.status
+                    ? 'category-item active'
+                    : 'category-item'
+                }
+                style={{
+                  backgroundColor: selectedStatus === cat.status ? getDetailStatusColor(cat.status) : undefined,
+                  color: selectedStatus === cat.status ? '#fff' : undefined
+                }}
+                onClick={() => setSelectedStatus(cat.status)}
+              >
+                {cat.status} <span className="count">{cat.count}</span>
+              </div>
+            ))}
           </div>
         </aside>
-
         {/* 右侧内容 */}
-        <main className="projects-main">
+        <main className="projects-main" style={{ flex: 1 }}>
           <div className="main-header">
             <div className="header-info">
               <h2 className="main-title">
@@ -140,77 +128,30 @@ export default function QuotedProjectsPage() {
               </div>
             </div>
           </div>
-
-          {loading ? (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <div className="loading-text">加载中...</div>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table className="projects-table">
-                <thead>
-                  <tr>
-                    <th className="project-name">项目名称</th>
-                    <th className="project-status">状态</th>
-                    <th className="project-date">开始时间</th>
-                    <th className="project-date">结束时间</th>
-                    <th className="project-price">期望总价</th>
-                    <th className="project-price">响应总额</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="empty-state">
-                        <div className="empty-content">
-                          📝 暂无项目数据
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    filtered.map(item => (
-                      <tr key={item.project_id} className="project-row">
-                        <td className="project-name">
-                          <div className="project-name-content">
-                            <span className="name-text">{item.project_name}</span>
-                            <span className="project-id">#{item.project_id}</span>
-                          </div>
-                        </td>
-                        <td className="project-status">
-                          <span 
-                            className="status-badge"
-                            style={{ 
-                              backgroundColor: getDetailStatusColor(item.detail_status || item.status_category),
-                              color: '#fff'
-                            }}
-                          >
-                            {item.detail_status || item.status_category}
-                          </span>
-                        </td>
-                        <td className="project-date">
-                          {formatDate(item.bid_start_time)}
-                        </td>
-                        <td className="project-date">
-                          {formatDate(item.bid_end_time)}
-                        </td>
-                        <td className="project-price">
-                          {formatPrice(item.expected_total_price)}
-                        </td>
-                        <td className="project-price">
-                          <span className={`price-amount ${Number(item.response_total) > 0 ? 'has-response' : ''}`}>
-                            {formatPrice(item.response_total)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <ProjectsTable
+            filtered={filtered}
+            loading={loading}
+            getDetailStatusColor={getDetailStatusColor}
+            formatDate={formatDate}
+            formatPrice={formatPrice}
+            type={type}
+            onShowProjectDetail={project => {
+              setSelectedProject({
+                ...project,
+                project_number: project.procurement_emall_id
+              });
+              setShowProjectDetail(true);
+            }}
+          />
         </main>
       </div>
+      {showProjectDetail && selectedProject && (
+        <ProjectDetailModal
+          isOpen={showProjectDetail}
+          onClose={() => setShowProjectDetail(false)}
+          project={selectedProject}
+        />
+      )}
     </div>
   );
 }

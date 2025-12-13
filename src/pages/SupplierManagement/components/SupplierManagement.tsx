@@ -31,10 +31,9 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
   const [remarksLoading, setRemarksLoading] = useState(false);
   const [latestRemark, setLatestRemark] = useState<any>(null); // 改为单个备注对象
 
-  // 将 Project 转换为 EmallItem
+  // 将 Project 转换为 EmallItem，确保 project_number = id
   const convertProjectToEmallItem = (project: Project): EmallItem => {
     const totalBudget = projectSuppliers?.project_info?.total_budget;
-    
     return {
       id: project.id,
       project_title: project.project_name,
@@ -42,7 +41,7 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
       purchasing_unit: '',
       publish_date: '',
       region: '',
-      project_number: '',
+      project_number: project.id, // 关键：project_number = id
       commodity_names: null,
       parameter_requirements: null,
       purchase_quantities: null,

@@ -1,0 +1,267 @@
+/* ProjectsTable.css - 现代化美化版本 */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.08);
+  position: relative;
+}
+
+.table-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+}
+
+.projects-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  min-width: 1000px;
+}
+
+.projects-table th {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 20px 24px;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.projects-table th:first-child {
+  border-radius: 16px 0 0 0;
+}
+
+.projects-table th:last-child {
+  border-radius: 0 16px 0 0;
+}
+
+.projects-table td {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+  transition: all 0.3s ease;
+  color: #475569;
+}
+
+.projects-table tr:last-child td {
+  border-bottom: none;
+}
+
+.projects-table tr:hover td {
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.1);
+}
+
+.projects-table tr:hover td:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.projects-table tr:hover td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+/* 列样式优化 */
+.project-name {
+  min-width: 280px;
+  max-width: 350px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.project-id {
+  min-width: 120px;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.project-id span {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+}
+
+.project-id span:hover {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+}
+
+.project-status {
+  min-width: 120px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+.project-date {
+  min-width: 140px;
+  color: #64748b;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+}
+
+.project-price {
+  min-width: 140px;
+  text-align: right;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+  font-size: 1rem;
+}
+
+.price-amount.has-response {
+  color: #059669;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #10b981;
+}
+
+.price-amount:not(.has-response) {
+  color: #64748b;
+  opacity: 0.7;
+}
+
+/* 空状态美化 */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: #f8fafc;
+  border-radius: 0 0 16px 16px;
+}
+
+.empty-content {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.empty-content::before {
+  content: '📝';
+  font-size: 1.5rem;
+}
+
+/* 加载状态美化 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 0;
+  background: #f8fafc;
+  border-radius: 16px;
+  margin: 20px 0;
+}
+
+.loading-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid #f1f5f9;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.loading-spinner::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 4px solid transparent;
+  border-top: 4px solid #60a5fa;
+  border-radius: 50%;
+  animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite reverse;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #64748b;
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .table-container {
+    border-radius: 12px;
+    margin: 0 -8px;
+  }
+  
+  .projects-table th,
+  .projects-table td {
+    padding: 16px 12px;
+    font-size: 0.875rem;
+  }
+  
+  .project-name {
+    min-width: 200px;
+  }
+  
+  .project-price {
+    min-width: 100px;
+  }
+}
+
+/* 滚动条美化 */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
