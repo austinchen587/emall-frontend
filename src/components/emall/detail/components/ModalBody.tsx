@@ -17,12 +17,7 @@ const ModalBody: React.FC<ModalBodyProps> = ({ project, onClose }) => {
   return (
     <div className="modal-body custom-scrollbar">
       <BasicInfoSection project={project} />
-      <TimeInfoSection
-        project={project}
-        winningDate={project.winning_date}
-        settlementDate={project.settlement_date}
-        settlementAmount={project.settlement_amount}
-      />
+      <TimeInfoSection project={project} />
       
       <div className="info-section">
         <h4>商品信息</h4>
