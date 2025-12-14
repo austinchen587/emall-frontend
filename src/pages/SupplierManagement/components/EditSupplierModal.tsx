@@ -1,11 +1,13 @@
 // src/pages/SupplierManagement/components/EditSupplierModal.tsx
 import React, { useState, useEffect } from 'react';
 import { supplierAPI, Supplier, Commodity } from '../../../services/api_supplier';
+import { useAuthStore } from '../../../stores/authStore'; // 导入 authStore
 import './Modals.css';
 
 interface EditSupplierModalProps {
   supplier: Supplier;
   projectId: number;
+  projectStatus: string; // 从父组件传入项目状态
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -13,6 +15,7 @@ interface EditSupplierModalProps {
 const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   supplier,
   projectId,
+  projectStatus, // 接收项目状态
   onClose,
   onSuccess
 }) => {
@@ -24,25 +27,51 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   });
   const [commodities, setCommodities] = useState<Commodity[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // 使用 useAuthStore 获取用户信息
+  const user = useAuthStore((state) => state.user);
+  const userRole = user?.role || '';
 
   useEffect(() => {
     // 深拷贝商品数据，避免直接修改原始数据
     setCommodities(supplier.commodities.map(commodity => ({ ...commodity })));
+    console.log('[DEBUG] Loaded supplier:', supplier);
+    console.log('[DEBUG] Loaded commodities:', supplier.commodities);
   }, [supplier]);
+
+  // 将条件判断移到 useEffect 中或使用 useMemo 确保在 userRole 更新后重新计算
+  const canEditPaymentAndLogistics = React.useMemo(() => {
+    if (!projectStatus || projectStatus === 'unknown') {
+      console.warn('[DEBUG] Project info not loaded yet');
+      return false;
+    }
+
+    console.log('[DEBUG] User role:', userRole);
+    console.log('[DEBUG] Project bidding status:', projectStatus);
+    console.log('[DEBUG] Supplier is selected:', supplier.is_selected);
+
+    const canEdit = 
+      projectStatus === 'successful' && 
+      supplier.is_selected === true &&
+      (userRole === 'supplier_manager' || userRole === 'admin');
+
+    console.log('[DEBUG] Can edit payment and logistics:', canEdit);
+    return canEdit;
+  }, [projectStatus, supplier.is_selected, userRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // 根据您的 API 设计，可能需要同时传递 projectId 和 supplier.id
+      console.log('[DEBUG] Submitting form data:', formData, commodities);
       await supplierAPI.updateSupplier(projectId, supplier.id, {
         ...formData,
         commodities: commodities
       });
       onSuccess();
     } catch (error) {
-      console.error('更新供应商失败:', error);
+      console.error('[DEBUG] 更新供应商失败:', error);
       alert('更新失败，请重试');
     } finally {
       setLoading(false);
@@ -50,25 +79,31 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
   };
 
   const addCommodity = () => {
-    setCommodities([...commodities, { 
-      id: 0, // 新商品ID为0，后端会识别为新增
-      name: '', 
-      specification: '', 
+    const newCommodity = {
+      id: 0,
+      name: '',
+      specification: '',
       price: 0,
       quantity: 0,
       product_url: '',
       purchaser_created_by: '',
-      purchaser_created_at: ''
-    }]);
+      purchaser_created_at: '',
+      payment_amount: null,
+      tracking_number: ''
+    };
+    console.log('[DEBUG] Adding new commodity:', newCommodity);
+    setCommodities([...commodities, newCommodity]);
   };
 
   const updateCommodity = (index: number, field: string, value: any) => {
     const updated = [...commodities];
     updated[index] = { ...updated[index], [field]: value };
+    console.log(`[DEBUG] Updating commodity at index ${index}:`, updated[index]);
     setCommodities(updated);
   };
 
   const removeCommodity = (index: number) => {
+    console.log(`[DEBUG] Removing commodity at index ${index}:`, commodities[index]);
     setCommodities(commodities.filter((_, i) => i !== index));
   };
 
@@ -123,54 +158,6 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
             <div className="section-header">
               <label>商品信息</label>
               <button type="button" onClick={addCommodity}>添加商品</button>
-            </div>
-            
-            <div className="audit-section">
-              <div className="section-header">
-                <label>审计信息</label>
-              </div>
-              <div className="audit-info">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>创建人</label>
-                    <input
-                      type="text"
-                      value={supplier.purchaser_created_by || '未知'}
-                      disabled
-                      className="disabled-field"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>创建时间</label>
-                    <input
-                      type="text"
-                      value={supplier.purchaser_created_at ? new Date(supplier.purchaser_created_at).toLocaleString('zh-CN') : '未知'}
-                      disabled
-                      className="disabled-field"
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>最后更新人</label>
-                    <input
-                      type="text"
-                      value={supplier.purchaser_updated_by || '无'}
-                      disabled
-                      className="disabled-field"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>最后更新时间</label>
-                    <input
-                      type="text"
-                      value={supplier.purchaser_updated_at ? new Date(supplier.purchaser_updated_at).toLocaleString('zh-CN') : '无'}
-                      disabled
-                      className="disabled-field"
-                    />
-                  </div>
-                </div>
-              </div>
             </div>
             
             {commodities.map((commodity, index) => (
@@ -228,6 +215,31 @@ const EditSupplierModal: React.FC<EditSupplierModalProps> = ({
                     onChange={(e) => updateCommodity(index, 'product_url', e.target.value)}
                   />
                 </div>
+
+                {/* 新增：支付和物流字段，仅在条件满足时显示 */}
+                {canEditPaymentAndLogistics && (
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>支付金额</label>
+                      <input
+                        type="number"
+                        value={commodity.payment_amount !== null ? commodity.payment_amount : ''}
+                        onChange={(e) => updateCommodity(index, 'payment_amount', e.target.value ? parseFloat(e.target.value) : null)}
+                        placeholder="请输入支付金额"
+                        step="0.01"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>物流单号</label>
+                      <input
+                        type="text"
+                        value={commodity.tracking_number || ''}
+                        onChange={(e) => updateCommodity(index, 'tracking_number', e.target.value)}
+                        placeholder="请输入物流单号"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

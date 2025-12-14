@@ -21,26 +21,30 @@ export interface Commodity {
   product_url: string;
   purchaser_created_by: string;
   purchaser_created_at: string;
+  payment_amount: number | null; // 确保类型与后端返回一致
+  tracking_number: string; // 确保类型与后端返回一致
 }
 
 export interface Supplier {
   id: number;
-	name: string;
-	source: string;
-	contact: string;
-	store_name: string;
-	is_selected: boolean;
-	total_quote: number;
-	commodities: Commodity[];
-	purchaser_created_by: string;
-	purchaser_created_at: string;
-	purchaser_updated_by?: string;
-	purchaser_updated_at?: string;
-	// 添加供应商关系审计字段
-	procurement_supplier_created_by: string;
-	procurement_supplier_created_at: string;
-	procurement_supplier_updated_by?: string;
-	procurement_supplier_updated_at?: string;
+  name: string;
+  source: string;
+  contact: string;
+  store_name: string;
+  is_selected: boolean;
+  total_quote: number;
+  commodities: Commodity[];
+  purchaser_created_by: string;
+  purchaser_created_at: string;
+  purchaser_updated_by?: string;
+  purchaser_updated_at?: string;
+  bidding_status?: string; // 确保接口定义包含此字段
+  project_bidding_status?: string; // 确保接口定义包含此字段
+  // 添加供应商关系审计字段
+  procurement_supplier_created_by: string;
+  procurement_supplier_created_at: string;
+  procurement_supplier_updated_by?: string;
+  procurement_supplier_updated_at?: string;
 }
 
 export interface ProjectSuppliersResponse {

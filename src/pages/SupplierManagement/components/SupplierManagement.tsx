@@ -266,6 +266,7 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
         <EditSupplierModal
           supplier={editingSupplier}
           projectId={selectedProject.id}
+          projectStatus={selectedProject.bidding_status as string} // 传递项目状态
           onClose={() => setEditingSupplier(null)}
           onSuccess={() => {
             setEditingSupplier(null);

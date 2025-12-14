@@ -1,5 +1,5 @@
 // src/pages/Procurement/Procurement.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useProcurementData } from './hooks/useProcurementData';
 import { useTimeFilter } from './hooks/useTimeFilter';
 import { useSorting } from './hooks/useSorting';
@@ -17,8 +17,21 @@ const Procurement: React.FC = () => {
   const { sortConfig, handleSort, sortedStats } = useSorting(filteredStats, searchTerm);
   const { finalQuotes, savingQuotes, handleFinalQuoteChange } = useFinalQuotes(filteredStats);
   
-  const user = useAuthStore((state) => state.user);
-  const userRole = user?.role || '';
+  const [userRole, setUserRole] = useState<string>('');
+
+  useEffect(() => {
+    // 角色获取逻辑
+    const userInfoStr = localStorage.getItem('userInfo');
+    if (userInfoStr) {
+      try {
+        const userInfo = JSON.parse(userInfoStr);
+        setUserRole(userInfo.role || '');
+      } catch {
+        setUserRole('');
+      }
+    }
+  }, []);
+
   const isProcurementStaff = userRole === 'procurement_staff';
   const isSupervisor = userRole === 'supervisor';
   const canEditFinalQuote = !isProcurementStaff && !isSupervisor;
