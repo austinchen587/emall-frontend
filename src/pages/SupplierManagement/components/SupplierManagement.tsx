@@ -41,7 +41,7 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
       purchasing_unit: '',
       publish_date: '',
       region: '',
-      project_number: project.id, // 关键：project_number = id
+      project_number: project.id.toString(), // 关键：project_number = id
       commodity_names: null,
       parameter_requirements: null,
       purchase_quantities: null,

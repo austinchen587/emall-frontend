@@ -29,14 +29,22 @@ export default function ProjectsTable({
     );
   }
 
+  // 系统状态样式映射
+  const getSystemStatusClass = (status: string | undefined) => {
+    if (!status) return 'status--';
+    return `status-${status}`;
+  };
+
   return (
     <div className="table-container">
       <table className="projects-table">
         <thead>
           <tr>
             <th className="project-name">项目名称</th>
+            <th className="project-owner">负责人</th>
             <th className="project-id">项目编号</th>
-            <th className="project-status">状态</th>
+            <th className="project-status">官网状态</th>
+            <th className="project-status">系统状态</th> {/* 新增：系统状态 */}
             <th className="project-date">开始时间</th>
             <th className="project-date">结束时间</th>
             <th className="project-price">期望总价</th>
@@ -46,7 +54,7 @@ export default function ProjectsTable({
         <tbody>
           {filtered.length === 0 ? (
             <tr>
-              <td colSpan={7} className="empty-state">
+              <td colSpan={9} className="empty-state">{/* 列数+1 */}
                 <div className="empty-content">
                   📝 暂无项目数据
                 </div>
@@ -59,6 +67,9 @@ export default function ProjectsTable({
                   {type === 'reverse'
                     ? item.project_name
                     : item.procurement_project_name}
+                </td>
+                <td className="project-owner">
+                  {item.project_owner || '-'}
                 </td>
                 <td className="project-id">
                   {type === 'reverse' ? (
@@ -90,6 +101,13 @@ export default function ProjectsTable({
                     }}
                   >
                     {item.status_category}
+                  </span>
+                </td>
+                <td className="project-status project-system-status">
+                  <span
+                    className={`system-status-badge ${getSystemStatusClass(item.bidding_status)}`}
+                  >
+                    {item.bidding_status || '-'}
                   </span>
                 </td>
                 <td className="project-date">
