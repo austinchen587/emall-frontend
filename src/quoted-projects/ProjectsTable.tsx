@@ -5,7 +5,7 @@ interface ProjectsTableProps {
   filtered: any[];
   loading: boolean;
   getDetailStatusColor: (status: string) => string;
-  formatDate: (date: string) => string;
+  formatDate: (date: string | null) => string;
   formatPrice: (price: string | number) => string;
   type: string;
   onShowProjectDetail: (project: any) => void;
@@ -29,10 +29,13 @@ export default function ProjectsTable({
     );
   }
 
-  // 系统状态样式映射
   const getSystemStatusClass = (status: string | undefined) => {
     if (!status) return 'status--';
     return `status-${status}`;
+  };
+
+  const formatNullableDate = (date: string | null) => {
+    return date ? formatDate(date) : ''; // 如果为 null，显示为空字符串
   };
 
   return (
@@ -44,17 +47,20 @@ export default function ProjectsTable({
             <th className="project-owner">负责人</th>
             <th className="project-id">项目编号</th>
             <th className="project-status">官网状态</th>
-            <th className="project-status">系统状态</th> {/* 新增：系统状态 */}
+            <th className="project-status">系统状态</th>
             <th className="project-date">开始时间</th>
             <th className="project-date">结束时间</th>
+            <th className="project-date">中标时间</th>
+            <th className="project-date">结算时间</th>
             <th className="project-price">期望总价</th>
             <th className="project-price">响应总额</th>
+            <th className="project-price">结算金额</th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
             <tr>
-              <td colSpan={9} className="empty-state">{/* 列数+1 */}
+              <td colSpan={12} className="empty-state">
                 <div className="empty-content">
                   📝 暂无项目数据
                 </div>
@@ -116,6 +122,12 @@ export default function ProjectsTable({
                 <td className="project-date">
                   {formatDate(item.bid_end_time)}
                 </td>
+                <td className="project-date">
+                  {formatNullableDate(item.winning_date)} {/* 中标时间 */}
+                </td>
+                <td className="project-date">
+                  {formatNullableDate(item.settlement_date)} {/* 结算时间 */}
+                </td>
                 <td className="project-price">
                   {formatPrice(item.expected_total_price)}
                 </td>
@@ -123,6 +135,9 @@ export default function ProjectsTable({
                   <span className={`price-amount ${Number(item.response_total) > 0 ? 'has-response' : ''}`}>
                     {formatPrice(item.response_total)}
                   </span>
+                </td>
+                <td className="project-price">
+                  {formatPrice(item.settlement_amount)} {/* 结算金额 */}
                 </td>
               </tr>
             ))

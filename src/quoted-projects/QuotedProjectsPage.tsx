@@ -55,8 +55,9 @@ export default function QuotedProjectsPage() {
     }).format(num);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-CN', {
+  const formatDate = (date: string | null) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
