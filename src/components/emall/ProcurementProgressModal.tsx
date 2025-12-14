@@ -35,6 +35,10 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   const [biddingStatus, setBiddingStatus] = useState('not_started');
   const [clientContacts, setClientContacts] = useState<ClientContact[]>([]);
   const [supplierSelection, setSupplierSelection] = useState<{[key: number]: boolean}>({});
+  // 新增：用 state 管理结算相关字段
+  const [winningDate, setWinningDate] = useState<string | null>(null);
+  const [settlementDate, setSettlementDate] = useState<string | null>(null);
+  const [settlementAmount, setSettlementAmount] = useState<number | null>(null);
 
   // 从 authStore 获取用户角色
   const userRole = useAuthStore((state) => state.user?.role || 'unassigned');
@@ -42,6 +46,7 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
 
   useEffect(() => {
     if (isOpen && procurementId) {
+      console.log('弹窗打开，准备加载采购进度数据', { isOpen, procurementId });
       loadProgressData();
     }
   }, [isOpen, procurementId]);
@@ -51,10 +56,13 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
     try {
       const response = await emallApi.getProgressData(procurementId);
       setProgressData(response.data);
-      
+
       // 初始化表单状态
       setBiddingStatus(response.data.bidding_status);
       setClientContacts(response.data.client_contacts || []);
+      setWinningDate(response.data.winning_date ?? null);
+      setSettlementDate(response.data.settlement_date ?? null);
+      setSettlementAmount(response.data.settlement_amount ?? null);
       
       // 初始化供应商选择状态
       const selection: {[key: number]: boolean} = {};
@@ -78,14 +86,17 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
 
     setSaving(true);
     try {
-      // 构建更新数据
+      // 构建更新数据，带上结算相关字段
       const updateData: UpdateProgressData = {
         bidding_status: biddingStatus,
         client_contacts: clientContacts,
         supplier_selection: Object.entries(supplierSelection).map(([supplierId, isSelected]) => ({
           supplier_id: parseInt(supplierId),
           is_selected: isSelected
-        }))
+        })),
+        winning_date: winningDate,
+        settlement_date: settlementDate,
+        settlement_amount: settlementAmount,
       };
 
       // 如果有新备注，添加到更新数据中
@@ -160,7 +171,18 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
     setClientContacts(contacts);
   };
 
+  useEffect(() => {
+    if (progressData) {
+      setWinningDate(progressData.winning_date ?? null);
+      setSettlementDate(progressData.settlement_date ?? null);
+      setSettlementAmount(progressData.settlement_amount ?? null);
+    }
+  }, [progressData]);
+
   if (!isOpen) return null;
+
+  // debug: 打印当前状态
+  console.log('ProcurementProgressModal 渲染', { isOpen, procurementId, progressData, loading });
 
   return (
     <div className="procurement-progress-modal-overlay" onClick={onClose}>
@@ -195,6 +217,12 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
                   onBiddingStatusChange={setBiddingStatus}
                   onClientContactsChange={handleClientContactsChange}
                   isReadOnly={isReadOnly}
+                  winningDate={winningDate}
+                  settlementDate={settlementDate}
+                  settlementAmount={settlementAmount}
+                  onWinningDateChange={setWinningDate}
+                  onSettlementDateChange={setSettlementDate}
+                  onSettlementAmountChange={setSettlementAmount}
                 />
               )}
 

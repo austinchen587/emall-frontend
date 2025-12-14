@@ -9,12 +9,14 @@ export const useProjectDetail = (isOpen: boolean, initialProject: EmallItem | nu
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProjectDetail = async () => {
-      if (!isOpen || !initialProject) {
-        setProject(null);
-        return;
-      }
+    if (!isOpen || !initialProject) {
+      setProject(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
+    const fetchProjectDetail = async () => {
       setProject(initialProject);
       setLoading(true);
       setError(null);
@@ -34,14 +36,6 @@ export const useProjectDetail = (isOpen: boolean, initialProject: EmallItem | nu
 
     fetchProjectDetail();
   }, [isOpen, initialProject]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setProject(null);
-      setLoading(false);
-      setError(null);
-    }
-  }, [isOpen]);
 
   return { project, loading, error };
 };

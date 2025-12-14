@@ -67,7 +67,8 @@ const Dashboard: React.FC = () => {
         return baseItems.filter(item => 
           item.path === '/emall-list' || 
           item.path === '/procurement' || 
-          item.path === '/chat'
+          item.path === '/chat' ||
+          item.path === '/quoted-projects'   
         );
       
       case 'supplier_manager':

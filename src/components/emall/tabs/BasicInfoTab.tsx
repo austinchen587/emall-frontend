@@ -10,6 +10,13 @@ interface BasicInfoTabProps {
   onBiddingStatusChange: (status: string) => void;
   onClientContactsChange: (contacts: ClientContact[]) => void;
   isReadOnly?: boolean;
+  // 恢复字段
+  winningDate?: string | null;
+  settlementDate?: string | null;
+  settlementAmount?: number | null;
+  onWinningDateChange?: (date: string) => void;
+  onSettlementDateChange?: (date: string) => void;
+  onSettlementAmountChange?: (amount: number) => void;
 }
 
 const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
@@ -17,7 +24,14 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
   clientContacts,
   onBiddingStatusChange,
   onClientContactsChange,
-  isReadOnly = false
+  isReadOnly = false,
+  // 新增参数
+  winningDate,
+  settlementDate,
+  settlementAmount,
+  onWinningDateChange,
+  onSettlementDateChange,
+  onSettlementAmountChange,
 }) => {
   const addContact = () => {
     if (isReadOnly) {
@@ -116,6 +130,60 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="form-group">
+        <label>中标日期</label>
+        {/* debug 输出 */}
+        {/* <div>debug: {String(winningDate)}</div> */}
+        <input
+          type="date"
+          value={winningDate ?? ''} // 保证为字符串
+          onChange={e => {
+            if (isReadOnly) {
+              alert('您只有查看权限，无法修改中标日期');
+              return;
+            }
+            onWinningDateChange && onWinningDateChange(e.target.value);
+          }}
+          className="form-input"
+          disabled={isReadOnly}
+        />
+      </div>
+      <div className="form-group">
+        <label>结算日期</label>
+        {/* <div>debug: {String(settlementDate)}</div> */}
+        <input
+          type="date"
+          value={settlementDate ?? ''} // 保证为字符串
+          onChange={e => {
+            if (isReadOnly) {
+              alert('您只有查看权限，无法修改结算日期');
+              return;
+            }
+            onSettlementDateChange && onSettlementDateChange(e.target.value);
+          }}
+          className="form-input"
+          disabled={isReadOnly}
+        />
+      </div>
+      <div className="form-group">
+        <label>结算金额</label>
+        {/* <div>debug: {String(settlementAmount)}</div> */}
+        <input
+          type="number"
+          step="0.01"
+          value={settlementAmount !== null && settlementAmount !== undefined ? settlementAmount : ''} // 保证为字符串或数字
+          onChange={e => {
+            if (isReadOnly) {
+              alert('您只有查看权限，无法修改结算金额');
+              return;
+            }
+            onSettlementAmountChange && onSettlementAmountChange(Number(e.target.value));
+          }}
+          className="form-input"
+          disabled={isReadOnly}
+        />
       </div>
     </div>
   );

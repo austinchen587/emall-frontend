@@ -91,6 +91,9 @@ export interface ProcurementProgressData {
 	remarks_history: ProcurementRemark[];
 	created_at?: string;
 	updated_at?: string;
+	winning_date?: string;
+  settlement_date?: string;
+  settlement_amount?: number;
 }
 
 export interface ClientContact {
@@ -159,6 +162,9 @@ export interface UpdateProgressData {
 	new_remark?: {
 		remark_content: string;
 	};
+	winning_date?: string | null;
+  settlement_date?: string | null;
+  settlement_amount?: number | null;
 }
 
 // 新增：添加供应商请求数据类型

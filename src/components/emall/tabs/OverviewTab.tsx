@@ -59,6 +59,29 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ data }) => {
           <div className="stat-value">{data.bidding_status_display}</div>
           <div className="stat-label">竞标状态</div>
         </div>
+        {/* 新增：中标日期 */}
+        <div className="stat-card">
+          <div className="stat-value">
+            {data.winning_date ? data.winning_date : '未设置'}
+          </div>
+          <div className="stat-label">中标日期</div>
+        </div>
+        {/* 新增：结算日期 */}
+        <div className="stat-card">
+          <div className="stat-value">
+            {data.settlement_date ? data.settlement_date : '未设置'}
+          </div>
+          <div className="stat-label">结算日期</div>
+        </div>
+        {/* 新增：结算金额 */}
+        <div className="stat-card">
+          <div className="stat-value">
+            {data.settlement_amount !== null && data.settlement_amount !== undefined
+              ? formatCurrency(data.settlement_amount)
+              : '未设置'}
+          </div>
+          <div className="stat-label">结算金额</div>
+        </div>
       </div>
 
       {/* 联系人信息 */}

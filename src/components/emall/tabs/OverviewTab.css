@@ -256,6 +256,35 @@
   line-height: 1.4;
 }
 
+/* 新增：中标日期、结算日期、结算金额在 stats-grid 中的样式（复用 stat-card） */
+.stat-card input[type="date"],
+.stat-card input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #1e293b;
+  background: #f8fafc;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.stat-card input[type="date"]:focus,
+.stat-card input[type="number"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.stat-card input[type="date"]:disabled,
+.stat-card input[type="number"]:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .stats-grid {
@@ -275,3 +304,4 @@
     gap: 2px;
   }
 }
+
