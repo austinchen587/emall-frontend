@@ -13,6 +13,11 @@ interface ProjectListProps {
   onSelectProject: (project: Project) => void;
   onTimeFilterChange: (filter: string) => void;
   onToggleTimeFilter: (filter: string) => void;
+  // 新增
+  successProjects: Project[];
+  loadingSuccess: boolean;
+  expandedSuccess: boolean;
+  onToggleSuccess: () => void;
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({
@@ -24,7 +29,12 @@ const ProjectList: React.FC<ProjectListProps> = ({
   loading,
   onSelectProject,
   onTimeFilterChange,
-  onToggleTimeFilter
+  onToggleTimeFilter,
+  // 新增
+  successProjects,
+  loadingSuccess,
+  expandedSuccess,
+  onToggleSuccess = () => {}, // 默认空函数，防止未传时报错
 }) => {
   // 按时间过滤器分组项目
   const groupProjectsByTimeFilter = () => {
@@ -69,6 +79,61 @@ const ProjectList: React.FC<ProjectListProps> = ({
     <div className="project-list">
       <div className="time-filter-section">
         <h3>时间筛选</h3>
+        {/* 新增：竞标成功筛选区域 */}
+        <div className="time-filter-group">
+          <div
+            className={`time-filter-header`}
+            onClick={onToggleSuccess}
+          >
+            <span>竞标成功</span>
+            <button
+              className="toggle-btn"
+              onClick={e => {
+                e.stopPropagation();
+                onToggleSuccess();
+              }}
+            >
+              {expandedSuccess ? '−' : '+'}
+            </button>
+          </div>
+          {expandedSuccess && (
+            <div className="project-items">
+              {loadingSuccess ? (
+                <div className="loading">加载中...</div>
+              ) : successProjects.length > 0 ? (
+                // 按 selected_at 降序排序，显示 bidding_status_display
+                [...successProjects]
+                  .sort((a, b) => new Date(b.selected_at).getTime() - new Date(a.selected_at).getTime())
+                  .map(project => (
+                    <div
+                      key={project.id}
+                      className={`project-item ${selectedProject?.id === project.id ? 'selected' : ''}`}
+                      onClick={() => onSelectProject(project)}
+                    >
+                      <div className="project-name">{project.project_name}</div>
+                      <div className="project-meta">
+                        <span>供应商: {project.supplier_count}</span>
+                        <span>负责人: {project.project_owner || '-'}</span>
+                        <span>
+                          系统状态: {
+                            // 优先显示 bidding_status_display（后端返回的中文），否则 fallback
+                            (project as any).bidding_status_display ||
+                            (typeof project.bidding_status === 'string'
+                              ? project.bidding_status
+                              : project.bidding_status?.status || '-')
+                          }
+                        </span>
+                        <span>{new Date(project.selected_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="no-projects">暂无项目</div>
+              )}
+            </div>
+          )}
+        </div>
+        {/* 原有时间筛选区域 */}
         {timeFilterOptions.map(option => (
           <div key={option.value} className="time-filter-group">
             <div 
@@ -101,6 +166,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
                       <div className="project-name">{project.project_name}</div>
                       <div className="project-meta">
                         <span>供应商: {project.supplier_count}</span>
+                        <span>负责人: {project.project_owner || '-'}</span>
+                        <span>
+                          系统状态: {
+                            // 优先显示 bidding_status_display（后端返回的中文），否则 fallback
+                            (project as any).bidding_status_display ||
+                            (typeof project.bidding_status === 'string'
+                              ? project.bidding_status
+                              : project.bidding_status?.status || '-')
+                          }
+                        </span>
                         <span>{new Date(project.selected_at).toLocaleDateString()}</span>
                       </div>
                     </div>

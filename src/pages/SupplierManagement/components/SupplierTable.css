@@ -2,6 +2,8 @@
 .supplier-table {
   flex: 1;
   overflow: auto;
+  overflow-x: auto; /* 新增，确保横向可滚动 */
+  max-width: 100%;  /* 新增，防止超出容器 */
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -10,6 +12,7 @@
 
 .supplier-table table {
   width: 100%;
+  min-width: 100%; /* 新增，防止内容溢出 */
   border-collapse: separate;
   border-spacing: 0;
   font-size: 14px;

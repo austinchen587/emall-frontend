@@ -286,3 +286,117 @@
   font-style: italic;
   font-size: 13px; /* 减小字体大小 */
 }
+
+/* 项目状态按钮不同状态的颜色 */
+.status-not-started {
+  background: #a0aec0 !important; /* 灰色 */
+  color: #fff !important;
+}
+.status-in-progress {
+  background: #3182ce !important; /* 蓝色 */
+  color: #fff !important;
+}
+.status-successful {
+  background: #38a169 !important; /* 绿色 */
+  color: #fff !important;
+}
+.status-failed {
+  background: #e53e3e !important; /* 红色 */
+  color: #fff !important;
+}
+.status-cancelled {
+  background: #718096 !important; /* 深灰 */
+  color: #fff !important;
+}
+
+/* 竞标成功筛选区域样式（可选，和时间筛选一致） */
+.time-filter-group {
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.06);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.time-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ef 100%);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s;
+}
+
+.time-filter-header.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: inherit;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: color 0.2s;
+}
+
+.project-items {
+  padding: 8px 0;
+}
+
+.project-item {
+  padding: 10px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: #fff;
+}
+
+.project-item:last-child {
+  border-bottom: none;
+}
+
+.project-item.selected {
+  background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+}
+
+.project-item:hover {
+  background: #f1f5f9;
+}
+
+.project-name {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.project-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.no-projects {
+  text-align: center;
+  color: #a0aec0;
+  padding: 18px 0;
+  font-size: 13px;
+}
+
+.loading {
+  text-align: center;
+  color: #64748b;
+  padding: 18px 0;
+  font-size: 13px;
+}

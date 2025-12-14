@@ -9,6 +9,7 @@ export interface Project {
   selected_at: string;
   supplier_count: number;
   project_owner: string;
+  bidding_status?: string | { status: string }; // 新增，类型根据后端实际返回调整
 }
 
 export interface Commodity {
@@ -77,6 +78,12 @@ export const supplierAPI = {
   getProjects: async (timeFilter?: string): Promise<Project[]> => {
     const params = timeFilter ? { time_filter: timeFilter } : {};
     const response = await apiClient.get('/supplier/projects/', { params });
+    return response.data;
+  },
+
+  // 获取竞标成功的项目列表
+  getSuccessProjects: async (): Promise<Project[]> => {
+    const response = await apiClient.get('/supplier/projects-success/');
     return response.data;
   },
 

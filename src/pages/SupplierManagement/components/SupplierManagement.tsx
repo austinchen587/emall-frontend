@@ -36,12 +36,12 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     const totalBudget = projectSuppliers?.project_info?.total_budget;
     return {
       id: project.id,
-      project_title: project.project_name,
+      project_title: project.project_title, // 注意这里应为 project_title
       project_name: project.project_name,
       purchasing_unit: '',
       publish_date: '',
       region: '',
-      project_number: project.id.toString(), // 关键：project_number = id
+      project_number: project.id.toString(),
       commodity_names: null,
       parameter_requirements: null,
       purchase_quantities: null,
@@ -55,8 +55,11 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
       total_price_numeric: typeof totalBudget === 'number' ? totalBudget : 0,
       quote_start_time: '',
       quote_end_time: '',
-      bidding_status: '未知状态',
-      project_owner: ''
+      // 关键：确保 bidding_status 始终为 string
+      bidding_status: typeof project.bidding_status === 'object' && project.bidding_status !== null
+        ? project.bidding_status.status
+        : project.bidding_status,
+      project_owner: project.project_owner || ''
     };
   };
 
@@ -112,6 +115,24 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     }
   }, [showRemarksTab, selectedProject]);
 
+  // 状态按钮样式映射
+  const getStatusButtonClass = (status: string) => {
+    switch (status) {
+      case '未开始':
+        return 'btn btn-secondary status-not-started';
+      case '进行中':
+        return 'btn btn-primary status-in-progress';
+      case '竞标成功':
+        return 'btn btn-success status-successful';
+      case '竞标失败':
+        return 'btn btn-danger status-failed';
+      case '已取消':
+        return 'btn btn-cancelled status-cancelled';
+      default:
+        return 'btn btn-secondary';
+    }
+  };
+
   if (!selectedProject) {
     return (
       <div className="supplier-management-empty">
@@ -149,13 +170,37 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
           >
             添加备注
           </button>
-          <button 
-            className="btn btn-secondary"
-            onClick={onRefresh}
-            disabled={loading}
-          >
-            {loading ? '刷新中...' : '刷新'}
-          </button>
+          {/* 状态按钮，颜色根据状态变化 */}
+          {(() => {
+            // 兼容后端返回的 bidding_status 可能为 code 或 display
+            const statusMap: Record<string, string> = {
+              not_started: '未开始',
+              in_progress: '进行中',
+              successful: '竞标成功',
+              failed: '竞标失败',
+              cancelled: '已取消'
+            };
+            let status = selectedProject.bidding_status;
+            // 兼容对象、字符串、中文
+            if (typeof status === 'object' && status !== null) {
+              status = status.status ?? '';
+            }
+            // 如果是英文 code，映射为中文
+            if (typeof status === 'string' && statusMap[status]) {
+              status = statusMap[status];
+            }
+            // 如果是空字符串或 null/undefined
+            if (!status || typeof status !== 'string') status = '未知';
+            return (
+              <button
+                className={getStatusButtonClass(status)}
+                style={{ cursor: 'default', marginLeft: 8 }}
+                disabled
+              >
+                {status}
+              </button>
+            );
+          })()}
         </div>
       </div>
 

@@ -13,6 +13,11 @@ const SupplierManagementPage: React.FC = () => {
   const [timeFilter, setTimeFilter] = useState<string>('today');
   const [expandedTimeFilters, setExpandedTimeFilters] = useState<Set<string>>(new Set(['today']));
 
+  // 新增：竞标成功项目相关状态
+  const [successProjects, setSuccessProjects] = useState<Project[]>([]);
+  const [loadingSuccess, setLoadingSuccess] = useState(false);
+  const [expandedSuccess, setExpandedSuccess] = useState(false);
+
   const timeFilterOptions: TimeFilterOption[] = [
     { value: 'today', label: '今天', expanded: true },
     { value: 'yesterday', label: '昨天' },
@@ -47,6 +52,19 @@ const SupplierManagementPage: React.FC = () => {
     }
   };
 
+  // 加载竞标成功项目
+  const loadSuccessProjects = async () => {
+    try {
+      setLoadingSuccess(true);
+      const data = await supplierAPI.getSuccessProjects();
+      setSuccessProjects(data);
+    } catch (error) {
+      console.error('加载竞标成功项目失败:', error);
+    } finally {
+      setLoadingSuccess(false);
+    }
+  };
+
   // 切换时间过滤器展开状态
   const toggleTimeFilter = (filterValue: string) => {
     setExpandedTimeFilters(prev => {
@@ -76,6 +94,13 @@ const SupplierManagementPage: React.FC = () => {
     }
   };
 
+  // 展开/收起竞标成功区域时加载
+  useEffect(() => {
+    if (expandedSuccess) {
+      loadSuccessProjects();
+    }
+  }, [expandedSuccess]);
+
   useEffect(() => {
     loadProjects(timeFilter);
   }, []);
@@ -99,6 +124,11 @@ const SupplierManagementPage: React.FC = () => {
             onSelectProject={handleSelectProject}
             onTimeFilterChange={handleTimeFilterChange}
             onToggleTimeFilter={toggleTimeFilter}
+            // 新增竞标成功相关props
+            successProjects={successProjects}
+            loadingSuccess={loadingSuccess}
+            expandedSuccess={expandedSuccess}
+            onToggleSuccess={() => setExpandedSuccess(exp => !exp)}
           />
         </div>
 
