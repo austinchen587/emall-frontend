@@ -1,4 +1,6 @@
-#root {
+/* src/App.css */
+/* 只在非登录页面应用这些样式 */
+.app-container:not(.login-page) #root {
   max-width: 2000px;
   margin: 0 auto;
   padding: 2rem;
