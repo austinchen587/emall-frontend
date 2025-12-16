@@ -69,3 +69,39 @@
     font-size: 1.75rem;
   }
 }
+
+
+@media (max-width: 768px) {
+  .auth-layout {
+    padding: 1rem;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center; /* 确保垂直居中 */
+    justify-content: center;
+  }
+  
+  .auth-container {
+    width: 100%;
+    max-width: 400px; /* 限制最大宽度 */
+  }
+  
+  .auth-card {
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    margin: 0 auto; /* 水平居中 */
+  }
+}
+@media (max-width: 480px) {
+  .auth-layout {
+    padding: 0.5rem;
+  }
+  
+  .auth-container {
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .auth-card {
+    padding: 1.5rem 1rem;
+    border-radius: 8px;
+  }
+}

@@ -12,7 +12,7 @@
 
 .login-page::before {
   content: '';
-  position: absolute;
+ position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
@@ -30,11 +30,35 @@
 
 @media (max-width: 768px) {
   .login-page {
-    padding: 1.5rem;
+    padding: 1rem;
+    align-items: flex-start; /* 改为顶部对齐 */
+    justify-content: center;
   }
   
   .login-page::before {
     background-size: 30px 30px;
     animation-duration: 15s;
+  }
+}
+
+/* 新增：专门针对小屏幕手机的优化 */
+@media (max-width: 480px) {
+  .login-page {
+    padding: 0.5rem;
+    min-height: 100dvh; /* 使用动态视口高度 */
+    align-items: center; /* 恢复垂直居中 */
+    justify-content: center;
+  }
+  
+  /* 确保内容区域不会超出屏幕 */
+  .auth-container {
+    width: 100%;
+    max-width: calc(100vw - 1rem); /* 减去内边距 */
+    margin: 0 auto;
+  }
+  
+  .auth-card {
+    max-height: calc(100dvh - 1rem); /* 限制最大高度 */
+    overflow-y: auto; /* 内容过多时可滚动 */
   }
 }
