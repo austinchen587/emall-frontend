@@ -73,18 +73,25 @@ const EmallTableRow: React.FC<EmallTableRowProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (!item.is_selected && !unifiedRemark && item.id) {
-      fetchUnifiedRemark(item.id);
-    }
-  }, [item.is_selected, item.id]);
-
-  const getDisplayRemark = () => {
-    if (!item.is_selected) {
-      return unifiedRemark;
-    }
+useEffect(() => {
+  if (!item.is_selected && item.id) {
+    fetchUnifiedRemark(item.id);
+  }
+}, [item.is_selected, item.id, item.latest_remark]); // 移除 !unifiedRemark 条件
+const getDisplayRemark = () => {
+  // 如果项目已选中，显示项目备注
+  if (item.is_selected) {
     return item.latest_remark;
-  };
+  }
+  
+  // 如果项目未选中，但有最新的项目备注（可能发生在刚取消选择时），优先显示
+  if (item.latest_remark && item.latest_remark.content) {
+    return item.latest_remark;
+  }
+  
+  // 否则显示统一备注
+  return unifiedRemark;
+};
 
   const displayRemark = getDisplayRemark();
 

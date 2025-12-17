@@ -51,7 +51,6 @@ const AddRemarkModal: React.FC<AddRemarkModalProps> = ({
             created_by: '当前用户', // 这里可以从用户状态获取或API返回
             created_at: new Date().toISOString(),
             // 可以根据API实际返回的数据添加更多字段
-            ...response.data.data // 如果有额外数据
           });
         }
         onClose();

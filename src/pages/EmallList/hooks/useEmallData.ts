@@ -138,6 +138,20 @@ export const useEmallData = () => {
 
   // 工具函数
   const utils = useMemo(() => emallUtils, []);
+  const updateRemark = useCallback((procurementId: number, newRemark: any) => {
+    setEmallItems(prev => prev.map(item => 
+      item.id === procurementId 
+        ? { 
+            ...item, 
+            latest_remark: {
+              content: newRemark.content || '',
+              created_by: newRemark.created_by || '当前用户',
+              created_at: newRemark.created_at || new Date().toISOString()
+            }
+          }
+        : item
+    ));
+  }, []);
 
   
 
@@ -152,6 +166,7 @@ export const useEmallData = () => {
     setError,
     fetchEmallList,
     handleSelectProcurement,
+    updateRemark, // 🔧 新增：导出更新备注方法
     handleFilterChange,
     resetFilters,
     utils

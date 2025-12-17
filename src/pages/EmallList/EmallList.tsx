@@ -23,7 +23,8 @@ const EmallList: React.FC = () => {
     handleSelectProcurement,
     handleFilterChange,
     resetFilters,
-    utils
+    utils,
+    setEmallItems  // 确保有这个
   } = useEmallData();
 
   const {
@@ -43,7 +44,7 @@ const EmallList: React.FC = () => {
   const { user } = useAuthStore();
   const userRole = user?.role || '';
   const isSupervisor = userRole === 'supervisor';
-  const isReadOnly = isSupervisor;
+ const isReadOnly = isSupervisor;
 
   useEffect(() => {
     fetchEmallList();
@@ -100,8 +101,37 @@ const EmallList: React.FC = () => {
     handleSelectProcurement(item, newSelectedState);
   };
 
-  const handleRemarkSuccess = () => {
-    fetchEmallList();
+  const handleRemarkSuccess = (procurementId: number, newRemark: any) => {
+    // 立即更新本地状态
+    setEmallItems(prev => prev.map(item => 
+      item.id === procurementId 
+        ? { 
+            ...item, 
+            latest_remark: {
+              content: newRemark.content || '',
+              created_by: newRemark.created_by || '当前用户',
+              created_at: newRemark.created_at || new Date().toISOString()
+            }
+          }
+        : item
+    ));
+  };
+
+  // 🔥 新增：处理采购进度中的备注成功回调
+  const handleProgressRemarkSuccess = (procurementId: number, newRemark: any) => {
+    // 立即更新本地状态
+    setEmallItems(prev => prev.map(item => 
+      item.id === procurementId 
+        ? { 
+            ...item, 
+            latest_remark: {
+              content: newRemark.content || '',
+              created_by: newRemark.created_by || '当前用户',
+              created_at: newRemark.created_at || new Date().toISOString()
+            }
+          }
+        : item
+    ));
   };
 
   if (loading && emallItems.length === 0) {
@@ -183,6 +213,7 @@ const EmallList: React.FC = () => {
         procurementId={modalState.procurementProgress.id!}
         procurementTitle={modalState.procurementProgress.title}
         isReadOnly={isReadOnly}
+        onRemarkSuccess={handleProgressRemarkSuccess} // 🔥 新增：传递回调函数
       />
       
       <AddRemarkModal

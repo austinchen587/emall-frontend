@@ -16,14 +16,16 @@ interface ProcurementProgressModalProps {
   onClose: () => void;
   procurementId: number;
   procurementTitle: string;
-  isReadOnly?: boolean; // 添加 isReadOnly 属性
+  isReadOnly?: boolean;
+  onRemarkSuccess?: (procurementId: number, newRemark: any) => void;
 }
 
 const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
   isOpen,
   onClose,
   procurementId,
-  procurementTitle
+  procurementTitle,
+  onRemarkSuccess
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'basic' | 'suppliers' | 'remarks'>('overview');
   const [progressData, setProgressData] = useState<ProcurementProgressData | null>(null);
@@ -104,6 +106,17 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
         updateData.new_remark = {
           remark_content: newRemark
         };
+        
+        // 构建备注对象并调用回调函数
+        const remarkData = {
+          content: newRemark,
+          created_by: '当前用户',
+          created_at: new Date().toISOString()
+        };
+        
+        if (onRemarkSuccess) {
+          onRemarkSuccess(procurementId, remarkData);
+        }
       }
 
       await emallApi.updateProgressData(procurementId, updateData);
@@ -151,6 +164,18 @@ const ProcurementProgressModal: React.FC<ProcurementProgressModalProps> = ({
       };
 
       await emallApi.updateProgressData(procurementId, updateData);
+      
+      // 构建备注对象并调用回调函数
+      const remarkData = {
+        content: newRemark,
+        created_by: '当前用户',
+        created_at: new Date().toISOString()
+      };
+      
+      // 调用父组件的回调函数
+      if (onRemarkSuccess) {
+        onRemarkSuccess(procurementId, remarkData);
+      }
       
       // 重新加载数据
       await loadProgressData();
