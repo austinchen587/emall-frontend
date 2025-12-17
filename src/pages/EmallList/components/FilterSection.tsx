@@ -16,6 +16,45 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   onReset,
   onSearch
 }) => {
+  // 🔥 新增：本地状态管理输入值
+  const [localFilters, setLocalFilters] = React.useState({
+    project_title: filters.project_title || '',
+    purchasing_unit: filters.purchasing_unit || '',
+    project_number: filters.project_number || '',
+    total_price_condition: filters.total_price_condition || '',
+    project_owner: filters.project_owner || '',
+    search: filters.search || ''
+  });
+
+  // 🔥 新增：同步props变化到本地状态
+  React.useEffect(() => {
+    setLocalFilters({
+      project_title: filters.project_title || '',
+      purchasing_unit: filters.purchasing_unit || '',
+ project_number: filters.project_number || '',
+      total_price_condition: filters.total_price_condition || '',
+      project_owner: filters.project_owner || '',
+      search: filters.search || ''
+    });
+  }, [filters]);
+
+  // 🔥 新增：处理输入变化，只更新本地状态
+  const handleInputChange = (key: keyof typeof localFilters, value: string) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  // 🔥 新增：手动触发搜索
+  const handleManualSearch = () => {
+    // 将所有本地状态同步到父组件
+    Object.entries(localFilters).forEach(([key, value]) => {
+      onFilterChange(key as keyof EmallFilterParams, value);
+    });
+    onSearch();
+  };
+
   return (
     <div className="filter-section">
       <div className="filter-header">
@@ -25,7 +64,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             <span className="btn-icon">↺</span>
             重置
           </button>
-          <button onClick={onSearch} className="search-btn">
+          <button onClick={handleManualSearch} className="search-btn">
             <span className="btn-icon">🔍</span>
             搜索
           </button>
@@ -37,8 +76,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <label className="filter-label">项目标题</label>
           <input
             type="text"
-            value={filters.project_title || ''}
-            onChange={(e) => onFilterChange('project_title', e.target.value)}
+            value={localFilters.project_title}
+            onChange={(e) => handleInputChange('project_title', e.target.value)}
             placeholder="输入项目标题关键词..."
             className="filter-input"
           />
@@ -48,8 +87,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <label className="filter-label">采购单位</label>
           <input
             type="text"
-           value={filters.purchasing_unit || ''}
-            onChange={(e) => onFilterChange('purchasing_unit', e.target.value)}
+            value={localFilters.purchasing_unit}
+            onChange={(e) => handleInputChange('purchasing_unit', e.target.value)}
             placeholder="输入采购单位名称..."
             className="filter-input"
           />
@@ -59,8 +98,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <label className="filter-label">项目编号</label>
           <input
             type="text"
-            value={filters.project_number || ''}
-            onChange={(e) => onFilterChange('project_number', e.target.value)}
+            value={localFilters.project_number}
+            onChange={(e) => handleInputChange('project_number', e.target.value)}
             placeholder="输入项目编号..."
             className="filter-input"
           />
@@ -70,19 +109,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <label className="filter-label">价格条件</label>
           <input
             type="text"
-            value={filters.total_price_condition || ''}
-            onChange={(e) => onFilterChange('total_price_condition', e.target.value)}
+            value={localFilters.total_price_condition}
+            onChange={(e) => handleInputChange('total_price_condition', e.target.value)}
             placeholder="例如: >1000, <=50000, =2000"
             className="filter-input"
           />
         </div>
-        {/* 新增：项目归属人筛选 */}
+        
         <div className="filter-group">
           <label className="filter-label">项目归属人</label>
           <input
             type="text"
-            value={filters.project_owner || ''}
-            onChange={(e) => onFilterChange('project_owner', e.target.value)}
+            value={localFilters.project_owner}
+            onChange={(e) => handleInputChange('project_owner', e.target.value)}
             placeholder="输入归属人姓名..."
             className="filter-input"
           />
@@ -92,14 +131,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           <label className="filter-label">全局搜索</label>
           <input
             type="text"
-            value={filters.search || ''}
-            onChange={(e) => onFilterChange('search', e.target.value)}
+            value={localFilters.search}
+            onChange={(e) => handleInputChange('search', e.target.value)}
             placeholder="输入任意关键词搜索..."
             className="filter-input"
           />
         </div>
         
-        {/* 新增：只看选择项目复选框 */}
+        {/* 复选框保持实时响应 */}
         <div className="filter-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
           <input
             type="checkbox"

@@ -27,9 +27,9 @@ export const procurementApi = {
     return response.data;
   },
 
-  // 更新最终报价 - 修复语法错误（缺少逗号和右大括号）
+  // 更新最终报价 - 修复语法错误
   updateFinalQuote: async (request: UpdateFinalQuoteRequest) => {
     const response = await apiClient.post('/analysis/update-final-quote/', request);
     return response.data;
   }
-}; // 这里需要右大括号
+}; // 添加缺失的右大括号
