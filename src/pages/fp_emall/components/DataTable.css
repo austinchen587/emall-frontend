@@ -1,0 +1,105 @@
+/* src/pages/fp_emall/components/DataTable.css */
+.data-table {
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  background-color: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #262626;
+}
+
+.table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #595959;
+}
+
+.table tr:hover {
+  background-color: #fafafa;
+}
+
+.table-loading {
+  padding: 40px;
+  text-align: center;
+  color: #8c8c8c;
+  background: #fff;
+  border-radius: 6px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.pagination-info {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.pagination-btn:disabled {
+  color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+.pagination-current {
+  margin: 0 16px;
+  color: #262626;
+  font-size: 14px;
+}
+
+.page-size-select {
+  padding: 6px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-left: 16px;
+}
+.table-empty {
+  padding: 40px;
+  text-align: center;
+  color: #8c8c8c;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+}

@@ -56,6 +56,16 @@ const Dashboard: React.FC = () => {
       },
     ];
 
+    // 添加反拍模块 - 只有 admin 和 supplier_manager 可以看到
+    if (user?.role === 'admin' || user?.role === 'supplier_manager') {
+      baseItems.push({
+        icon: '🔁',
+        title: '反拍管理',
+        description: '反拍项目管理',
+        path: '/fg-emall'
+      });
+    }
+
     switch (user?.role) {
       case 'admin':
         // 管理员显示全部模块
@@ -72,9 +82,11 @@ const Dashboard: React.FC = () => {
         );
       
       case 'supplier_manager':
-        // 供应商管理员显示供应商管理和报价项目管理模块
+        // 供应商管理员显示供应商管理和反拍管理模块
         return baseItems.filter(item => 
-          item.path === '/suppliers' || item.path === '/chat'
+          item.path === '/suppliers' || 
+          item.path === '/chat' ||
+          item.path === '/fg-emall'
         );
       
       case 'unassigned':

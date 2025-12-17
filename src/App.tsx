@@ -8,6 +8,7 @@ import EmallList from './pages/EmallList';
 import Procurement from './pages/Procurement/Procurement';
 import SupplierManagementPage from './pages/SupplierManagement';
 import QuotedProjectsPage from './quoted-projects/QuotedProjectsPage';
+import FpListPage from './pages/fp_emall/FpListPage'; // 导入反拍页面
 import './App.css';
 
 // 角色权限检查函数
@@ -109,6 +110,13 @@ function App() {
           <Route path="/quoted-projects" element={
             <ProtectedRoute requiredRoles={['admin', 'procurement_staff', 'supervisor']}>
               <QuotedProjectsPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* 反拍管理 - 只有 admin 和 supplier_manager 可以访问 */}
+          <Route path="/fg-emall" element={
+            <ProtectedRoute requiredRoles={['admin', 'supplier_manager']}>
+              <FpListPage />
             </ProtectedRoute>
           } />
           
