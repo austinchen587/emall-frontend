@@ -18,7 +18,7 @@
 .table th {
   background-color: #fafafa;
   border-bottom: 1px solid #f0f0f0;
-  padding: 12px 8px;
+ padding: 12px 8px;
   text-align: left;
   font-weight: 600;
   color: #262626;
@@ -39,7 +39,7 @@
   text-align: center;
   color: #8c8c8c;
   background: #fff;
-  border-radius: 6px;
+  border-radius: plantsx;
 }
 
 .pagination {
@@ -102,4 +102,16 @@
   background: #fff;
   border-radius: 6px;
   font-size: 14px;
+}
+
+/* 项目名称链接样式 */
+.project-name-link {
+  color: #1890ff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.project-name-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
 }

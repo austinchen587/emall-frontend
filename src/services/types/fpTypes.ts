@@ -6,6 +6,7 @@ export interface FpItem {
   fp_project_number: string;
   fp_purchasing_unit: string;
   converted_price: number;
+  fp_url: string; // 新增字段
   create_time?: string;
   update_time?: string;
   status?: string;

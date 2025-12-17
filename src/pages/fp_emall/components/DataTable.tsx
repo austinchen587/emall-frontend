@@ -37,6 +37,13 @@ const DataTable: React.FC<DataTableProps> = ({
     onPageChange(1, pageSize);
   };
 
+  // 处理项目名称点击事件，在新窗口中打开链接
+  const handleProjectNameClick = (url: string) => {
+    if (url) {
+      window.open(url, '_blank');
+    }
+  };
+
   if (loading) {
     return <div className="table-loading">加载中...</div>;
   }
@@ -55,7 +62,25 @@ const DataTable: React.FC<DataTableProps> = ({
           <tbody>
             {data.map((item, index) => (
               <tr key={item.id || `row-${index}`}>
-                <td>{item.fp_project_name || '-'}</td>
+                <td>
+                  {item.fp_url ? (
+                    <a 
+                      href={item.fp_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="project-name-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleProjectNameClick(item.fp_url);
+                      }}
+                      title="点击查看项目详情"
+                    >
+                      {item.fp_project_name || '-'}
+                    </a>
+                  ) : (
+                    item.fp_project_name || '-'
+                  )}
+                </td>
                 <td>{item.fp_project_number || '-'}</td>
                 <td>{item.fp_purchasing_unit || '-'}</td>
                 <td>{item.converted_price ? `¥${item.converted_price.toLocaleString()}` : '-'}</td>
