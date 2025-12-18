@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
       { 
         icon: '📊', 
         title: '已报价项目管理', 
-        description: '集中管理竞价与反拍项目',
+description: '集中管理竞价与反拍项目',
         path: '/quoted-projects'
       },
       { 
@@ -63,6 +63,16 @@ const Dashboard: React.FC = () => {
         title: '反拍管理',
         description: '反拍项目管理',
         path: '/fg-emall'
+      });
+    }
+
+    // 添加利润分析模块 - 只有 admin 可以看到
+    if (user?.role === 'admin') {
+      baseItems.push({
+        icon: '💰',
+        title: '利润分析',
+        description: '利润成本管理与分析',
+        path: '/profit'
       });
     }
 

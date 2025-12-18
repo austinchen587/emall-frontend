@@ -9,6 +9,7 @@ import Procurement from './pages/Procurement/Procurement';
 import SupplierManagementPage from './pages/SupplierManagement';
 import QuotedProjectsPage from './quoted-projects/QuotedProjectsPage';
 import FpListPage from './pages/fp_emall/FpListPage'; // 导入反拍页面
+import ProfitPage from './pages/profit'; // 导入利润分析页面
 import './App.css';
 
 // 角色权限检查函数
@@ -120,8 +121,15 @@ function App() {
             </ProtectedRoute>
           } />
           
+          {/* 利润分析 - 只有 admin 可以访问 */}
+          <Route path="/profit" element={
+            <ProtectedRoute requiredRoles={['admin']}>
+              <ProfitPage />
+            </ProtectedRoute>
+          } />
+          
           {/* 默认重定向到 Dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/"element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
