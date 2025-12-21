@@ -25,7 +25,7 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
   isProcurementStaff,
   isSupervisor,
   canEditFinalQuote,
- onSort,
+  onSort,
   onFinalQuoteChange
 }) => {
   const handleSort = (key: string) => {
@@ -33,6 +33,22 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
   };
 
   const hideFinancialColumns = isProcurementStaff || isSupervisor;
+
+  const renderSupplierCell = (stat: any) => {
+    if (stat.supplier_name === '询价中') {
+      return stat.supplier_name;
+    }
+    
+    return (
+      <div className="supplier-info">
+        <div className="supplier-name">{stat.supplier_name}</div>
+        <div className="supplier-meta">
+          <span>创建人: {stat.supplier_created_by || '未知'}</span>
+          <span>更新人: {stat.supplier_updated_by || '未知'}</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="procurement-table-container">
@@ -71,7 +87,7 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
               <td className="project-name">{stat.project_name}</td>
               <td className="project-owner">{stat.project_owner}</td>
               <td className="price-control">{formatCurrency(stat.total_price_control)}</td>
-              <td>{stat.supplier_name}</td>
+              <td>{renderSupplierCell(stat)}</td>
               {!hideFinancialColumns && (
                 <td className="total-quote">{formatCurrency(stat.total_quote)}</td>
               )}

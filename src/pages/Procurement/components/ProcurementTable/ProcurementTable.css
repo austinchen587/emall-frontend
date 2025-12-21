@@ -118,3 +118,27 @@
   margin-bottom: 16px;
   opacity: 0.5;
 }
+
+/* 新增的供应商信息样式 */
+.supplier-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.supplier-name {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.supplier-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.supplier-meta span {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.2;
+}
