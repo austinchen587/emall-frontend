@@ -12,6 +12,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  table-layout: fixed;
 }
 
 .procurement-table th {
@@ -25,6 +26,8 @@
   transition: all 0.3s ease;
   user-select: none;
   position: relative;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .procurement-table th:hover {
@@ -44,7 +47,7 @@
   transition: all 0.3s ease;
   word-wrap: break-word;
   white-space: normal;
-  max-width: 200px;
+  overflow-wrap: break-word;
 }
 
 .table-row:hover {
@@ -57,23 +60,35 @@
   font-weight: 700;
   color: #1e293b;
   font-size: 15px;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .project-owner {
   color: #64748b;
   font-weight: 500;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .price-control, .total-quote {
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   font-weight: 600;
   color: #374151;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .profit {
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   font-weight: 800;
   font-size: 15px;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .profit-positive {
@@ -105,6 +120,7 @@
   border-radius: 8px;
   font-size: 13px;
   border-left: 3px solid #3b82f6;
+  overflow-wrap: break-word;
 }
 
 .no-data {
@@ -127,21 +143,33 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .supplier-name {
   font-weight: 500;
   color: #1e293b;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .supplier-meta {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .supplier-meta span {
   font-size: 11px;
   color: #94a3b8;
   line-height: 1.2;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
