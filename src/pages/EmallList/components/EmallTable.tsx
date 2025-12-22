@@ -71,6 +71,7 @@ const EmallTable: React.FC<EmallTableProps> = ({
               <th className="col-title">项目标题</th>
               <th className="col-number">项目编号</th>
               <th className="col-unit">采购单位</th>
+              <th className="col-region">所在地区</th>
               <th className="col-price">总控制价格</th>
               <th className="col-date">发布时间</th>
               <th className="col-date">截止时间</th>

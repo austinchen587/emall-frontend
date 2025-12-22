@@ -186,6 +186,10 @@ const getDisplayRemark = () => {
         <td className="purchasing-unit-cell">
           <span className="unit-text">{item.purchasing_unit}</span>
         </td>
+
+        <td className="region-cell">
+          <span className="region-text">{item.region || '-'}</span>
+        </td>
         
         <td className="price-cell">
           <span className="price-value">

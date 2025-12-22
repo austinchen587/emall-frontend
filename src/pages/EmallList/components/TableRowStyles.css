@@ -142,3 +142,9 @@
 .detail-link:hover {
   text-decoration: underline;
 }
+
+
+.region-text {
+  color: #4a5568;
+  font-size: 14px;
+}
