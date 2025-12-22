@@ -1,5 +1,5 @@
-/* src/pages/Procurement/components/ProcurementTable/ProcurementTable.css */
-.procurement-table-container {
+/* src/pages/Procurement/components/ProcurementTable/ProcurementTable.module.css */
+.procurementTableContainer {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -8,18 +8,18 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.procurement-table {
+.procurementTable {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
   table-layout: fixed;
 }
 
-.procurement-table th {
+.procurementTable th {
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
   padding: 20px;
   text-align: left;
-  font-weight: 700;
+ font-weight: 700;
   color: #475569;
   border-bottom: 2px solid #e2e8f0;
   cursor: pointer;
@@ -28,58 +28,67 @@
   position: relative;
   word-wrap: break-word;
   white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.procurement-table th:hover {
+.procurementTable th:hover {
   background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
 }
 
-.procurement-table th::after {
+.procurementTable th::after {
   content: "↕️";
   margin-left: 8px;
   opacity: 0.5;
   font-size: 0.9em;
 }
 
-.procurement-table td {
+.procurementTable td {
   padding: 20px;
   border-bottom: 1px solid #f1f5f9;
   transition: all 0.3s ease;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.table-row:hover {
+.tableRow:hover {
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
   transform: scale(1.01);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-.project-name {
+.projectName {
   font-weight: 700;
   color: #1e293b;
   font-size: 15px;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
-.project-owner {
+.projectOwner {
   color: #64748b;
   font-weight: 500;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
-.price-control, .total-quote {
+.priceControl,
+.totalQuote {
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   font-weight: 600;
   color: #374151;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .profit {
@@ -89,9 +98,10 @@
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.profit-positive {
+.profitPositive {
   color: #10b981;
   background: linear-gradient(45deg, #10b981, #059669);
   -webkit-background-clip: text;
@@ -99,15 +109,15 @@
   background-clip: text;
 }
 
-.profit-negative {
+.profitNegative {
   color: #ef4444;
 }
 
-.profit-neutral {
+.profitNeutral {
   color: #64748b;
 }
 
-.latest-remark {
+.latestRemark {
   max-width: 250px;
   max-height: 60px;
   overflow-y: auto;
@@ -121,16 +131,17 @@
   font-size: 13px;
   border-left: 3px solid #3b82f6;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.no-data {
+.noData {
   text-align: center;
   padding: 80px 20px;
   color: #64748b;
   font-size: 16px;
 }
 
-.no-data::before {
+.noData::before {
   content: "📊";
   font-size: 3em;
   display: block;
@@ -138,38 +149,56 @@
   opacity: 0.5;
 }
 
-/* 新增的供应商信息样式 */
-.supplier-info {
+/* 供应商信息样式 */
+.supplierInfo {
   display: flex;
   flex-direction: column;
   gap: 2px;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.supplier-name {
+.supplierName {
   font-weight: 500;
   color: #1e293b;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
-.supplier-meta {
+.supplierMeta {
   display: flex;
   flex-direction: column;
   gap: 1px;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.supplier-meta span {
+.supplierMeta span {
   font-size: 11px;
   color: #94a3b8;
   line-height: 1.2;
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* 重置表格单元格的文本溢出行为 */
+.procurementTable td,
+.procurementTable th {
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+
+.procurementTable td *,
+.procurementTable th * {
+  overflow: visible !important;
+  text-overflow: unset !important;
 }

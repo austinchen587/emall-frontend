@@ -3,7 +3,7 @@ import React from 'react';
 import FinalQuoteInput from '../FinalQuoteInput';
 import { formatCurrency } from '../../utils/formatters';
 import { calculateProfit, getProfitClass, formatProfit } from '../../utils/calculations';
-import './ProcurementTable.css';
+import styles from './ProcurementTable.module.css';
 
 interface ProcurementTableProps {
   stats: any[];
@@ -40,19 +40,25 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
     }
     
     return (
-      <div className="supplier-info">
-        <div className="supplier-name">{stat.supplier_name}</div>
-        <div className="supplier-meta">
-          <span>创建人: {stat.supplier_created_by || '未知'}</span>
-          <span>更新人: {stat.supplier_updated_by || '未知'}</span>
+      <div className={styles.supplierInfo}>
+        <div className={styles.supplierName} title={stat.supplier_name}>
+          {stat.supplier_name}
+        </div>
+        <div className={styles.supplierMeta}>
+          <span title={stat.supplier_created_by || '未知'}>
+            创建人: {stat.supplier_created_by || '未知'}
+          </span>
+          <span title={stat.supplier_updated_by || '未知'}>
+            更新人: {stat.supplier_updated_by || '未知'}
+          </span>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="procurement-table-container">
-      <table className="procurement-table">
+    <div className={styles.procurementTableContainer}>
+      <table className={styles.procurementTable}>
         <thead>
           <tr>
             <th onClick={() => handleSort('project_name')}>
@@ -83,13 +89,17 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
         </thead>
         <tbody>
           {stats.map((stat, index) => (
-            <tr key={index} className="table-row">
-              <td className="project-name">{stat.project_name}</td>
-              <td className="project-owner">{stat.project_owner}</td>
-              <td className="price-control">{formatCurrency(stat.total_price_control)}</td>
+            <tr key={index} className={styles.tableRow}>
+              <td className={styles.projectName} title={stat.project_name}>
+                {stat.project_name}
+              </td>
+              <td className={styles.projectOwner} title={stat.project_owner}>
+                {stat.project_owner}
+              </td>
+              <td className={styles.priceControl}>{formatCurrency(stat.total_price_control)}</td>
               <td>{renderSupplierCell(stat)}</td>
               {!hideFinancialColumns && (
-                <td className="total-quote">{formatCurrency(stat.total_quote)}</td>
+                <td className={styles.totalQuote}>{formatCurrency(stat.total_quote)}</td>
               )}
               <td>
                 <FinalQuoteInput
@@ -101,18 +111,20 @@ const ProcurementTable: React.FC<ProcurementTableProps> = ({
                 />
               </td>
               {!hideFinancialColumns && (
-                <td className={`profit ${getProfitClass(calculateProfit(stat, finalQuotes))}`}>
+                <td className={`${styles.profit} ${styles[getProfitClass(calculateProfit(stat, finalQuotes))]}`}>
                   {formatProfit(calculateProfit(stat, finalQuotes))}
                 </td>
               )}
-              <td className="latest-remark">{stat.latest_remark || '无备注'}</td>
+              <td className={styles.latestRemark} title={stat.latest_remark || '无备注'}>
+                {stat.latest_remark || '无备注'}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
       
       {stats.length === 0 && (
-        <div className="no-data">
+        <div className={styles.noData}>
           <p>暂无数据</p>
         </div>
       )}
