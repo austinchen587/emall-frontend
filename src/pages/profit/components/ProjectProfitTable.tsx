@@ -47,7 +47,7 @@ export const ProjectProfitTable: React.FC<ProjectProfitTableProps> = ({ data }) 
                 <td>{project.project_owner}</td>
                 <td>{formatCurrency(project.response_total)}</td>
                 <td>
-                  {parseFloat(project.settlement_amount) === 0.00 ? '未结算' : formatCurrency(project.settlement_amount)}
+                  {project.settlement_amount === null || parseFloat(project.settlement_amount) === 0.00 ? '未结算' : formatCurrency(project.settlement_amount)}
                 </td>
                 <td>{formatCurrency(project.purchase_payment_amount)}</td>
                 <td style={{ color: getProfitColor(project.project_profit), fontWeight: '600' }}>
@@ -57,7 +57,7 @@ export const ProjectProfitTable: React.FC<ProjectProfitTableProps> = ({ data }) 
                   {formatPercentage(project.project_profit_margin)}
                 </td>
                 <td>{formatDate(project.winning_date)}</td>
-                <td>{formatDate(project.settlement_date) === '未填写' ? '未结算' : formatDate(project.settlement_date)}</td>
+                <td>{formatDate(project.settlement_date) === '未填写' ? '未填写' : formatDate(project.settlement_date)}</td>
               </tr>
             ))}
           </tbody>
