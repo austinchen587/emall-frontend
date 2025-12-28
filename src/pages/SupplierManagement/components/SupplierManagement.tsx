@@ -152,6 +152,7 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
             {selectedProject.project_name}
           </h2>
           <div className="project-stats">
+            <span>所在地区: {selectedProject?.region || '无地区信息'}</span>
             <span>甲方总预算: {formatCurrency(projectSuppliers?.project_info?.total_budget)}</span>
             <span>供应商采购成本: {formatCurrency(projectSuppliers?.project_info?.total_selected_quote)}</span>
             <span>采购利润: {formatCurrency(projectSuppliers?.project_info?.total_profit)}</span>

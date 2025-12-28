@@ -9,6 +9,7 @@ export interface Project {
   selected_at: string;
   supplier_count: number;
   project_owner: string;
+  region?: string;
   bidding_status?: string | { status: string }; // 新增，类型根据后端实际返回调整
 }
 

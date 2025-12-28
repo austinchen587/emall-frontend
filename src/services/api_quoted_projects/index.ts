@@ -10,7 +10,7 @@ export const quotedProjectsApi = {
 
   // 获取反拍项目
   getReverseProjects: async (): Promise<QuotedProject[]> => {
-    const response = await apiClient.get('/analysis/ht-emall-reverse/records/');
+    const response = await apiClient.get('/analysis/ht-emall/records/');
     return response.data.data;
   },
 

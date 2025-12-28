@@ -51,7 +51,7 @@ export default function ProjectsTable({
             <th className="project-date">开始时间</th>
             <th className="project-date">结束时间</th>
             <th className="project-date">中标时间</th>
-            <th className="project-date">结算时间</th>
+            <th className="project-date">结算時間</th>
             <th className="project-price">期望总价</th>
             <th className="project-price">响应总额</th>
             <th className="project-price">结算金额</th>
@@ -70,9 +70,7 @@ export default function ProjectsTable({
             filtered.map(item => (
               <tr key={item.project_id} className="project-row">
                 <td className="project-name">
-                  {type === 'reverse'
-                    ? item.project_name
-                    : item.procurement_project_name}
+                  {item.procurement_project_name} {/* 修改：不论类型，都使用 procurement_project_name */}
                 </td>
                 <td className="project-owner">
                   {item.project_owner || '-'}
@@ -123,10 +121,10 @@ export default function ProjectsTable({
                   {formatDate(item.bid_end_time)}
                 </td>
                 <td className="project-date">
-                  {formatNullableDate(item.winning_date)} {/* 中标时间 */}
+                  {formatNullableDate(item.winning_date)}
                 </td>
                 <td className="project-date">
-                  {formatNullableDate(item.settlement_date)} {/* 结算时间 */}
+                  {formatNullableDate(item.settlement_date)}
                 </td>
                 <td className="project-price">
                   {formatPrice(item.expected_total_price)}
@@ -137,7 +135,7 @@ export default function ProjectsTable({
                   </span>
                 </td>
                 <td className="project-price">
-                  {formatPrice(item.settlement_amount)} {/* 结算金额 */}
+                  {formatPrice(item.settlement_amount)}
                 </td>
               </tr>
             ))
