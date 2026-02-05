@@ -1,0 +1,44 @@
+/* src/pages/BiddingHall/BiddingHall.css */
+
+/* 1. 列表淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bidding-list-container {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* 2. 覆盖 Ant Design Radio Button 样式 */
+/* 让选中状态变成蓝色 (Tailwind blue-600: #2563eb) */
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #fff !important;
+  box-shadow: -1px 0 0 0 #2563eb !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+  background-color: #2563eb !important;
+}
+
+/* 悬停状态颜色 */
+.ant-radio-button-wrapper:hover {
+  color: #2563eb;
+}
+
+/* 3. 自定义滚动条 (可选) */
+.bidding-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+.bidding-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
