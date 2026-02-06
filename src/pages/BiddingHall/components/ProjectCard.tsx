@@ -1,6 +1,6 @@
 import React from 'react';
-import { Tag, Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Tag } from 'antd';
+import { Link } from 'react-router-dom'; // [新增] 引入 Link
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { IBiddingProject } from '@/services/types/bidding';
 
@@ -9,15 +9,19 @@ interface Props {
 }
 
 export const ProjectCard: React.FC<Props> = ({ data }) => {
-  const navigate = useNavigate();
   // 简单计算剩余小时数
   const hoursLeft = Math.floor(data.countdown / 3600);
   const isUrgent = hoursLeft < 24 && data.status === 1;
 
   return (
-    <div 
-      className="bg-white rounded-xl border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group h-full"
-      onClick={() => navigate(`/bidding/detail/${data.id}`)}
+    <Link 
+      // [核心修改] 使用 Link 组件，to 属性会自动处理路由前缀
+      to={`/bidding/detail/${data.id}`}
+      target="_blank"                 // 新标签页打开
+      rel="noopener noreferrer"       // 安全属性
+      // className 保持不变，但 flex 布局对 a 标签同样有效
+      className="bg-white rounded-xl border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group h-full block text-left"
+      style={{ textDecoration: 'none' }} // 去掉链接下划线
     >
       {/* 头部：标签 */}
       <div className="p-4 pb-2 flex justify-between items-start">
@@ -60,10 +64,11 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
 
       {/* 底部：按钮 */}
       <div className="p-3 bg-gray-50 border-t border-gray-100 group-hover:bg-blue-50 transition-colors">
-        <Button type="primary" block ghost={!isUrgent} className={!isUrgent ? 'text-blue-600 border-blue-200' : ''}>
+        {/* [修改] 为了符合 HTML 规范，把 Button 换成 div 模拟样式，因为 Link 本身就是可点击的 */}
+        <div className={`ant-btn ant-btn-primary ant-btn-block ${!isUrgent ? 'ant-btn-background-ghost text-blue-600 border-blue-200' : ''} w-full text-center`}>
           查看详情
-        </Button>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };

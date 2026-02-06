@@ -1,4 +1,4 @@
-// src/stores/authStore.ts (修复版本)
+// src/stores/authStore.ts (修复初始化版本)
 import { create } from 'zustand';
 import { authAPI, LoginRequest, RegisterRequest } from '../services/api_auth/auth';
 
@@ -21,9 +21,30 @@ interface AuthState {
   clearError: () => void;
 }
 
+// [新增] 辅助函数：安全读取 LocalStorage
+const getInitialState = () => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      return {
+        user: JSON.parse(storedUser),
+        isAuthenticated: true
+      };
+    }
+  } catch (e) {
+    console.error('读取 LocalStorage 失败', e);
+  }
+  return { user: null, isAuthenticated: false };
+};
+
+// [修改] 获取初始值
+const { user: initialUser, isAuthenticated: initialAuth } = getInitialState();
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
+  // [关键修改] 使用 LocalStorage 里的值作为初始状态，而不是 null/false
+  user: initialUser,
+  isAuthenticated: initialAuth,
+  
   isLoading: false,
   error: null,
 
@@ -39,10 +60,11 @@ export const useAuthStore = create<AuthState>((set) => ({
           role: (userData as any).role || 'unassigned'
         } : null;
         
+        // 更新状态并写入缓存
         set({
           user: userWithRole,
           isAuthenticated: true,
- isLoading: false,
+          isLoading: false,
           error: null
         });
         
@@ -98,6 +120,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      // 清除状态和缓存
       set({
         user: null,
         isAuthenticated: false,
@@ -105,37 +128,38 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
       
       localStorage.removeItem('user');
+      // 清除 Cookie (保持你原有的逻辑)
       document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   },
 
   checkAuth: async () => {
-    set({ isLoading: true });
+    // [优化] 如果本地已有用户数据，不要让 isLoading 变成 true 导致页面闪烁或重定向
+    // 仅在后台静默检查
+    // set({ isLoading: true }); 
+    
     try {
       const response = await authAPI.checkSession();
       
-      console.log('checkAuth 响应:', response);
-      
       if (response.status === 'success' && response.user) {
-        // 关键修复：确保用户数据结构正确
         const userData = response.user;
         const userWithRole: User = {
           id: userData.id,
           username: userData.username,
           email: userData.email,
-          role: (userData as any).role || 'unassigned'  // 使用类型断言
+          role: (userData as any).role || 'unassigned'
         };
         
+        // 会话有效，更新最新信息
         set({
           user: userWithRole,
           isAuthenticated: true,
           isLoading: false
         });
-        
         localStorage.setItem('user', JSON.stringify(userWithRole));
       } else {
-        // 关键修复：即使 status 是 success，但没有 user 数据也要视为未认证
-        console.log('认证失败：缺少用户数据');
+        // 会话失效，清除本地登录状态
+        console.log('会话已失效');
         set({
           user: null,
           isAuthenticated: false,
