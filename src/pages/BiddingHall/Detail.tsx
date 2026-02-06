@@ -1,18 +1,16 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Button, Spin, message, Modal, Empty, Tag 
-} from 'antd';
+  Button, Spin, message, Modal, Empty, Tag, Dropdown, MenuProps 
+} from 'antd'; // [新增] 引入 Dropdown, MenuProps
 import { 
   ArrowLeftOutlined, ShoppingCartOutlined, UserOutlined, 
-  CheckCircleOutlined 
+  CheckCircleOutlined, DownOutlined, LoadingOutlined // [新增] 图标
 } from '@ant-design/icons';
-import axios from 'axios'; // 保持 axios 用于获取详情（GET请求）
+import axios from 'axios';
+import { emallApi } from '@/services/api_emall'; // 确保引入 API
 
-// [新增] 引入封装好的 API 服务
-import { emallApi } from '@/services/api_emall';
-
-// 引入现有组件
+// 引入现有组件...
 import BasicInfoSection from '@/components/emall/detail/components/BasicInfoSection';
 import TimeInfoSection from '@/components/emall/detail/components/TimeInfoSection';
 import CommodityTable from '@/components/emall/detail/components/CommodityTable';
@@ -21,12 +19,21 @@ import FileLinksSection from '@/components/emall/detail/components/FileLinksSect
 import AIRecommendation from './components/AIRecommendation';
 import { BiddingProjectDetail as BaseDetail } from './types';
 
-// 扩展接口定义，包含新字段
+// [修改] 扩展接口定义，增加 bidding_status 原始字段
 interface ExtendedProjectDetail extends BaseDetail {
   is_selected: boolean;
   project_owner: string;
-  bidding_status_display: string;
+  bidding_status: string;        // [新增] 原始状态码 (如 'bidding')
+  bidding_status_display: string; // 显示文本 (如 '竞价中')
 }
+
+// [新增] 定义状态选项配置
+const STATUS_OPTIONS = [
+  { key: 'not_started', label: '未开始', color: 'default' },
+  { key: 'bidding', label: '竞价/谈判中', color: 'processing' },
+  { key: 'successful', label: '竞价成功', color: 'success' },
+  { key: 'failed', label: '竞价失败', color: 'error' },
+];
 
 const Detail: React.FC = () => {
   const { id } = useParams();
@@ -34,8 +41,9 @@ const Detail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ExtendedProjectDetail | null>(null);
   const [transferring, setTransferring] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false); // [新增] 状态更新loading
 
-  // 获取详情数据
+  // 获取详情数据...
   const fetchDetail = () => {
     if (id) {
       axios.get(`/api/bidding/project/${id}/`)
@@ -73,49 +81,93 @@ const Detail: React.FC = () => {
     };
   }, [data]);
 
-  // [修改] 处理选择/取消选择逻辑 - 使用 emallApi 修复 403 问题
   const handleToggleSelect = async () => {
-    if (!data) return;
-    setTransferring(true);
-    try {
-      // 计算目标状态（取反）
-      const targetState = !data.is_selected;
-      
-      // 使用封装好的 API 发送请求，它会自动携带 CSRF Token 和 Cookie
-      const response = await emallApi.toggleProcurementSelection(data.id, targetState);
-      const resData = response.data;
+     // ... (保持原有的选择/取消逻辑不变)
+     if (!data) return;
+     setTransferring(true);
+     try {
+       const targetState = !data.is_selected;
+       const response = await emallApi.toggleProcurementSelection(data.id, targetState);
+       const resData = response.data;
+ 
+       if (resData.success) {
+         setData(prev => prev ? {
+           ...prev,
+           is_selected: resData.is_selected,
+           project_owner: resData.project_owner
+         } : null);
+         message.success(resData.is_selected ? '已选择该项目，归属人已更新' : '已取消选择，归属人已重置');
+         if (resData.is_selected) {
+            Modal.confirm({
+              title: '✅ 项目已转入采购工作台',
+              content: '您现在要去处理该项目吗？',
+              okText: '去处理',
+              cancelText: '留在此处',
+              onOk: () => navigate('/procurement'),
+            });
+         }
+       }
+     } catch (err) { 
+       console.error(err);
+       message.error('操作失败，请检查登录状态或权限'); 
+     } finally { 
+       setTransferring(false); 
+     }
+  };
 
-      if (resData.success) {
-        // 更新本地状态
-        setData(prev => prev ? {
-          ...prev,
-          is_selected: resData.is_selected,
-          project_owner: resData.project_owner
-        } : null);
-        
-        message.success(resData.is_selected ? '已选择该项目，归属人已更新' : '已取消选择，归属人已重置');
-        
-        // 如果是选中状态，引导用户跳转
-        if (resData.is_selected) {
-           Modal.confirm({
-             title: '✅ 项目已转入采购工作台',
-             content: '您现在要去处理该项目吗？',
-             okText: '去处理',
-             cancelText: '留在此处',
-             onOk: () => navigate('/procurement'),
-           });
-        }
-      }
-    } catch (err) { 
-      console.error(err);
-      message.error('操作失败，请检查登录状态或权限'); 
-    } finally { 
-      setTransferring(false); 
+  // [新增] 处理状态变更逻辑
+  const handleStatusChange: MenuProps['onClick'] = async ({ key }) => {
+    if (!data || !data.is_selected) {
+      message.warning('请先选择该项目，才能修改竞标状态');
+      return;
     }
+    
+    setStatusUpdating(true);
+    try {
+      // [核心修改] 把 updateProcurementProgress 改为 updateProgressData
+      // 因为你的 index.ts 里定义的是 updateProgressData
+      await emallApi.updateProgressData(data.id, {
+        bidding_status: key
+      });
+
+      // 找到对应的配置项以获取 label 和 color
+      const selectedOption = STATUS_OPTIONS.find(opt => opt.key === key);
+      
+      // 更新本地状态
+      setData(prev => prev ? {
+        ...prev,
+        bidding_status: key,
+        bidding_status_display: selectedOption?.label || key
+      } : null);
+
+      message.success('状态更新成功');
+    } catch (error) {
+      console.error('更新状态失败:', error);
+      message.error('状态更新失败');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
+  // [新增] 下拉菜单配置
+  const menuProps: MenuProps = {
+    items: STATUS_OPTIONS.map(opt => ({
+      key: opt.key,
+      label: (
+        <span>
+          <Tag color={opt.color} className="mr-2">{opt.label}</Tag>
+          {data?.bidding_status === opt.key && <CheckCircleOutlined className="text-blue-500" />}
+        </span>
+      )
+    })),
+    onClick: handleStatusChange,
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center"><Spin size="large" /></div>;
   if (!data || !adapterProject) return <Empty description="未找到项目" className="mt-20" />;
+
+  // 获取当前状态对应的颜色
+  const currentStatusConfig = STATUS_OPTIONS.find(opt => opt.key === data.bidding_status) || STATUS_OPTIONS[0];
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -127,14 +179,24 @@ const Detail: React.FC = () => {
             <h1 className="text-xl font-bold text-gray-800 m-0 truncate max-w-2xl">{data.title}</h1>
             <div className="text-gray-500 text-xs mt-1 flex gap-4 items-center">
               <span>编号: {data.requirements?.project_code}</span>
-              {/* 显示归属人和状态 */}
+              
               <div className="flex items-center gap-2 ml-4 px-3 py-1 bg-gray-50 rounded-full border border-gray-100">
                 <UserOutlined className="text-blue-500" />
                 <span className="text-gray-600">归属人: <span className="font-medium text-gray-900">{data.project_owner}</span></span>
               </div>
-              <Tag color={data.bidding_status_display === '未开始' ? 'default' : 'processing'}>
-                {data.bidding_status_display}
-              </Tag>
+              
+              {/* [核心修改] 交互式状态标签 */}
+              <Dropdown menu={menuProps} trigger={['click']} disabled={!data.is_selected}>
+                <Tag 
+                  color={currentStatusConfig.color} 
+                  className={`cursor-pointer select-none transition-all hover:opacity-80 flex items-center gap-1 px-3 py-1 text-sm ${!data.is_selected ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {statusUpdating ? <LoadingOutlined /> : null}
+                  {data.bidding_status_display}
+                  <DownOutlined className="text-xs ml-1 opacity-60" />
+                </Tag>
+              </Dropdown>
+
             </div>
           </div>
         </div>
@@ -145,7 +207,6 @@ const Detail: React.FC = () => {
             <div className="text-2xl font-bold text-red-600 font-mono">{data.price_display}</div>
           </div>
           
-          {/* 交互按钮：根据是否选中显示不同状态 */}
           <Button 
             type={data.is_selected ? "default" : "primary"}
             size="large" 
@@ -163,7 +224,7 @@ const Detail: React.FC = () => {
       </div>
 
       <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* 左侧：原始需求信息 */}
+        {/* 左侧及右侧内容保持不变 */}
         <div className="lg:col-span-5 space-y-4">
           <div className="bg-white rounded-xl shadow-sm p-4 h-full custom-scrollbar overflow-y-auto" style={{maxHeight: 'calc(100vh - 120px)'}}>
             <BasicInfoSection project={adapterProject as any} />
@@ -177,9 +238,11 @@ const Detail: React.FC = () => {
           </div>
         </div>
 
-        {/* 右侧：AI 推荐结果 */}
         <div className="lg:col-span-7 space-y-4">
-          <AIRecommendation recommendations={data.recommendations} />
+          <AIRecommendation 
+            recommendations={data.recommendations} 
+            isSelected={data.is_selected} 
+          />
         </div>
       </div>
     </div>
