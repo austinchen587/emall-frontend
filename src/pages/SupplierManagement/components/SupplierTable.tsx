@@ -31,9 +31,18 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
     }
   };
 
+  const getSourceStyle = (source: string | null) => {
+    if (source === '手动添加') {
+      return { background: '#dbeafe', color: '#1e40af' }; 
+    }
+    if (source && source.includes('AI推荐')) {
+      return { background: '#ede9fe', color: '#6d28d9' }; 
+    }
+    return { background: '#f0fdf4', color: '#166534' }; 
+  };
+
   const handleDeleteSupplier = async (supplierId: number) => {
     if (!confirm('确定要删除这个供应商吗？')) return;
-    
     try {
       await supplierAPI.deleteSupplier(projectId, supplierId);
       onRefresh();
@@ -56,18 +65,13 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
     }
   };
 
-  // 获取创建人姓名首字母
   const getInitials = (name: string) => {
     if (!name) return '?';
     return name.charAt(0).toUpperCase();
   };
 
   if (loading) {
-    return (
-      <div className="loading">
-        <div>加载供应商数据...</div>
-      </div>
-    );
+    return <div className="loading"><div>加载供应商数据...</div></div>;
   }
 
   if (suppliers.length === 0) {
@@ -80,15 +84,14 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
         <thead>
           <tr>
             <th style={{ width: '40px' }}></th>
-            <th style={{ width: '60px' }}>选择</th>
-            <th>供应商名称</th>
+            <th style={{ width: '50px' }}>选择</th>
+            <th style={{ width: '180px' }}>供应商名称</th>
+            <th style={{ width: '250px' }}>供应商品详情</th> {/* 新增列 */}
             <th>来源</th>
-            <th>联系方式</th>
             <th>店铺名称</th>
             <th>总报价</th>
-            <th>商品数量</th>
             <th>创建人</th>
-            <th style={{ width: '160px' }}>操作</th>
+            <th style={{ width: '140px' }}>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -113,10 +116,27 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
                   />
                 </td>
                 <td style={{ fontWeight: '600', color: '#1f2937' }}>{supplier.name}</td>
+                
+                {/* [新增] 显示具体的商品信息 */}
+                <td>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {supplier.commodities && supplier.commodities.length > 0 ? (
+                      supplier.commodities.map((item, idx) => (
+                        <div key={idx} style={{ fontSize: '12px', color: '#4b5563', borderBottom: '1px dashed #e5e7eb', paddingBottom: '2px' }}>
+                          <span style={{ fontWeight: 500 }}>{item.name}</span>
+                          <span style={{ marginLeft: '8px', color: '#dc2626' }}>¥{item.price}</span>
+                          <span style={{ marginLeft: '8px', color: '#6b7280' }}>x{item.quantity}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>无商品信息</span>
+                    )}
+                  </div>
+                </td>
+
                 <td>
                   <span style={{
-                    background: supplier.source === '手动添加' ? '#dbeafe' : '#f0fdf4',
-                    color: supplier.source === '手动添加' ? '#1e40af' : '#166534',
+                    ...getSourceStyle(supplier.source),
                     padding: '4px 8px',
                     borderRadius: '6px',
                     fontSize: '12px',
@@ -125,22 +145,9 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
                     {supplier.source || '-'}
                   </span>
                 </td>
-                <td>{supplier.contact || '-'}</td>
                 <td>{supplier.store_name || '-'}</td>
                 <td style={{ fontWeight: '600', color: '#dc2626' }}>
                   ¥{supplier.total_quote.toLocaleString()}
-                </td>
-                <td>
-                  <span style={{
-                    background: '#f3f4f6',
-                    color: '#374151',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '500'
-                  }}>
-                    {supplier.commodities.length} 件
-                  </span>
                 </td>
                 <td>
                   <div className="creator-cell">
@@ -151,27 +158,29 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
                   </div>
                 </td>
                 <td>
-                  <button 
-                    className="btn-edit"
-                    onClick={() => onEditSupplier(supplier)}
-                    title="编辑供应商信息"
-                  >
-                    编辑
-                  </button>
-                  <button 
-                    className="btn-delete"
-                    onClick={() => handleDeleteSupplier(supplier.id)}
-                    title="删除供应商"
-                  >
-                    删除
-                  </button>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button 
+                      className="btn-edit"
+                      onClick={() => onEditSupplier(supplier)}
+                      title="编辑"
+                    >
+                      编辑
+                    </button>
+                    <button 
+                      className="btn-delete"
+                      onClick={() => handleDeleteSupplier(supplier.id)}
+                      title="删除"
+                    >
+                      删除
+                    </button>
+                  </div>
                 </td>
               </tr>
               
-              {/* 审计信息展开行 */}
+              {/* 审计信息 */}
               {expandedSupplier === supplier.id && (
                 <tr className="audit-info-row">
-                  <td colSpan={10}>
+                  <td colSpan={9}>
                     <div className="audit-info">
                       <h4>审计信息</h4>
                       <div className="audit-details">
@@ -179,15 +188,10 @@ const SupplierTable: React.FC<SupplierTableProps> = ({
                           <strong>供应商信息:</strong>
                           <div>创建人: {supplier.purchaser_created_by || '未知'}</div>
                           <div>创建时间: {formatDate(supplier.purchaser_created_at)}</div>
-                          <div>更新人: {supplier.purchaser_updated_by || '无'}</div>
-                          <div>更新时间: {formatDate(supplier.purchaser_updated_at || '')}</div>
                         </div>
                         <div className="audit-section">
-                          <strong>项目关联信息:</strong>
-                          <div>关联创建人: {supplier.procurement_supplier_created_by || '未知'}</div>
-                          <div>关联创建时间: {formatDate(supplier.procurement_supplier_created_at)}</div>
-                          <div>关联更新人: {supplier.procurement_supplier_updated_by || '无'}</div>
-                          <div>关联更新时间: {formatDate(supplier.procurement_supplier_updated_at || '')}</div>
+                          <strong>联系方式:</strong>
+                          <div>{supplier.contact || '暂无'}</div>
                         </div>
                       </div>
                     </div>

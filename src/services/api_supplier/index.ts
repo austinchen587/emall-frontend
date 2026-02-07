@@ -154,5 +154,6 @@ export const supplierAPI = {
   deleteRemark: async (remarkId: number): Promise<any> => {
     const response = await apiClient.delete(`/emall/purchasing/remark/${remarkId}/delete/`);
     return response.data;
-  }
+  },
+  
 };
