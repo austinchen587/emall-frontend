@@ -1,4 +1,4 @@
-// 定义所有相关的接口，供其他组件复用
+// src/pages/BiddingHall/types.ts
 
 export interface Candidate {
   sku: string;
@@ -16,6 +16,12 @@ export interface RecommendationItem {
   brand?: string;
   reason: string;
   candidates: Candidate[];
+  // [新增] 补充 AIRecommendation 组件需要的可选字段
+  quantity?: number;
+  unit?: string;
+  key_word?: string;
+  search_platform?: string;
+  notes?: string;
 }
 
 export interface BiddingProjectDetail {
@@ -35,6 +41,19 @@ export interface BiddingProjectDetail {
     quantities: any; 
     url: string;
     files?: any[];
+    // [新增] 解决 utils.ts 报错的字段
+    business_items?: any[];
+    business_reqs?: any[];
+    file_names?: string[];
+    file_urls?: string[];
   };
   recommendations: RecommendationItem[];
+}
+
+// 扩展接口定义
+export interface ExtendedProjectDetail extends BiddingProjectDetail {
+  is_selected: boolean;
+  project_owner: string;
+  bidding_status: string;        
+  bidding_status_display: string; 
 }
