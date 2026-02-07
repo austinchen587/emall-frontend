@@ -1,8 +1,7 @@
 /* src/pages/SupplierManagement/components/ProjectList.css */
 .project-sidebar {
   width: 280px;
-  background: #FFFFFF; /* 改回纯白背景，让列表项背景去区分 */
-  /* 右侧加阴影而不是边框 */
+  background: #FFFFFF;
   box-shadow: 2px 0 12px rgba(0,0,0,0.02);
   border-right: 1px solid rgba(0,0,0,0.03);
   display: flex;
@@ -22,7 +21,6 @@
   padding-bottom: 20px;
 }
 
-/* 总标题 */
 .time-filter-section h3 {
   margin: 0 0 12px 4px;
   color: #86868B;
@@ -32,12 +30,11 @@
   letter-spacing: 0.5px;
 }
 
-/* 分组容器 */
 .time-filter-group {
   margin-bottom: 12px;
 }
 
-/* 修复：分组标题加上浅色背景，形成层级 */
+/* 核心修复：给分组标题加背景，增加层次感 */
 .time-filter-header {
   display: flex;
   justify-content: space-between;
@@ -45,21 +42,21 @@
   padding: 10px 12px;
   border-radius: 10px;
   cursor: pointer;
-  
-  /* 默认给个极淡的背景 */
-  background-color: #F9F9F9;
+  background-color: #F9F9F9; /* 浅灰背景 */
   color: #1D1D1F;
   font-weight: 600;
   font-size: 14px;
   transition: all 0.2s;
+  border: 1px solid transparent;
 }
 
 .time-filter-header:hover {
-  background-color: #F2F2F7; /* 悬停加深 */
+  background-color: #F2F2F7;
+  border-color: rgba(0,0,0,0.05);
 }
 
 .time-filter-header.active {
-  background-color: #E5E5EA; /* 展开状态背景 */
+  background-color: #E5E5EA; /* 激活时深一点 */
   color: #000;
 }
 
@@ -74,12 +71,11 @@
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
 }
-.toggle-btn:hover { background: rgba(0,0,0,0.05); color: #86868B;}
+.toggle-btn:hover { background: rgba(0,0,0,0.05); color: #86868B; }
 
-/* 项目列表 */
 .project-items {
   margin-top: 6px;
-  padding: 0 4px; /* 稍微内缩 */
+  padding: 0 4px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -92,7 +88,6 @@
   transition: all 0.2s;
   background: transparent;
   position: relative;
-  /* 移除左侧线条，改用全背景高亮 */
   border: none;
 }
 
@@ -100,7 +95,7 @@
   background-color: #F2F2F7;
 }
 
-/* 修复：选中状态 - Apple 风格的高亮蓝 */
+/* 选中项：Apple 风格高亮蓝 */
 .project-item.selected {
   background-color: #007AFF;
   color: white;
@@ -118,7 +113,7 @@
 }
 
 .project-item.selected .project-name {
-  color: white; /* 选中变白 */
+  color: white;
 }
 
 .project-meta {
@@ -130,7 +125,7 @@
 }
 
 .project-item.selected .project-meta {
-  color: rgba(255, 255, 255, 0.85); /* 选中变淡白 */
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .loading, .no-projects {
@@ -141,5 +136,4 @@
   font-style: italic;
 }
 
-/* 滚动条 */
-.project-list::-webkit-scrollbar { width: 0px; } /* 隐藏滚动条让界面更干净，或者设为极细 */
+.project-list::-webkit-scrollbar { width: 0px; }
