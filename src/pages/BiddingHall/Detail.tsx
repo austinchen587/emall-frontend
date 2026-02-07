@@ -30,9 +30,10 @@ interface ExtendedProjectDetail extends BaseDetail {
 // [新增] 定义状态选项配置
 const STATUS_OPTIONS = [
   { key: 'not_started', label: '未开始', color: 'default' },
-  { key: 'bidding', label: '竞价/谈判中', color: 'processing' },
-  { key: 'successful', label: '竞价成功', color: 'success' },
-  { key: 'failed', label: '竞价失败', color: 'error' },
+  { key: 'in_progress', label: '进行中', color: 'processing' }, // 对应 'in_progress'
+  { key: 'successful', label: '竞标成功', color: 'success' },   // 对应 'successful'
+  { key: 'failed', label: '竞标失败', color: 'error' },         // 对应 'failed'
+  { key: 'cancelled', label: '已取消', color: 'warning' },      // 对应 'cancelled'
 ];
 
 const Detail: React.FC = () => {
@@ -57,9 +58,14 @@ const Detail: React.FC = () => {
     fetchDetail();
   }, [id]);
 
+  // [修改 1] 更新数据转换逻辑，接收 files 数据
   const adapterProject = useMemo(() => {
     if (!data) return null;
     const provMap: Record<string, string> = { JX: '江西', HN: '湖南', AH: '安徽', ZJ: '浙江' };
+    
+    // 获取 requirements 数据 (使用 as any 规避 TS 类型检查)
+    const reqs = data.requirements as any;
+
     return {
       purchasing_unit: data.requirements?.purchaser,
       project_number: data.requirements?.project_code,
@@ -76,7 +82,16 @@ const Detail: React.FC = () => {
       purchase_quantities: data.requirements?.quantities || [],
       suggested_brands: data.requirements?.brands || [],
       control_amounts: [],
-      business_items: [], business_requirements: [], download_files: [], related_links: [],
+      
+      // [核心修改 1] 映射商务字段
+      // BusinessTable 组件读取的是 business_items 和 business_requirements
+      business_items: reqs?.business_items || [], 
+      business_requirements: reqs?.business_reqs || [],
+      
+      // [核心修改 2] 映射附件字段 (保持之前的修复)
+      download_files: reqs?.file_names || [],
+      related_links: reqs?.file_urls || [],
+      
       url: data.requirements?.url
     };
   }, [data]);
@@ -226,12 +241,16 @@ const Detail: React.FC = () => {
       <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* 左侧及右侧内容保持不变 */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-xl shadow-sm p-4 h-full custom-scrollbar overflow-y-auto" style={{maxHeight: 'calc(100vh - 120px)'}}>
+          {/* [修改 2] 布局优化：去掉 maxHeight 和 overflow-y-auto */}
+          <div className="bg-white rounded-xl shadow-sm p-4 h-auto"> {/* h-full 改为 h-auto */}
             <BasicInfoSection project={adapterProject as any} />
             <TimeInfoSection project={adapterProject as any} />
             <div className="info-section mt-4"><h4 className="text-gray-900 font-bold mb-3 border-l-4 border-blue-500 pl-3">商品信息</h4><CommodityTable project={adapterProject as any} /></div>
             <div className="info-section mt-4"><BusinessTable project={adapterProject as any} /></div>
+            
+            {/* 这个组件现在可以接收到 adapterProject 中的 download_files 了 */}
             <FileLinksSection project={adapterProject as any} />
+            
             <div className="mt-6 pt-4 border-t text-center">
               <Button type="dashed" block href={data.requirements?.url} target="_blank">查看原始公告网页</Button>
             </div>

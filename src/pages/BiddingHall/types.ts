@@ -34,6 +34,7 @@ export interface BiddingProjectDetail {
     brands: any;     
     quantities: any; 
     url: string;
+    files?: any[];
   };
   recommendations: RecommendationItem[];
 }
