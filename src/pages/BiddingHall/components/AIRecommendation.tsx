@@ -85,7 +85,7 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
                     
                     {/* 1. 平台 (有值才显示，直接显示 '1688' 等) */}
                     {item.search_platform && (
-                        <Tag bordered={false} color="blue" className="m-0 text-xs flex items-center gap-1 px-2">
+                        <Tag variant="filled" color="blue" className="m-0 text-xs flex items-center gap-1 px-2">
                             <ShopOutlined /> {item.search_platform}
                         </Tag>
                     )}
@@ -94,7 +94,7 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
                     {item.key_word && (
                       <Tooltip title={`搜索使用的关键词: ${item.key_word}`}>
                         <Tag 
-                          bordered={false} 
+                          variant="filled" 
                           color="orange" 
                           // [核心修改] 
                           // 1. 去掉了 'max-w-[150px]' 和 'truncate' (解除宽度限制)
@@ -109,7 +109,7 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
 
                     {/* 3. 建议品牌 */}
                     {item.brand && item.brand !== '-' && (
-                      <Tag bordered={false} color="geekblue" className="m-0 text-xs px-2">
+                      <Tag variant="filled" color="geekblue" className="m-0 text-xs px-2">
                         品牌: {item.brand}
                       </Tag>
                     )}
