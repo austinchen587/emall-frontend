@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useBiddingList } from './hooks';
 import { FilterSection } from './components/FilterSection';
 import { ProjectCard } from './components/ProjectCard';
+import BiddingStats from './components/BiddingStats'; // [新增] 引入统计组件
 import './BiddingHall.css';
 
 const BiddingHallPage: React.FC = () => {
@@ -20,6 +21,9 @@ const BiddingHallPage: React.FC = () => {
         <div className="mb-6">
           <Breadcrumb items={[{ title: '首页' }, { title: `${provMap[filters.province!] || ''}竞价大厅` }]} />
         </div>
+
+        {/* [新增] 统计仪表盘组件 */}
+        <BiddingStats />
 
         {/* 筛选组件 */}
         <FilterSection filters={filters} onFilterChange={updateFilter} />

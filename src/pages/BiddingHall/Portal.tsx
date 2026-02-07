@@ -11,7 +11,7 @@ const PROVINCES = [
 
 const Portal: React.FC = () => {
   const navigate = useNavigate();
-  const { stats } = useBiddingStats();
+  const { stats } = useBiddingStats(); // stats 是一个对象，例如 { JX: 10, HN: 5 }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
@@ -33,12 +33,16 @@ const Portal: React.FC = () => {
           >
             <div className="relative z-10">
               <div className="text-3xl font-bold mb-6 opacity-95">{prov.name}</div>
+              
+              {/* [修复] 在这里使用 stats 数据 */}
               <div className="flex items-end justify-between border-t border-white/20 pt-4">
-                <span className="text-sm opacity-80 font-medium">进行中项目</span>
-                <span className="text-4xl font-mono font-bold tracking-tight">
-                  {stats[prov.key] || 0}
-                </span>
+                 <span className="text-sm opacity-80 font-medium">进行中项目</span>
+                 <span className="text-4xl font-mono font-bold tracking-tight">
+                   {/* 如果 stats 还没加载或者是 undefined，显示 0 */}
+                   {stats?.[prov.key] || 0}
+                 </span>
               </div>
+
             </div>
             {/* 装饰圆圈 */}
             <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
