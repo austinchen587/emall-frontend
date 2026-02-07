@@ -1,4 +1,4 @@
-import { MenuProps } from 'antd';
+// [删除] import { MenuProps } from 'antd';  <--这一行删掉
 
 // 定义状态选项配置
 export const STATUS_OPTIONS = [
