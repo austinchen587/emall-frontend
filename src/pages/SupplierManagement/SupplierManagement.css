@@ -1,45 +1,293 @@
 /* src/pages/SupplierManagement/SupplierManagement.css */
+:root {
+  --primary-color: #6366f1; /* 更加现代的靛蓝色 */
+  --primary-light: #e0e7ff;
+  --text-main: #1e293b;
+  --text-secondary: #64748b;
+  --bg-page: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+}
+
 .supplier-management-page {
-  padding: 24px;
+  padding: 20px;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-width: 1600px;
+  background-color: var(--bg-page);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 1400px; /* 稍微减小最小宽度，增加适应性 */
 }
 
 .page-header {
-  margin-bottom: 24px;
-  text-align: center;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
 }
 
 .page-header h1 {
-  color: white;
-  font-size: 32px;
+  color: var(--text-main);
+  font-size: 24px;
   font-weight: 700;
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-header h1::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: var(--primary-color);
+  border-radius: 2px;
 }
 
 .supplier-layout {
   display: flex;
-  gap: 24px;
-  height: calc(100vh - 120px);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden; /* 保证内部滚动 */
+  background: transparent; /* 移除背景，让子元素卡片化 */
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .project-sidebar {
-  flex: 3;
-  background: white;
-  border-right: 1px solid #e1e5e9;
+  flex: 0 0 320px; /* 固定宽度侧边栏，更稳定 */
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
 .supplier-main {
-  flex: 7;
-  background: #f8fafc;
+  flex: 1;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  position: relative;
+}
+
+/* --- 右侧主区域内部样式 --- */
+
+.supplier-management {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0; /* 移除内边距，让表格贴边或自定义 */
+}
+
+.supplier-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: white;
+}
+
+.project-info h2 {
+  margin: 0 0 20px 0;
+  font-size: 22px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-info h2:hover {
+  color: var(--primary-color);
+}
+
+.project-info h2::after {
+  content: 'ⓘ';
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: normal;
+  background: #f1f5f9;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 统计卡片样式 */
+.project-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.stat-card {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  background: #fff;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+  font-feature-settings: "tnum";
+}
+
+.stat-value.highlight {
+  color: var(--primary-color);
+}
+
+.supplier-actions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 按钮通用样式 */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-secondary:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* 状态徽章 */
+.status-badge-large {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+.status-not-started { background: #f1f5f9; color: #64748b; }
+.status-in-progress { background: #eff6ff; color: #3b82f6; }
+.status-successful { background: #ecfdf5; color: #10b981; }
+.status-failed { background: #fef2f2; color: #ef4444; }
+.status-cancelled { background: #f3f4f6; color: #9ca3af; }
+
+/* 备注区域美化 */
+.latest-remarks-section {
+  padding: 16px 24px;
+  background: #fdfdfd;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto; /* 推到底部 */
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.btn-view-all {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-view-all:hover { text-decoration: underline; }
+
+.remark-item {
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.remark-content {
+  color: #334155;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.remark-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.supplier-management-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
 }

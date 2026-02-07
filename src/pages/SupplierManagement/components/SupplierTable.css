@@ -1,415 +1,126 @@
 /* src/pages/SupplierManagement/components/SupplierTable.css */
 .supplier-table {
   flex: 1;
+  height: 100%;
   overflow: auto;
-  overflow-x: auto; /* 新增，确保横向可滚动 */
-  max-width: 100%;  /* 新增，防止超出容器 */
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f1f5f9;
+  width: 100%;
+  /* 确保背景是白色的，以便毛玻璃效果生效 */
+  background: var(--bg-card); 
 }
 
 .supplier-table table {
   width: 100%;
-  min-width: 100%; /* 新增，防止内容溢出 */
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 14px;
-  table-layout: fixed;
-  min-width: 1200px;
-}
-
-.supplier-table th,
-.supplier-table td {
-  padding: 16px 12px;
-  text-align: left;
-  border-bottom: 1px solid #f1f5f9;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-}
-
-.supplier-table th {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-weight: 600;
+  border-collapse: separate; /* 改为 separate 以支持圆角和间距 */
+  border-spacing: 0; /* 移除默认间距 */
   font-size: 13px;
-  text-transform: uppercase;
+  table-layout: fixed;
+  min-width: 1000px;
+}
+
+/* 固定表头 - Apple Style 毛玻璃 */
+.supplier-table th {
+  /* 使用半透明白色背景 */
+  background: rgba(255, 255, 255, 0.85);
+  /* 核心：毛玻璃效果 */
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  
+  color: var(--text-sub);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase; /* 保持大写，增加专业感 */
   letter-spacing: 0.5px;
+  padding: 16px; /* 增加内边距 */
+  text-align: left;
+  /* 极细的分割线 */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  
   position: sticky;
   top: 0;
-  border: none;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  white-space: nowrap;
+  z-index: 10;
 }
 
-.supplier-table th:first-child {
-  border-radius: 16px 0 0 0;
-  width: 50px;
+.supplier-table td {
+  padding: 16px; /* 增加行高，更透气 */
+  /* 极细的分割线 */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+  vertical-align: middle;
+  font-weight: 500;
 }
 
-.supplier-table th:nth-child(2) {
-  width: 70px;
-}
-
-.supplier-table th:nth-child(3) {
-  width: 180px;
-}
-
-.supplier-table th:nth-child(4) {
-  width: 100px;
-}
-
-.supplier-table th:nth-child(5) {
-  width: 120px;
-}
-
-.supplier-table th:nth-child(6) {
-  width: 150px;
-}
-
-.supplier-table th:nth-child(7) {
-  width: 120px;
-}
-
-.supplier-table th:nth-child(8) {
-  width: 100px;
-}
-
-.supplier-table th:nth-child(9) {
-  width: 120px;
-}
-
-.supplier-table th:last-child {
-  border-radius: 0 16px 0 0;
-  width: 160px;
-}
-
-.supplier-table tr.selected {
-  background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
-  border-left: 4px solid #667eea;
-}
-
-.supplier-table tr:hover {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  transform: translateX(2px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-.supplier-table tr {
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.supplier-table tr::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transition: width 0.3s ease;
-}
-
-.supplier-table tr:hover::before {
-  width: 3px;
-}
-
-.supplier-table input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 2px solid #e2e8f0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.supplier-table input[type="checkbox"]:checked {
-  background: #667eea;
-  border-color: #667eea;
-  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
-}
-
-.supplier-table input[type="checkbox"]:checked::after {
-  content: '✓';
-  position: absolute;
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.supplier-table input[type="checkbox"]:hover {
-  border-color: #667eea;
-  transform: scale(1.05);
-}
-
-.btn-edit {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-right: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(72, 187, 120, 0.3);
-  min-width: 60px;
-  white-space: nowrap;
-}
-
-.btn-edit:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(72, 187, 120, 0.4);
-}
-
-.btn-delete {
-  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(245, 101, 101, 0.3);
-  min-width: 60px;
-  white-space: nowrap;
-}
-
-.btn-delete:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(245, 101, 101, 0.4);
-}
-
-.loading, .no-suppliers {
-  text-align: center;
-  padding: 60px;
-  color: #64748b;
-  font-size: 15px;
-  background: white;
-  border-radius: 16px;
-}
-
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-direction: column;
-}
-
-.loading::after {
-  content: '';
-  width: 30px;
-  height: 30px;
-  border: 2px solid #f1f5f9;
-  border-top: 2px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.expand-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
-  font-size: 12px;
-}
-
-.expand-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
-}
-
-.audit-info-row {
-  background: #f8f9fa !important;
-  transition: all 0.3s ease;
-}
-
-.audit-info {
-  padding: 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  margin: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.audit-info h4 {
-  margin: 0 0 12px 0;
-  color: #2d3748;
-  font-size: 14px;
-  font-weight: 600;
-  border-bottom: 1px solid #667eea;
-  padding-bottom: 8px;
-}
-
-.audit-details {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.audit-section {
-  flex: 1;
-  min-width: 200px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-}
-
-.audit-section:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.audit-section strong {
-  display: block;
-  margin-bottom: 8px;
-  color: #374151;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.audit-section div {
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 4px;
-  padding: 2px 0;
-  border-bottom: 1px solid #f3f4f6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.audit-section div:last-child {
+/* 移除最后一行的下边框 */
+.supplier-table tr:last-child td {
   border-bottom: none;
 }
 
-/* 创建人样式 */
-.creator-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 500;
-  color: #374151;
-  white-space: nowrap;
-  overflow: hidden;
+.supplier-table tr {
+  transition: background-color 0.2s;
 }
 
-.creator-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.supplier-table tr:hover td {
+  background-color: #F9F9F9; /* 极淡的灰色悬停 */
+}
+
+/* 选中高亮 - 使用主色调的极淡背景 */
+.supplier-table tr.selected td {
+  background-color: rgba(0, 122, 255, 0.05);
+}
+
+/* 操作按钮样式优化 */
+.btn-edit, .btn-delete {
+  padding: 6px 12px;
+  border-radius: 14px; /* 胶囊 */
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  margin-right: 8px;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  color: var(--primary);
+  background: rgba(0, 122, 255, 0.1);
+}
+.btn-edit:hover {
+  background: var(--primary);
   color: white;
-  font-size: 11px;
-  font-weight: 600;
-  flex-shrink: 0;
 }
 
-/* 标签样式优化 */
-.source-tag {
-  background: #dbeafe;
-  color: #1e40af;
-  padding: 3px 8px;
+.btn-delete {
+  color: var(--danger);
+  background: rgba(255, 59, 48, 0.1);
+}
+.btn-delete:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* 展开按钮 */
+.expand-btn {
+  background: #F2F2F7;
+  border: none;
+  color: var(--text-sub);
+  width: 24px; height: 24px;
+  border-radius: 50%; /* 圆形 */
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.expand-btn:hover { background: #E5E5EA; color: var(--text-main); }
+
+/* 审计详情区域 */
+.audit-info-row td { background: #F9F9F9; padding: 0; }
+.audit-info {
+  padding: 20px;
+  /* 内嵌阴影，营造凹陷感 */
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.03);
+}
+
+/* 复选框美化 */
+.supplier-table input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 18px; height: 18px; cursor: pointer;
   border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.quantity-badge {
-  background: #f3f4f6;
-  color: #374151;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .supplier-table {
-    border-radius: 12px;
-  }
-  
-  .supplier-table table {
-    min-width: 1000px;
-    font-size: 12px;
-  }
-  
-  .supplier-table th,
-  .supplier-table td {
-    padding: 12px 8px;
-  }
-  
-  .audit-details {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .audit-section {
-    min-width: auto;
-  }
-  
-  .btn-edit,
-  .btn-delete {
-    padding: 6px 12px;
-    font-size: 10px;
-    min-width: 50px;
-  }
-}
-
-/* 表格滚动容器 */
-.table-container {
-  overflow-x: auto;
-  border-radius: 16px;
-}
-
-/* 价格样式 */
-.price-cell {
-  font-weight: 600;
-  color: #dc2626;
-  white-space: nowrap;
-}
-
-/* 供应商名称样式 */
-.supplier-name {
-  font-weight: 600;
-  color: #1f2937;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }

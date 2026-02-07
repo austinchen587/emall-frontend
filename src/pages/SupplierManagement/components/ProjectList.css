@@ -1,170 +1,145 @@
 /* src/pages/SupplierManagement/components/ProjectList.css */
+.project-sidebar {
+  width: 280px;
+  background: #FFFFFF; /* 改回纯白背景，让列表项背景去区分 */
+  /* 右侧加阴影而不是边框 */
+  box-shadow: 2px 0 12px rgba(0,0,0,0.02);
+  border-right: 1px solid rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
 .project-list {
   height: 100%;
   overflow-y: auto;
-  background: #f8fafc;
+  padding: 16px;
 }
 
 .time-filter-section {
-  padding: 24px;
+  padding-bottom: 20px;
 }
 
+/* 总标题 */
 .time-filter-section h3 {
-  margin-bottom: 20px;
-  color: #2d3748;
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
+  margin: 0 0 12px 4px;
+  color: #86868B;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* 分组容器 */
 .time-filter-group {
   margin-bottom: 12px;
 }
 
+/* 修复：分组标题加上浅色背景，形成层级 */
 .time-filter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid #e2e8f0;
-  margin-bottom: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+  /* 默认给个极淡的背景 */
+  background-color: #F9F9F9;
+  color: #1D1D1F;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
 }
 
 .time-filter-header:hover {
-  border-color: #667eea;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #F2F2F7; /* 悬停加深 */
 }
 
 .time-filter-header.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: #667eea;
+  background-color: #E5E5EA; /* 展开状态背景 */
+  color: #000;
 }
 
 .toggle-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
+  background: transparent;
+  border: none;
+  color: #AEAEB2;
   font-weight: bold;
-  color: inherit;
-  transition: all 0.3s ease;
+  font-size: 14px;
+  cursor: pointer;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
 }
+.toggle-btn:hover { background: rgba(0,0,0,0.05); color: #86868B;}
 
-.time-filter-header:not(.active) .toggle-btn {
-  background: #f7fafc;
-  border-color: #cbd5e0;
-  color: #4a5568;
-}
-
+/* 项目列表 */
 .project-items {
-  margin-top: 8px;
-  padding-left: 16px;
+  margin-top: 6px;
+  padding: 0 4px; /* 稍微内缩 */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .project-item {
-  padding: 16px;
-  margin: 4px 0;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+  background: transparent;
+  position: relative;
+  /* 移除左侧线条，改用全背景高亮 */
+  border: none;
 }
 
 .project-item:hover {
-  border-color: #667eea;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  background-color: #F2F2F7;
 }
 
+/* 修复：选中状态 - Apple 风格的高亮蓝 */
 .project-item.selected {
-  border-color: #667eea;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #007AFF;
   color: white;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.25);
 }
 
 .project-name {
   font-weight: 600;
-  margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 13px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #1D1D1F;
+}
+
+.project-item.selected .project-name {
+  color: white; /* 选中变白 */
 }
 
 .project-meta {
   display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  opacity: 0.8;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: #86868B;
 }
 
 .project-item.selected .project-meta {
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.85); /* 选中变淡白 */
 }
 
 .loading, .no-projects {
-  padding: 20px;
+  padding: 12px;
   text-align: center;
-  color: #718096;
-  font-size: 14px;
-  background: white;
-  border-radius: 12px;
-  margin: 8px 0;
-}
-
-/* 高亮项目状态字段 */
-.project-status-badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 8px;
-  font-weight: bold;
+  color: #C7C7CC;
   font-size: 12px;
-  margin-left: 2px;
-  margin-right: 2px;
-  letter-spacing: 1px;
-  /* 默认色 */
-  background: #fbbf24;
-  color: #fff;
+  font-style: italic;
 }
 
-/* 各状态专属颜色 */
-.project-status-badge.not-started {
-  background: #a0aec0;
-}
-.project-status-badge.in-progress {
-  background: #3182ce;
-}
-.project-status-badge.successful {
-  background: #38a169;
-}
-.project-status-badge.failed {
-  background: #e53e3e;
-}
-.project-status-badge.cancelled {
-  background: #718096;
-}
-
-/* 竞标成功筛选区域样式与时间筛选一致，无需额外样式 */
-/* 如需单独高亮可加如下内容（可选） */
-/*
-.time-filter-header.success {
-  background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
-  color: #fff;
-  border-color: #38a169;
-}
-*/
+/* 滚动条 */
+.project-list::-webkit-scrollbar { width: 0px; } /* 隐藏滚动条让界面更干净，或者设为极细 */

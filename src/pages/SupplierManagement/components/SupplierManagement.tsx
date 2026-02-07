@@ -27,16 +27,15 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showRemarksTab, setShowRemarksTab] = useState(false);
   const [newRemark, setNewRemark] = useState('');
-  const [remarksData,setRemarksData] = useState<any>(null);
+  const [remarksData, setRemarksData] = useState<any>(null);
   const [remarksLoading, setRemarksLoading] = useState(false);
-  const [latestRemark, setLatestRemark] = useState<any>(null); // 改为单个备注对象
+  const [latestRemark, setLatestRemark] = useState<any>(null);
 
-  // 将 Project 转换为 EmallItem，确保 project_number = id
   const convertProjectToEmallItem = (project: Project): EmallItem => {
     const totalBudget = projectSuppliers?.project_info?.total_budget;
     return {
       id: project.id,
-      project_title: project.project_title, // 注意这里应为 project_title
+      project_title: project.project_title,
       project_name: project.project_name,
       purchasing_unit: '',
       publish_date: '',
@@ -55,7 +54,6 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
       total_price_numeric: typeof totalBudget === 'number' ? totalBudget : 0,
       quote_start_time: '',
       quote_end_time: '',
-      // 关键：确保 bidding_status 始终为 string
       bidding_status: typeof project.bidding_status === 'object' && project.bidding_status !== null
         ? project.bidding_status.status
         : project.bidding_status,
@@ -68,15 +66,12 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     return `¥${value.toLocaleString()}`;
   };
 
-  // 加载备注数据
   const loadRemarks = async () => {
     if (!selectedProject) return;
-    
     setRemarksLoading(true);
     try {
       const data = await supplierAPI.getRemarks(selectedProject.id);
       setRemarksData(data);
-      // 设置最新备注（取第一条，即最新的）
       setLatestRemark(data.remarks_history?.[0] || null);
     } catch (error) {
       console.error('加载备注失败:', error);
@@ -87,13 +82,11 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     }
   };
 
-  // 处理添加备注
   const handleAddRemark = async () => {
     if (!selectedProject || !newRemark.trim()) return;
-    
     try {
       await supplierAPI.addRemark(selectedProject.id, newRemark.trim());
-      await loadRemarks(); // 重新加载备注数据
+      await loadRemarks();
       setNewRemark('');
     } catch (error) {
       console.error('添加备注失败:', error);
@@ -101,35 +94,23 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
     }
   };
 
-  // 当选择项目或显示备注弹窗时加载数据
   useEffect(() => {
-    if (selectedProject) {
-      loadRemarks();
-    }
+    if (selectedProject) loadRemarks();
   }, [selectedProject]);
 
-  //当显示备注弹窗时加载数据
   useEffect(() => {
-    if (showRemarksTab && selectedProject) {
-      loadRemarks();
-    }
+    if (showRemarksTab && selectedProject) loadRemarks();
   }, [showRemarksTab, selectedProject]);
 
-  // 状态按钮样式映射
   const getStatusButtonClass = (status: string) => {
+    const base = 'status-badge-large';
     switch (status) {
-      case '未开始':
-        return 'btn btn-secondary status-not-started';
-      case '进行中':
-        return 'btn btn-primary status-in-progress';
-      case '竞标成功':
-        return 'btn btn-success status-successful';
-      case '竞标失败':
-        return 'btn btn-danger status-failed';
-      case '已取消':
-        return 'btn btn-cancelled status-cancelled';
-      default:
-        return 'btn btn-secondary';
+      case '未开始': return `${base} status-not-started`;
+      case '进行中': return `${base} status-in-progress`;
+      case '竞标成功': return `${base} status-successful`;
+      case '竞标失败': return `${base} status-failed`;
+      case '已取消': return `${base} status-cancelled`;
+      default: return `${base} status-not-started`;
     }
   };
 
@@ -138,7 +119,7 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
       <div className="supplier-management-empty">
         <div className="empty-state">
           <h3>请选择项目</h3>
-          <p>从左侧项目列表中选择一个项目来管理供应商</p>
+          <p>从左侧列表选择一个项目开始管理</p>
         </div>
       </div>
     );
@@ -146,148 +127,122 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
 
   return (
     <div className="supplier-management">
-      <div className="supplier-header">
-        <div className="project-info">
-          <h2 onClick={() => setShowProjectDetail(true)}>
-            {selectedProject.project_name}
-          </h2>
-          <div className="project-stats">
-            <span>所在地区: {selectedProject?.region || '无地区信息'}</span>
-            <span>甲方总预算: {formatCurrency(projectSuppliers?.project_info?.total_budget)}</span>
-            <span>供应商采购成本: {formatCurrency(projectSuppliers?.project_info?.total_selected_quote)}</span>
-            <span>采购利润: {formatCurrency(projectSuppliers?.project_info?.total_profit)}</span>
+      <div className="supplier-header-card">
+        {/* 顶部：标题与操作 */}
+        <div className="header-top-row">
+          <div className="project-title-area">
+            <h2 onClick={() => setShowProjectDetail(true)}>
+              {selectedProject.project_name}
+            </h2>
+            <span className="info-icon" title="查看详情">ⓘ</span>
+            {(() => {
+              const statusMap: Record<string, string> = {
+                not_started: '未开始', in_progress: '进行中', successful: '竞标成功', failed: '竞标失败', cancelled: '已取消'
+              };
+              let status = selectedProject.bidding_status;
+              if (typeof status === 'object' && status !== null) status = status.status ?? '';
+              if (typeof status === 'string' && statusMap[status]) status = statusMap[status];
+              
+              return <span className={getStatusButtonClass(status as string || '未知')}>{status || '未知'}</span>;
+            })()}
+          </div>
+          
+          <div className="header-actions">
+            <button className="btn btn-secondary" onClick={() => setShowRemarksTab(true)}>备注管理</button>
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>+ 添加供应商</button>
           </div>
         </div>
-        <div className="supplier-actions">
-          <button 
-            className="btn btn-primary"
-            onClick={() => setShowAddModal(true)}
-          >
-            添加供应商
-          </button>
-          <button 
-            className="btn btn-secondary"
-            onClick={() => setShowRemarksTab(true)}
-          >
-            添加备注
-          </button>
-          {/* 状态按钮，颜色根据状态变化 */}
-          {(() => {
-            // 兼容后端返回的 bidding_status 可能为 code 或 display
-            const statusMap: Record<string, string> = {
-              not_started: '未开始',
-              in_progress: '进行中',
-              successful: '竞标成功',
-              failed: '竞标失败',
-              cancelled: '已取消'
-            };
-            let status = selectedProject.bidding_status;
-            // 兼容对象、字符串、中文
-            if (typeof status === 'object' && status !== null) {
-              status = status.status ?? '';
-            }
-            // 如果是英文 code，映射为中文
-            if (typeof status === 'string' && statusMap[status]) {
-              status = statusMap[status];
-            }
-            // 如果是空字符串或 null/undefined
-            if (!status || typeof status !== 'string') status = '未知';
-            return (
-              <button
-                className={getStatusButtonClass(status)}
-                style={{ cursor: 'default', marginLeft: 8 }}
-                disabled
-              >
-                {status}
-              </button>
-            );
-          })()}
+
+        {/* 底部：横向统计卡片 */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <span className="stat-label">所在地区</span>
+            <span className="stat-value text-normal">{selectedProject?.region || '-'}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">甲方总预算</span>
+            <span className="stat-value highlight">{formatCurrency(projectSuppliers?.project_info?.total_budget)}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">供应商成本</span>
+            <span className="stat-value">{formatCurrency(projectSuppliers?.project_info?.total_selected_quote)}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">采购利润</span>
+            <span className="stat-value highlight-green">
+              {formatCurrency(projectSuppliers?.project_info?.total_profit)}
+            </span>
+          </div>
         </div>
       </div>
 
-      <SupplierTable
-        suppliers={projectSuppliers?.suppliers || []}
-        projectId={selectedProject.id}
-        loading={loading}
-        onEditSupplier={setEditingSupplier}
-        onRefresh={onRefresh}
-      />
-
-      {/* 最新备注显示区域 */}
-      <div className="latest-remarks-section">
-        <div className="section-header">
-          <h3>最新备注</h3>
-          <button 
-            className="btn-view-all"
-            onClick={() => setShowRemarksTab(true)}
-          >
-            查看全部
-          </button>
-        </div>
-        
-        {remarksLoading ? (
-          <div className="remarks-loading">加载中...</div>
-        ) : latestRemark ? (
-          <div className="remarks-list">
-            <div className="remark-item">
-              <div className="remark-content">
-                {latestRemark.remark_content}
-              </div>
-              <div className="remark-meta">
-                <span className="remark-author">{latestRemark.created_by}</span>
-                <span className="remark-time">{latestRemark.created_at_display}</span>
-              </div>
-            </div>
-          </div>
+      {/* 表格区域 - 注意 class table-section */}
+      <div className="table-section">
+        {projectSuppliers?.suppliers && projectSuppliers.suppliers.length > 0 ? (
+          <SupplierTable
+            suppliers={projectSuppliers.suppliers}
+            projectId={selectedProject.id}
+            loading={loading}
+            onEditSupplier={setEditingSupplier}
+            onRefresh={onRefresh}
+          />
         ) : (
-          <div className="no-remarks">
-            <p>暂无备注</p>
-            <button 
-              className="btn-add-remark"
-              onClick={() => setShowRemarksTab(true)}
-            >
-              添加第一条备注
-            </button>
+          <div className="empty-placeholder">
+            <div className="empty-icon">📦</div>
+            <h3>暂无供应商数据</h3>
+            <p>该项目尚未录入任何供应商，点击右上角添加。</p>
           </div>
         )}
       </div>
 
+      {/* 备注栏 - 修复 remarksLoading 使用 */}
+      <div className="remark-bar">
+        <div className="remark-header">
+          <span className="remark-title">最新备注</span>
+          <button className="btn-link" onClick={() => setShowRemarksTab(true)}>查看全部 &rarr;</button>
+        </div>
+        
+        {remarksLoading ? (
+           <div className="remark-preview loading-state">
+             <span className="remark-text">加载中...</span>
+           </div>
+        ) : latestRemark ? (
+          <div className="remark-preview">
+            <span className="remark-text" title={latestRemark.remark_content}>{latestRemark.remark_content}</span>
+            <span className="remark-date">{latestRemark.created_at_display}</span>
+          </div>
+        ) : (
+          <span className="remark-empty">暂无备注信息</span>
+        )}
+      </div>
+
+      {/* 弹窗组件 */}
       {showAddModal && (
         <AddSupplierModal
           projectId={selectedProject.id}
           onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
-            setShowAddModal(false);
-            onRefresh();
-          }}
+          onSuccess={() => { setShowAddModal(false); onRefresh(); }}
         />
       )}
-
       {editingSupplier && (
         <EditSupplierModal
           supplier={editingSupplier}
           projectId={selectedProject.id}
-          projectStatus={selectedProject.bidding_status as string} // 传递项目状态
+          projectStatus={selectedProject.bidding_status as string}
           onClose={() => setEditingSupplier(null)}
-          onSuccess={() => {
-            setEditingSupplier(null);
-            onRefresh();
-          }}
+          onSuccess={() => { setEditingSupplier(null); onRefresh(); }}
         />
       )}
-
       <ProjectDetailModal
         isOpen={showProjectDetail}
         onClose={() => setShowProjectDetail(false)}
         project={convertProjectToEmallItem(selectedProject)}
       />
-
-      {/* 备注弹窗 */}
       {showRemarksTab && (
         <div className="remarks-modal-overlay">
           <div className="remarks-modal-content">
             <div className="remarks-modal-header">
-              <h3>项目备注 - {selectedProject.project_name}</h3>
+              <h3>项目备注</h3>
               <button className="close-btn" onClick={() => setShowRemarksTab(false)}>×</button>
             </div>
             <RemarksTab
@@ -296,11 +251,6 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
               onNewRemarkChange={setNewRemark}
               onAddRemark={handleAddRemark}
             />
-            {remarksLoading && (
-              <div className="remarks-loading">
-                加载中...
-              </div>
-            )}
           </div>
         </div>
       )}
