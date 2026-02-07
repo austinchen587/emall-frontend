@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Spin, message, Modal, Empty, MenuProps } from 'antd';
+// [修复] 加回 Modal 组件
+import { Button, Spin, message, Empty, MenuProps, Modal } from 'antd';
 import axios from 'axios';
 import { emallApi } from '@/services/api_emall';
 
@@ -41,19 +42,40 @@ const Detail: React.FC = () => {
      if (!data) return;
      setTransferring(true);
      try {
+       // 调用后端 API 更新选择状态
        const response = await emallApi.toggleProcurementSelection(data.id, !data.is_selected);
        const resData = response.data;
+       
        if (resData.success) {
+         // 更新本地状态
          setData(prev => prev ? { ...prev, is_selected: resData.is_selected, project_owner: resData.project_owner } : null);
-         message.success(resData.is_selected ? '已选择该项目' : '已取消选择');
+         
          if (resData.is_selected) {
+            // [修复] 恢复弹窗确认逻辑
             Modal.confirm({
-              title: '✅ 项目已转入采购工作台', content: '您现在要去处理该项目吗？', okText: '去处理', cancelText: '留在此处',
-              onOk: () => navigate('/procurement'),
+              title: '✅ 项目已成功认领', 
+              content: '该项目已添加到您的采购工作台，是否立即前往处理？', 
+              okText: '去处理 (新窗口)', 
+              cancelText: '留在本页',
+              centered: true,
+              onOk: () => {
+                // [修复] 使用 window.open 在新标签页打开
+                window.open('/suppliers', '_blank');
+              },
+              onCancel: () => {
+                // 用户选择留下，不做任何操作
+              }
             });
+         } else {
+            message.success('已取消选择');
          }
        }
-     } catch (err) { message.error('操作失败'); } finally { setTransferring(false); }
+     } catch (err) { 
+        console.error(err);
+        message.error('操作失败'); 
+     } finally { 
+        setTransferring(false); 
+     }
   };
 
   const handleStatusChange: MenuProps['onClick'] = async ({ key }) => {
@@ -92,7 +114,6 @@ const Detail: React.FC = () => {
         </div>
 
         <div className="lg:col-span-7 space-y-4">
-          {/* [修复] 添加 isSelected 属性 */}
           <AIRecommendation 
             recommendations={data.recommendations} 
             isSelected={data.is_selected} 
