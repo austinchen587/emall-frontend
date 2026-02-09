@@ -57,3 +57,4 @@ export interface ExtendedProjectDetail extends BiddingProjectDetail {
   bidding_status: string;        
   bidding_status_display: string; 
 }
+

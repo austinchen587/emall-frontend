@@ -69,6 +69,9 @@ export interface IFilterParams {
   search?: string; // 新增搜索字段
   page?: number;
   page_size?: number;
+  // [新增] 必须显式定义这两个字段，FilterSection 才能正常赋值
+  owner?: string;        // 归属人搜索
+  is_selected?: string;  // 是否已选 ('true' | 'false')
 }
 
 // 省份统计类型
