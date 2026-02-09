@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { message, Spin } from 'antd'; // 引入 Ant Design 组件
+import axios from 'axios'; // 确保已安装 axios
 import { useBiddingStats } from './hooks';
 
 const PROVINCES = [
@@ -11,7 +13,37 @@ const PROVINCES = [
 
 const Portal: React.FC = () => {
   const navigate = useNavigate();
-  const { stats } = useBiddingStats(); // stats 是一个对象，例如 { JX: 10, HN: 5 }
+  const { stats } = useBiddingStats(); 
+  const [syncing, setSyncing] = useState<string | null>(null); // 记录正在同步的省份
+
+  const handleProvinceClick = async (provKey: string) => {
+    // 防止重复点击
+    if (syncing) return;
+    
+    setSyncing(provKey);
+    message.loading({ content: '正在同步最新数据...', key: 'sync_msg' });
+
+    try {
+      // 1. 调用后台同步接口
+      // 假设您的 API 基础路径已配置，如果没有，请加上 http://localhost:8000
+      await axios.post('/api/bidding/sync/', { province: provKey });
+      
+      message.success({ content: '同步指令已发送，即将进入大厅', key: 'sync_msg', duration: 1 });
+      
+      // 2. 跳转页面 (给一点延迟让用户看到反馈，或者立即跳转)
+      setTimeout(() => {
+        navigate(`/bidding/hall?province=${provKey}`);
+      }, 500);
+      
+    } catch (error) {
+      console.error('Sync trigger failed:', error);
+      // 即使同步接口失败，也允许用户进入查看历史数据
+      message.warning({ content: '同步服务响应超时，但这不影响您浏览历史数据', key: 'sync_msg' });
+      navigate(`/bidding/hall?province=${provKey}`);
+    } finally {
+      setSyncing(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
@@ -24,21 +56,24 @@ const Portal: React.FC = () => {
         {PROVINCES.map((prov) => (
           <div 
             key={prov.key}
-            onClick={() => navigate(`/bidding/hall?province=${prov.key}`)}
+            onClick={() => handleProvinceClick(prov.key)} // 修改这里
             className={`
               cursor-pointer rounded-2xl p-8 text-white relative overflow-hidden
               transform hover:-translate-y-2 hover:scale-105 transition-all duration-300
               bg-gradient-to-br ${prov.color} shadow-xl ${prov.shadow}
+              ${syncing === prov.key ? 'opacity-80 scale-95 pointer-events-none ring-4 ring-offset-2 ring-blue-300' : ''}
             `}
           >
             <div className="relative z-10">
-              <div className="text-3xl font-bold mb-6 opacity-95">{prov.name}</div>
+              <div className="flex justify-between items-start">
+                <div className="text-3xl font-bold mb-6 opacity-95">{prov.name}</div>
+                {/* 如果正在同步，显示 Loading 图标 */}
+                {syncing === prov.key && <Spin size="default" />}
+              </div>
               
-              {/* [修复] 在这里使用 stats 数据 */}
               <div className="flex items-end justify-between border-t border-white/20 pt-4">
                  <span className="text-sm opacity-80 font-medium">进行中项目</span>
                  <span className="text-4xl font-mono font-bold tracking-tight">
-                   {/* 如果 stats 还没加载或者是 undefined，显示 0 */}
                    {stats?.[prov.key] || 0}
                  </span>
               </div>
