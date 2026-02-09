@@ -9,6 +9,8 @@ const PROVINCES = [
   { key: 'HN', name: '湖南省', color: 'from-red-500 to-red-600', shadow: 'shadow-red-200' },
   { key: 'AH', name: '安徽省', color: 'from-green-500 to-green-600', shadow: 'shadow-green-200' },
   { key: 'ZJ', name: '浙江省', color: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-200' },
+  // [新增] 新疆入口 (橙色主题)
+  { key: 'XJ', name: '新疆', color: 'from-orange-500 to-orange-600', shadow: 'shadow-orange-200' },
 ];
 
 const Portal: React.FC = () => {
@@ -52,11 +54,12 @@ const Portal: React.FC = () => {
         <p className="text-gray-500 text-lg">请选择您要进入的省份区域</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl w-full">
+      {/* 调整 grid 布局，适配更多卡片 (lg:grid-cols-5 如果屏幕够宽，或者保持 4 列自动换行) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8 max-w-7xl w-full">
         {PROVINCES.map((prov) => (
           <div 
             key={prov.key}
-            onClick={() => handleProvinceClick(prov.key)} // 修改这里
+            onClick={() => handleProvinceClick(prov.key)} 
             className={`
               cursor-pointer rounded-2xl p-8 text-white relative overflow-hidden
               transform hover:-translate-y-2 hover:scale-105 transition-all duration-300

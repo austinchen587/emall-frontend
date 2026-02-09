@@ -4,7 +4,15 @@ import { ExtendedProjectDetail } from './types';
 export const adaptProjectData = (data: ExtendedProjectDetail | null) => {
   if (!data) return null;
   
-  const provMap: Record<string, string> = { JX: '江西', HN: '湖南', AH: '安徽', ZJ: '浙江' };
+  // [修改] 在这里添加 'XJ': '新疆'
+  const provMap: Record<string, string> = { 
+    JX: '江西', 
+    HN: '湖南', 
+    AH: '安徽', 
+    ZJ: '浙江',
+    XJ: '新疆'  // [新增]
+  };
+  
   const reqs = data.requirements || {}; // 安全访问
 
   return {
@@ -12,7 +20,8 @@ export const adaptProjectData = (data: ExtendedProjectDetail | null) => {
     project_number: reqs.project_code,
     project_name: data.title,
     project_title: data.title,
-    region: provMap[data.province] || data.province,
+    // 这里会根据映射转换，如果找不到则回退到原始代码
+    region: provMap[data.province] || data.province, 
     total_price_control: data.price_display, 
     total_price_numeric: 0, 
     publish_date: reqs.publish_date,
@@ -24,11 +33,9 @@ export const adaptProjectData = (data: ExtendedProjectDetail | null) => {
     suggested_brands: reqs.brands || [],
     control_amounts: [],
     
-    // [核心逻辑保持] 映射商务字段
     business_items: reqs.business_items || [], 
     business_requirements: reqs.business_reqs || [],
     
-    // [核心逻辑保持] 映射附件字段
     download_files: reqs.file_names || [],
     related_links: reqs.file_urls || [],
     

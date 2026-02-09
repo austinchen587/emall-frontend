@@ -1,6 +1,5 @@
 import React from 'react';
 import { Spin, Empty, Breadcrumb, Pagination } from 'antd';
-// [新增] 引入 Link
 import { useSearchParams, Link } from 'react-router-dom';
 import { useBiddingList } from './hooks';
 import { FilterSection } from './components/FilterSection';
@@ -11,7 +10,15 @@ import './BiddingHall.css';
 const BiddingHallPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const province = searchParams.get('province') || 'JX';
-  const provMap: Record<string, string> = { JX: '江西', HN: '湖南', AH: '安徽', ZJ: '浙江' };
+  
+  // [修改] 增加新疆的映射
+  const provMap: Record<string, string> = { 
+    JX: '江西', 
+    HN: '湖南', 
+    AH: '安徽', 
+    ZJ: '浙江',
+    XJ: '新疆' 
+  };
   
   const { loading, list, total, filters, updateFilter, handlePageChange } = useBiddingList(province);
 
@@ -21,7 +28,6 @@ const BiddingHallPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-[1600px] mx-auto">
         <div className="mb-6">
-          {/* [修复] 使用 Link 组件实现点击跳转 */}
           <Breadcrumb 
             items={[
               { 
