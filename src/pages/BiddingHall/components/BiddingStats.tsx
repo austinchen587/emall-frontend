@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, Progress, Tag, Empty, Avatar, Modal, Button, Tooltip } from 'antd';
+import { Spin, Progress, Tag, Empty, Avatar, Modal, Button } from 'antd';
 import { 
   ShopOutlined, 
   UserOutlined, 
@@ -33,6 +33,7 @@ interface StatsData {
   sub_cats: SubCatStat[];
   status_dist: Record<string, number>;
   owner_dist: OwnerStat[];
+  user_role?: string; // [新增]
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -66,7 +67,6 @@ const BiddingStats: React.FC = () => {
     }
   };
 
-  // 当弹窗打开时才去获取数据（节省资源）
   useEffect(() => {
     if (visible) {
       fetchStats();
@@ -74,10 +74,10 @@ const BiddingStats: React.FC = () => {
   }, [visible, province]);
 
   const totalGoods = data?.sub_cats.reduce((acc, cur) => acc + cur.total, 0) || 0;
+  const isAdmin = data?.user_role === 'admin'; // [新增] 判断管理员
 
   return (
     <>
-      {/* 1. 触发按钮区：放在列表页顶部 */}
       <div className="mb-4 flex justify-end">
         <Button 
           type="primary" 
@@ -89,21 +89,20 @@ const BiddingStats: React.FC = () => {
         </Button>
       </div>
 
-      {/* 2. 统计详情弹窗 */}
       <Modal
         title={
           <div className="flex items-center gap-2">
             <ShopOutlined className="text-blue-600" />
             <span>物资类寻源统计看板</span>
             <Tag color="blue" className="ml-2 font-normal">
-              当前省份未过期项目: {loading ? '...' : totalGoods}
+              {isAdmin ? '全员数据' : '个人数据'}
             </Tag>
           </div>
         }
         open={visible}
         onCancel={() => setVisible(false)}
         footer={null}
-        width={1200} // 宽屏弹窗
+        width={1200}
         centered
         bodyStyle={{ padding: '24px', backgroundColor: '#f8fafc' }}
       >
@@ -112,19 +111,16 @@ const BiddingStats: React.FC = () => {
         ) : data ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            {/* === 左侧：分类详情 (占 3/4) === */}
             <div className="lg:col-span-3 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.sub_cats.map((cat) => (
                   <div key={cat.key} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
                     
-                    {/* 标题 */}
                     <div className="flex justify-between items-center mb-3">
                       <span className="font-bold text-gray-800">{cat.label}</span>
                       <span className="text-xs text-gray-400 font-mono">Total: {cat.total}</span>
                     </div>
 
-                    {/* 进度条 */}
                     <div className="mb-4">
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-blue-600 font-medium">已选 {cat.selected}</span>
@@ -138,7 +134,6 @@ const BiddingStats: React.FC = () => {
                       />
                     </div>
 
-                    {/* 归属人列表 */}
                     <div className="border-t border-gray-50 pt-3">
                       <div className="text-xs text-gray-400 mb-2 flex items-center gap-1">
                         <UserOutlined /> 认领详情:
@@ -171,12 +166,13 @@ const BiddingStats: React.FC = () => {
               </div>
             </div>
 
-            {/* === 右侧：总状态分布 (占 1/4) === */}
             <div className="lg:col-span-1 space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-50">
                   <BarChartOutlined className="text-purple-600" />
-                  <h3 className="text-gray-700 font-bold m-0 text-sm">已选项目状态</h3>
+                  <h3 className="text-gray-700 font-bold m-0 text-sm">
+                    {isAdmin ? '已选项目状态 (全员)' : '我的项目状态'}
+                  </h3>
                 </div>
                 
                 <div className="space-y-2">
@@ -200,10 +196,19 @@ const BiddingStats: React.FC = () => {
 
                 <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
                    <div className="flex items-center gap-2 text-gray-500 text-xs">
-                      <TrophyOutlined /> 活跃采购员
+                      <TrophyOutlined /> {isAdmin ? '活跃采购员' : '我的认领数'}
                    </div>
                    <div className="text-xl font-bold text-gray-800">
-                     {data.owner_dist.length} <span className="text-xs font-normal text-gray-400">人</span>
+                     {isAdmin ? (
+                        <>
+                          {data.owner_dist.length} <span className="text-xs font-normal text-gray-400">人</span>
+                        </>
+                     ) : (
+                        // 个人视图下显示自己已认领的总数
+                        <>
+                          {Object.values(data.status_dist).reduce((a, b) => a + b, 0)} <span className="text-xs font-normal text-gray-400">个</span>
+                        </>
+                     )}
                    </div>
                 </div>
               </div>

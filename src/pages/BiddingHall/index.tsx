@@ -1,10 +1,11 @@
 import React from 'react';
 import { Spin, Empty, Breadcrumb, Pagination } from 'antd';
-import { useSearchParams } from 'react-router-dom';
+// [新增] 引入 Link
+import { useSearchParams, Link } from 'react-router-dom';
 import { useBiddingList } from './hooks';
 import { FilterSection } from './components/FilterSection';
 import { ProjectCard } from './components/ProjectCard';
-import BiddingStats from './components/BiddingStats'; // [新增] 引入统计组件
+import BiddingStats from './components/BiddingStats';
 import './BiddingHall.css';
 
 const BiddingHallPage: React.FC = () => {
@@ -12,34 +13,40 @@ const BiddingHallPage: React.FC = () => {
   const province = searchParams.get('province') || 'JX';
   const provMap: Record<string, string> = { JX: '江西', HN: '湖南', AH: '安徽', ZJ: '浙江' };
   
-  // 使用 Hook
   const { loading, list, total, filters, updateFilter, handlePageChange } = useBiddingList(province);
+
+  const currentProvName = provMap[filters.province!] || '';
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-[1600px] mx-auto">
         <div className="mb-6">
-          <Breadcrumb items={[{ title: '首页' }, { title: `${provMap[filters.province!] || ''}竞价大厅` }]} />
+          {/* [修复] 使用 Link 组件实现点击跳转 */}
+          <Breadcrumb 
+            items={[
+              { 
+                title: <Link to="/dashboard">首页</Link> 
+              }, 
+              { 
+                title: <Link to="/bidding">{currentProvName}竞价大厅</Link> 
+              }
+            ]} 
+          />
         </div>
 
-        {/* [新增] 统计仪表盘组件 */}
         <BiddingStats />
 
-        {/* 筛选组件 */}
         <FilterSection filters={filters} onFilterChange={updateFilter} />
 
-        {/* 列表内容区 */}
         <Spin spinning={loading}>
           {list.length > 0 ? (
             <>
-              {/* 4列网格布局 */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[600px] bidding-list-container">
                 {list.map(item => (
                   <ProjectCard key={item.id} data={item} />
                 ))}
               </div>
               
-              {/* 分页器 */}
               <div className="flex justify-center mt-10 pb-10">
                 <Pagination
                   current={filters.page}
