@@ -33,7 +33,7 @@ interface StatsData {
   sub_cats: SubCatStat[];
   status_dist: Record<string, number>;
   owner_dist: OwnerStat[];
-  user_role?: string; // [新增]
+  user_role?: string;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -73,8 +73,9 @@ const BiddingStats: React.FC = () => {
     }
   }, [visible, province]);
 
+  // 计算总数 (之前定义了但没用，导致报错)
   const totalGoods = data?.sub_cats.reduce((acc, cur) => acc + cur.total, 0) || 0;
-  const isAdmin = data?.user_role === 'admin'; // [新增] 判断管理员
+  const isAdmin = data?.user_role === 'admin';
 
   return (
     <>
@@ -96,6 +97,10 @@ const BiddingStats: React.FC = () => {
             <span>物资类寻源统计看板</span>
             <Tag color="blue" className="ml-2 font-normal">
               {isAdmin ? '全员数据' : '个人数据'}
+            </Tag>
+            {/* [修复] 在这里使用 totalGoods，消除 TS 警告，同时展示总数信息 */}
+            <Tag className="font-normal text-gray-500">
+              共 {totalGoods} 项
             </Tag>
           </div>
         }
@@ -204,7 +209,6 @@ const BiddingStats: React.FC = () => {
                           {data.owner_dist.length} <span className="text-xs font-normal text-gray-400">人</span>
                         </>
                      ) : (
-                        // 个人视图下显示自己已认领的总数
                         <>
                           {Object.values(data.status_dist).reduce((a, b) => a + b, 0)} <span className="text-xs font-normal text-gray-400">个</span>
                         </>

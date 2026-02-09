@@ -1,10 +1,11 @@
 import React from 'react';
-import { Tag } from 'antd';
+import { Tag, Tooltip } from 'antd';
 import { Link } from 'react-router-dom';
 import { 
   ClockCircleOutlined, 
   UserOutlined, 
-  CheckCircleFilled 
+  CheckCircleFilled,
+  InfoCircleOutlined 
 } from '@ant-design/icons';
 import { IBiddingProject } from '@/services/types/bidding';
 
@@ -26,10 +27,8 @@ interface Props {
 }
 
 export const ProjectCard: React.FC<Props> = ({ data }) => {
-  // 1. 保留了紧急状态的计算逻辑
   const hoursLeft = Math.floor(data.countdown / 3600);
   const isUrgent = hoursLeft < 24 && data.status === 1;
-  
   const statusConfig = STATUS_CONFIG[data.bidding_status || 'not_started'] || STATUS_CONFIG['not_started'];
 
   return (
@@ -59,17 +58,12 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
       {/* 头部：标签区域 */}
       <div className="p-4 pb-2 flex justify-between items-start">
         <div className="flex gap-2 flex-wrap">
-           {/* 1. 模式标签 */}
            <Tag color={data.mode === 'reverse' ? 'orange' : 'blue'} className="mr-0">
              {data.mode === 'reverse' ? '反拍' : '竞价'}
            </Tag>
-           
-           {/* 2. 新增的状态标签 */}
            <Tag color={statusConfig.color} className="mr-0 border-transparent">
              {statusConfig.label}
            </Tag>
-
-           {/* 3. 🔥【这里】闪烁功能完整保留！如果有 isUrgent，就会显示且闪烁 */}
            {isUrgent && (
              <Tag color="red" className="animate-pulse mr-0">
                即将截止
@@ -81,12 +75,15 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
         </span>
       </div>
 
-      {/* 内容：标题与价格 */}
+      {/* 内容主体 */}
       <div className="p-4 pt-0 flex-1 flex flex-col">
-        <h3 className="text-base font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors h-12">
+        {/* 标题 */}
+        <h3 className="text-base font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors h-12">
           {data.title}
         </h3>
         
+        {/* 此处原有的备注代码已移至下方 */}
+
         <div className="mt-auto space-y-2">
           {/* 价格行 */}
           <div className="flex justify-between items-end border-b border-gray-50 pb-2">
@@ -96,7 +93,7 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
             </span>
           </div>
           
-          {/* 时间状态行 (倒计时红字变色逻辑也保留了) */}
+          {/* 时间状态行 */}
           <div className="flex justify-between items-center text-xs text-gray-500 pt-1">
             <div className="flex items-center gap-1">
               <ClockCircleOutlined />
@@ -117,6 +114,29 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
                {data.project_owner || '未分配'}
              </span>
           </div>
+
+          {/* [移动到此处] 最新备注显示区域 */}
+          {data.latest_remark_content ? (
+            <div className="mt-2 bg-orange-50 border border-orange-100 rounded px-2 py-1.5 text-xs">
+              <div className="flex items-start gap-1 text-orange-800 mb-1">
+                <InfoCircleOutlined className="mt-0.5 flex-shrink-0" />
+                <Tooltip title={data.latest_remark_content}>
+                  <span className="line-clamp-2 font-medium leading-tight cursor-help">
+                    {data.latest_remark_content}
+                  </span>
+                </Tooltip>
+              </div>
+              <div className="flex justify-between text-orange-400 scale-95 origin-left w-full">
+                <span>{data.latest_remark_by}</span>
+                <span>{data.latest_remark_at?.substring(5, 16) || '-'}</span>
+              </div>
+            </div>
+          ) : (
+            /* 占位，保持卡片高度一致性 */
+            <div className="mt-2 h-[54px] flex items-center justify-center text-gray-300 text-xs border border-dashed border-gray-100 rounded bg-gray-50/50">
+              暂无备注
+            </div>
+          )}
         </div>
       </div>
 
@@ -125,10 +145,6 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
         p-3 border-t transition-colors
         ${data.is_selected ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100 group-hover:bg-blue-50'}
       `}>
-        {/* 保留了按钮的紧急状态逻辑：
-            如果 !isUrgent (不紧急)，按钮是 ghost (白底蓝字)；
-            如果 isUrgent (紧急)，!isUrgent 为 false，按钮变成默认 Primary (实心蓝底/红底)
-        */}
         <div className={`
           w-full text-center py-1 rounded text-sm transition-colors
           ${data.is_selected 

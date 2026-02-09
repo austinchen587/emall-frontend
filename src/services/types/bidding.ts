@@ -50,6 +50,10 @@ export interface IBiddingProject {
   // 详情页可选字段
   requirements?: IBiddingRequirements;
   recommendations?: IRecommendationItem[];
+  // [新增] 备注相关字段 (对应后端 annotate 的字段)
+  latest_remark_content?: string;
+  latest_remark_by?: string;
+  latest_remark_at?: string;
 }
 
 // 分页响应结构
