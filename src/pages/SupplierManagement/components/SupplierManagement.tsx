@@ -128,7 +128,6 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
   return (
     <div className="supplier-management">
       <div className="supplier-header-card">
-        {/* 顶部：标题与操作 */}
         <div className="header-top-row">
           <div className="project-title-area">
             <h2 onClick={() => setShowProjectDetail(true)}>
@@ -153,7 +152,6 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
           </div>
         </div>
 
-        {/* 底部：横向统计卡片 */}
         <div className="stats-grid">
           <div className="stat-card">
             <span className="stat-label">所在地区</span>
@@ -176,26 +174,18 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
         </div>
       </div>
 
-      {/* 表格区域 - 注意 class table-section */}
       <div className="table-section">
-        {projectSuppliers?.suppliers && projectSuppliers.suppliers.length > 0 ? (
-          <SupplierTable
-            suppliers={projectSuppliers.suppliers}
-            projectId={selectedProject.id}
-            loading={loading}
-            onEditSupplier={setEditingSupplier}
-            onRefresh={onRefresh}
-          />
-        ) : (
-          <div className="empty-placeholder">
-            <div className="empty-icon">📦</div>
-            <h3>暂无供应商数据</h3>
-            <p>该项目尚未录入任何供应商，点击右上角添加。</p>
-          </div>
-        )}
+        {/* [核心修复] 透传 requirements 参数 */}
+        <SupplierTable
+          suppliers={projectSuppliers?.suppliers || []}
+          projectId={selectedProject.id}
+          loading={loading}
+          onEditSupplier={setEditingSupplier}
+          onRefresh={onRefresh}
+          requirements={(projectSuppliers as any)?.requirements || {}}
+        />
       </div>
 
-      {/* 备注栏 - 修复 remarksLoading 使用 */}
       <div className="remark-bar">
         <div className="remark-header">
           <span className="remark-title">最新备注</span>
@@ -216,7 +206,6 @@ const SupplierManagement: React.FC<SupplierManagementProps> = ({
         )}
       </div>
 
-      {/* 弹窗组件 */}
       {showAddModal && (
         <AddSupplierModal
           projectId={selectedProject.id}

@@ -1,7 +1,6 @@
 // src/pages/SupplierManagement/components/SupplierTable.tsx
-import React, { useState } from 'react';
-import { Supplier } from '../../../services/api_supplier';
-import { supplierAPI } from '../../../services/api_supplier';
+import React, { useMemo } from 'react';
+import { Supplier, supplierAPI } from '../../../services/api_supplier';
 import './SupplierTable.css';
 
 interface SupplierTableProps {
@@ -10,198 +9,212 @@ interface SupplierTableProps {
   loading: boolean;
   onEditSupplier: (supplier: Supplier) => void;
   onRefresh: () => void;
+  requirements?: Record<string, any>; // 从后端传来的需求清单 (Key 是 Brand ID)
 }
+
+// 辅助函数：把供应商列表 -> 转换为 -> 商品列表 (Key 是商品名)
+const groupDataByProduct = (suppliers: Supplier[]) => {
+  const productMap: Record<string, any[]> = {};
+  
+  if (!suppliers) return {};
+
+  suppliers.forEach(supplier => {
+    if (supplier.commodities) {
+      supplier.commodities.forEach(comm => {
+        const productName = (comm.name || '未命名商品').trim();
+        if (!productMap[productName]) {
+          productMap[productName] = [];
+        }
+        productMap[productName].push({
+          ...comm,
+          _supplierName: supplier.name,
+          _supplierId: supplier.id,
+          _supplierSource: supplier.source,
+          _supplierSelected: supplier.is_selected,
+          _supplierObj: supplier
+        });
+      });
+    }
+  });
+  
+  return productMap;
+};
 
 const SupplierTable: React.FC<SupplierTableProps> = ({
   suppliers,
   projectId,
   loading,
   onEditSupplier,
-  onRefresh
+  onRefresh,
+  requirements = {}
 }) => {
-  const [expandedSupplier, setExpandedSupplier] = useState<number | null>(null);
+  
+  // 1. 先把现有的供应商数据按商品名分组
+  const productGroups = useMemo(() => groupDataByProduct(suppliers), [suppliers]);
+
+  // 2. [核心修复] 获取所有需要展示的“卡片”
+  // 以需求清单(Requirements)为主，确保 5 个需求显示 5 个卡片
+  const displayItems = useMemo(() => {
+    const reqEntries = Object.entries(requirements); // [[id, info], ...]
+    
+    // 如果没有需求清单，才回退到显示所有供应商商品
+    if (reqEntries.length === 0) {
+        return Object.keys(productGroups).map(name => ({
+            type: 'supply_only',
+            id: name, // 用名字做临时ID
+            name: name,
+            reqInfo: {}
+        }));
+    }
+
+    // 正常模式：遍历需求清单
+    const list = reqEntries.map(([id, info]) => ({
+        type: 'requirement',
+        id: id,
+        name: info.name,
+        reqInfo: info
+    }));
+
+    // (可选) 检查是否有供应商提供了“需求清单之外”的商品
+    // 这里为了界面整洁，暂时只显示匹配需求的商品，或者追加在后面
+    const reqNames = new Set(reqEntries.map(e => e[1].name));
+    Object.keys(productGroups).forEach(name => {
+        if (!reqNames.has(name)) {
+            list.push({
+                type: 'extra',
+                id: `extra-${name}`,
+                name: name,
+                reqInfo: { required_qty: 0, unit: '额外' }
+            });
+        }
+    });
+
+    return list;
+  }, [requirements, productGroups]);
 
   const handleToggleSelection = async (supplierId: number, isSelected: boolean) => {
     try {
       await supplierAPI.toggleSupplierSelection(projectId, supplierId, !isSelected);
       onRefresh();
     } catch (error) {
-      console.error('切换选择状态失败:', error);
-      alert('操作失败，请重试');
+      alert('操作失败');
     }
-  };
-
-  const getSourceStyle = (source: string | null) => {
-    if (source === '手动添加') {
-      return { background: '#dbeafe', color: '#1e40af' }; 
-    }
-    if (source && source.includes('AI推荐')) {
-      return { background: '#ede9fe', color: '#6d28d9' }; 
-    }
-    return { background: '#f0fdf4', color: '#166534' }; 
   };
 
   const handleDeleteSupplier = async (supplierId: number) => {
-    if (!confirm('确定要删除这个供应商吗？')) return;
+    if (!window.confirm('确定删除该供应商吗？')) return;
     try {
       await supplierAPI.deleteSupplier(projectId, supplierId);
       onRefresh();
     } catch (error) {
-      console.error('删除供应商失败:', error);
-      alert('删除失败，请重试');
+      alert('删除失败');
     }
   };
 
-  const toggleSupplierDetails = (supplierId: number) => {
-    setExpandedSupplier(expandedSupplier === supplierId ? null : supplierId);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '未知';
-    try {
-      return new Date(dateString).toLocaleString('zh-CN');
-    } catch (error) {
-      return '日期格式错误';
-    }
-  };
-
-  const getInitials = (name: string) => {
-    if (!name) return '?';
-    return name.charAt(0).toUpperCase();
-  };
-
-  if (loading) {
-    return <div className="loading"><div>加载供应商数据...</div></div>;
-  }
-
-  if (suppliers.length === 0) {
-    return <div className="no-suppliers">暂无供应商数据</div>;
-  }
+  if (loading) return <div className="table-loading">数据加载中...</div>;
+  if (displayItems.length === 0) return <div className="empty-placeholder">暂无数据</div>;
 
   return (
-    <div className="supplier-table">
-      <table>
-        <thead>
-          <tr>
-            <th style={{ width: '40px' }}></th>
-            <th style={{ width: '50px' }}>选择</th>
-            <th style={{ width: '180px' }}>供应商名称</th>
-            <th style={{ width: '250px' }}>供应商品详情</th> {/* 新增列 */}
-            <th>来源</th>
-            <th>店铺名称</th>
-            <th>总报价</th>
-            <th>创建人</th>
-            <th style={{ width: '140px' }}>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {suppliers.map(supplier => (
-            <React.Fragment key={supplier.id}>
-              <tr className={supplier.is_selected ? 'selected' : ''}>
-                <td>
-                  <button 
-                    className="expand-btn"
-                    onClick={() => toggleSupplierDetails(supplier.id)}
-                    title={expandedSupplier === supplier.id ? '收起详情' : '展开详情'}
-                  >
-                    {expandedSupplier === supplier.id ? '−' : '+'}
-                  </button>
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={supplier.is_selected}
-                    onChange={() => handleToggleSelection(supplier.id, supplier.is_selected)}
-                    title={supplier.is_selected ? '取消选择' : '选择供应商'}
-                  />
-                </td>
-                <td style={{ fontWeight: '600', color: '#1f2937' }}>{supplier.name}</td>
-                
-                {/* [新增] 显示具体的商品信息 */}
-                <td>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {supplier.commodities && supplier.commodities.length > 0 ? (
-                      supplier.commodities.map((item, idx) => (
-                        <div key={idx} style={{ fontSize: '12px', color: '#4b5563', borderBottom: '1px dashed #e5e7eb', paddingBottom: '2px' }}>
-                          <span style={{ fontWeight: 500 }}>{item.name}</span>
-                          <span style={{ marginLeft: '8px', color: '#dc2626' }}>¥{item.price}</span>
-                          <span style={{ marginLeft: '8px', color: '#6b7280' }}>x{item.quantity}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>无商品信息</span>
-                    )}
-                  </div>
-                </td>
+    <div className="supplier-product-view">
+      {displayItems.map((entry) => {
+        const { id, name, reqInfo } = entry;
+        const reqQty = reqInfo?.required_qty || 0;
+        
+        // 通过商品名 (name) 去查找供应商报价
+        const items = productGroups[name] || [];
 
-                <td>
-                  <span style={{
-                    ...getSourceStyle(supplier.source),
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '500'
-                  }}>
-                    {supplier.source || '-'}
-                  </span>
-                </td>
-                <td>{supplier.store_name || '-'}</td>
-                <td style={{ fontWeight: '600', color: '#dc2626' }}>
-                  ¥{supplier.total_quote.toLocaleString()}
-                </td>
-                <td>
-                  <div className="creator-cell">
-                    <div className="creator-avatar" title={supplier.purchaser_created_by || '未知'}>
-                      {getInitials(supplier.purchaser_created_by || '未知')}
-                    </div>
-                    <span>{supplier.purchaser_created_by || '未知'}</span>
-                  </div>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <button 
-                      className="btn-edit"
-                      onClick={() => onEditSupplier(supplier)}
-                      title="编辑"
-                    >
-                      编辑
-                    </button>
-                    <button 
-                      className="btn-delete"
-                      onClick={() => handleDeleteSupplier(supplier.id)}
-                      title="删除"
-                    >
-                      删除
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              
-              {/* 审计信息 */}
-              {expandedSupplier === supplier.id && (
-                <tr className="audit-info-row">
-                  <td colSpan={9}>
-                    <div className="audit-info">
-                      <h4>审计信息</h4>
-                      <div className="audit-details">
-                        <div className="audit-section">
-                          <strong>供应商信息:</strong>
-                          <div>创建人: {supplier.purchaser_created_by || '未知'}</div>
-                          <div>创建时间: {formatDate(supplier.purchaser_created_at)}</div>
-                        </div>
-                        <div className="audit-section">
-                          <strong>联系方式:</strong>
-                          <div>{supplier.contact || '暂无'}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
+        return (
+          <div key={id} className="product-card">
+            {/* 头部：商品名称 + 需求概览 */}
+            <div className="product-card-header">
+              <div className="pc-title">
+                <span className="icon">📦</span>
+                <span className="name">{name}</span>
+                {/* 如果是严格的 Brand ID 模式，这里可能显示规格区分同名商品 */}
+                {reqInfo?.spec && <span className="spec-tag" title={reqInfo.spec}>{reqInfo.spec}</span>}
+                {items.length === 0 && <span className="missing-tag">暂无报价</span>}
+                {entry.type === 'extra' && <span className="extra-tag">额外商品</span>}
+              </div>
+              <div className="pc-meta">
+                <span className="label">计划采购:</span>
+                <span className="value-highlight">{reqQty > 0 ? reqQty : '-'}</span>
+                <span className="unit">{reqInfo?.unit || ''}</span>
+              </div>
+            </div>
+
+            {/* 表格：各供应商报价 */}
+            <div className="table-wrapper">
+              {items.length > 0 ? (
+                <table className="simple-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '50px' }}>采纳</th>
+                      <th style={{ width: '200px' }}>供应商 / 店铺</th>
+                      <th style={{ width: '120px' }}>单价</th>
+                      <th style={{ width: '100px' }}>数量</th>
+                      <th style={{ width: '120px' }}>总价</th>
+                      <th>链接/备注</th>
+                      <th style={{ width: '80px' }}>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item, idx) => {
+                      // 数量检查
+                      const isQtyWrong = reqQty > 0 && item.quantity !== reqQty;
+
+                      return (
+                        <tr key={`${item._supplierId}-${idx}`} className={item._supplierSelected ? 'tr-selected' : ''}>
+                          <td className="text-center">
+                            <input
+                              type="checkbox"
+                              className="big-checkbox"
+                              checked={item._supplierSelected || false}
+                              onChange={() => handleToggleSelection(item._supplierId, item._supplierSelected)}
+                            />
+                          </td>
+                          <td>
+                            <div className="supp-name">{item._supplierName}</div>
+                            <div className="supp-tag">{item._supplierSource || '未知来源'}</div>
+                          </td>
+                          <td className="price-cell">
+                            ¥{item.price}
+                          </td>
+                          <td>
+                            <div className={isQtyWrong ? 'qty-mismatch' : 'qty-match'}>
+                              {item.quantity}
+                            </div>
+                            {isQtyWrong && <div className="qty-alert">需 {reqQty}</div>}
+                          </td>
+                          <td className="total-cell">
+                            ¥{(item.total_price || 0).toLocaleString()}
+                          </td>
+                          <td>
+                            {item.product_url ? (
+                              <a href={item.product_url} target="_blank" rel="noreferrer" className="link-text">
+                                商品链接 ↗
+                              </a>
+                            ) : <span className="text-gray">-</span>}
+                          </td>
+                          <td>
+                             <div className="action-row">
+                               <button className="icon-btn edit" onClick={() => onEditSupplier(item._supplierObj)}>✎</button>
+                               <button className="icon-btn del" onClick={() => handleDeleteSupplier(item._supplierId)}>🗑</button>
+                             </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="no-supply-placeholder">
+                  ⚠️ 该商品在清单中，但目前尚未录入任何供应商报价。
+                </div>
               )}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

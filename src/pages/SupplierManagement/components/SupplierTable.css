@@ -1,126 +1,193 @@
 /* src/pages/SupplierManagement/components/SupplierTable.css */
-.supplier-table {
-  flex: 1;
+
+/* 外层容器：负责滚动 */
+.supplier-product-view {
+  padding: 20px;
+  background-color: #F5F7FA;
   height: 100%;
-  overflow: auto;
-  width: 100%;
-  /* 确保背景是白色的，以便毛玻璃效果生效 */
-  background: var(--bg-card); 
+  overflow-y: auto; /* 只有这里能滚动 */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* 卡片间距 */
 }
 
-.supplier-table table {
-  width: 100%;
-  border-collapse: separate; /* 改为 separate 以支持圆角和间距 */
-  border-spacing: 0; /* 移除默认间距 */
-  font-size: 13px;
-  table-layout: fixed;
-  min-width: 1000px;
+/* 商品卡片 */
+.product-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #EAEAEA;
+  overflow: hidden; /* 防止圆角溢出 */
+  flex-shrink: 0; /* 防止被压缩 */
 }
 
-/* 固定表头 - Apple Style 毛玻璃 */
-.supplier-table th {
-  /* 使用半透明白色背景 */
-  background: rgba(255, 255, 255, 0.85);
-  /* 核心：毛玻璃效果 */
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  
-  color: var(--text-sub);
-  font-weight: 600;
+/* 卡片标题栏 */
+.product-card-header {
+  padding: 16px 24px;
+  background: #FAFAFA;
+  border-bottom: 1px solid #EEEEEE;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pc-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pc-title .icon { font-size: 20px; }
+.pc-title .name { 
+  font-size: 16px; 
+  font-weight: 700; 
+  color: #333; 
+}
+.spec-tag {
+  background: #F0F2F5;
+  color: #666;
   font-size: 12px;
-  text-transform: uppercase; /* 保持大写，增加专业感 */
-  letter-spacing: 0.5px;
-  padding: 16px; /* 增加内边距 */
+  padding: 2px 8px;
+  border-radius: 4px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pc-meta {
+  font-size: 13px;
+  color: #666;
+}
+.value-highlight {
+  font-size: 16px;
+  font-weight: 700;
+  color: #007AFF;
+  margin: 0 4px;
+}
+
+/* 表格样式 */
+.table-wrapper {
+  padding: 0; /* 贴边 */
+}
+
+.simple-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* 固定列宽，防止撑破 */
+}
+
+.simple-table th {
   text-align: left;
-  /* 极细的分割线 */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.supplier-table td {
-  padding: 16px; /* 增加行高，更透气 */
-  /* 极细的分割线 */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  color: var(--text-main);
-  vertical-align: middle;
+  padding: 12px 24px;
+  background: white;
+  color: #999;
+  font-size: 12px;
   font-weight: 500;
+  border-bottom: 1px solid #F0F0F0;
 }
 
-/* 移除最后一行的下边框 */
-.supplier-table tr:last-child td {
+.simple-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #F9F9F9;
+  font-size: 14px;
+  color: #333;
+  vertical-align: middle;
+}
+
+.simple-table tr:last-child td {
   border-bottom: none;
 }
 
-.supplier-table tr {
-  transition: background-color 0.2s;
+/* 选中高亮 */
+.tr-selected {
+  background-color: #F0F9FF;
+}
+.tr-selected td {
+  border-bottom: 1px solid #E0F2FE;
 }
 
-.supplier-table tr:hover td {
-  background-color: #F9F9F9; /* 极淡的灰色悬停 */
-}
-
-/* 选中高亮 - 使用主色调的极淡背景 */
-.supplier-table tr.selected td {
-  background-color: rgba(0, 122, 255, 0.05);
-}
-
-/* 操作按钮样式优化 */
-.btn-edit, .btn-delete {
-  padding: 6px 12px;
-  border-radius: 14px; /* 胶囊 */
-  font-size: 12px;
+/* 复选框 */
+.big-checkbox {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
+  accent-color: #007AFF;
+}
+
+/* 文本样式 */
+.supp-name { font-weight: 600; margin-bottom: 4px; }
+.supp-tag { 
+  font-size: 12px; 
+  color: #888; 
+  background: #F5F5F5; 
+  display: inline-block; 
+  padding: 2px 6px; 
+  border-radius: 4px; 
+}
+
+.price-cell { color: #F56A00; font-weight: 500; }
+.total-cell { font-weight: 700; color: #333; }
+
+/* 数量状态 */
+.qty-match { color: #333; }
+.qty-mismatch { 
+  color: #E02020; 
+  font-weight: 700; 
+  background: #FFF1F0; 
+  padding: 2px 6px; 
+  border-radius: 4px; 
+  display: inline-block;
+}
+.qty-alert {
+  font-size: 11px;
+  color: #E02020;
+  margin-top: 4px;
+}
+
+/* 链接 */
+.link-text {
+  color: #007AFF;
+  text-decoration: none;
+  font-size: 13px;
+}
+.link-text:hover { text-decoration: underline; }
+.text-gray { color: #CCC; }
+
+/* 按钮 */
+.action-row { display: flex; gap: 8px; }
+.icon-btn {
   border: none;
-  font-weight: 600;
-  margin-right: 8px;
-  transition: all 0.2s;
-}
-
-.btn-edit {
-  color: var(--primary);
-  background: rgba(0, 122, 255, 0.1);
-}
-.btn-edit:hover {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-delete {
-  color: var(--danger);
-  background: rgba(255, 59, 48, 0.1);
-}
-.btn-delete:hover {
-  background: var(--danger);
-  color: white;
-}
-
-/* 展开按钮 */
-.expand-btn {
-  background: #F2F2F7;
-  border: none;
-  color: var(--text-sub);
-  width: 24px; height: 24px;
-  border-radius: 50%; /* 圆形 */
-  display: inline-flex; align-items: center; justify-content: center;
+  background: none;
   cursor: pointer;
-  transition: all 0.2s;
-}
-.expand-btn:hover { background: #E5E5EA; color: var(--text-main); }
-
-/* 审计详情区域 */
-.audit-info-row td { background: #F9F9F9; padding: 0; }
-.audit-info {
-  padding: 20px;
-  /* 内嵌阴影，营造凹陷感 */
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.03);
-}
-
-/* 复选框美化 */
-.supplier-table input[type="checkbox"] {
-  accent-color: var(--primary);
-  width: 18px; height: 18px; cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
   border-radius: 4px;
+  transition: background 0.2s;
+}
+.icon-btn.edit:hover { background: #E6F7FF; color: #007AFF; }
+.icon-btn.del:hover { background: #FFF1F0; color: #F5222D; }
+
+.text-center { text-align: center; }
+
+
+/* 缺货标签 */
+.missing-tag {
+  background: #FFF1F0;
+  color: #F5222D;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #FFA39E;
+  margin-left: 8px;
+}
+
+/* 无报价占位符 */
+.no-supply-placeholder {
+  padding: 30px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  background: #FAFAFA;
+  border-top: 1px dashed #E0E0E0;
 }

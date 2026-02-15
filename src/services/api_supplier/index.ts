@@ -46,6 +46,12 @@ export interface Supplier {
   procurement_supplier_created_at: string;
   procurement_supplier_updated_by?: string;
   procurement_supplier_updated_at?: string;
+
+  // [新增] 补充后端返回的字段
+  total_price: number;      // 对应后端计算的 supplier_total_price
+  status: string;           // 对应后端返回的 pending/approved/rejected
+
+
 }
 
 export interface ProjectSuppliersResponse {
