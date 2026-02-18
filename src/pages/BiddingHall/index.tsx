@@ -11,7 +11,6 @@ const BiddingHallPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const province = searchParams.get('province') || 'JX';
   
-  // [修改] 增加新疆的映射
   const provMap: Record<string, string> = { 
     JX: '江西', 
     HN: '湖南', 
@@ -22,37 +21,28 @@ const BiddingHallPage: React.FC = () => {
   
   const { loading, list, total, filters, updateFilter, handlePageChange } = useBiddingList(province);
 
-  // [新增] 前端排序逻辑
+  // [前端排序优化]
   const sortedList = React.useMemo(() => {
-    // 浅拷贝数组以避免直接修改原引用
     return [...list].sort((a, b) => {
-      // 1. 优先级规则：即将过期优先
-      // 逻辑复用 ProjectCard: hoursLeft < 24 && status === 1
+      // 1. 优先级规则：即将过期优先 (进行中 status===1 且 < 24h)
+      // 计算剩余小时数
       const hoursA = Math.floor((a.countdown || 0) / 3600);
-      const isUrgentA = a.status === 1 && hoursA < 24;
-
       const hoursB = Math.floor((b.countdown || 0) / 3600);
+      
+      const isUrgentA = a.status === 1 && hoursA < 24;
       const isUrgentB = b.status === 1 && hoursB < 24;
 
-      // 如果 A 是急需而 B 不是，A 排在 B 前面 (-1)
+      // 如果 A 急需而 B 不急 -> A 排前
       if (isUrgentA && !isUrgentB) return -1;
-      // 如果 B 是急需而 A 不是，B 排在 A 前面 (1)
+      // 如果 B 急需而 A 不急 -> B 排前
       if (!isUrgentA && isUrgentB) return 1;
 
-      // 2. 次要规则：其他全部按照发布时间 desc 顺序排列
-      // [修复] 使用 (x as any) 绕过类型检查，并尝试读取 publish_date 或 id
-      const itemA = a as any;
-      const itemB = b as any;
+      // 2. 次要规则：严格按照 ID 倒序排列 (ID 大的在前)
+      // ID 是最可靠的发布时间代理指标
+      const idA = Number(a.id) || 0;
+      const idB = Number(b.id) || 0;
       
-      // 尝试获取时间字段，如果不存在则使用 0
-      const dateStrA = itemA.publish_date || itemA.publish_time || itemA.create_time || '';
-      const dateStrB = itemB.publish_date || itemB.publish_time || itemB.create_time || '';
-      
-      const timeA = new Date(dateStrA).getTime() || 0;
-      const timeB = new Date(dateStrB).getTime() || 0;
-      
-      // 时间戳大的（新的）排在前面
-      return timeB - timeA;
+      return idB - idA;
     });
   }, [list]);
 
@@ -93,7 +83,6 @@ const BiddingHallPage: React.FC = () => {
                   total={total}
                   pageSize={filters.page_size}
                   onChange={handlePageChange}
-                  // [修复] 显式指定参数类型 (t: number)
                   showTotal={(t: number) => `共 ${t} 条项目`}
                   showSizeChanger={false}
                 />
