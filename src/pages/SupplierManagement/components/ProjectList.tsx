@@ -1,5 +1,5 @@
 // src/pages/SupplierManagement/components/ProjectList.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Project, TimeFilterOption } from '../../../services/api_supplier';
 import './ProjectList.css';
 
@@ -13,7 +13,6 @@ interface ProjectListProps {
   onSelectProject: (project: Project) => void;
   onTimeFilterChange: (filter: string) => void;
   onToggleTimeFilter: (filter: string) => void;
-  // 新增
   successProjects: Project[];
   loadingSuccess: boolean;
   expandedSuccess: boolean;
@@ -30,21 +29,36 @@ const ProjectList: React.FC<ProjectListProps> = ({
   onSelectProject,
   onTimeFilterChange,
   onToggleTimeFilter,
-  // 新增
   successProjects,
   loadingSuccess,
   expandedSuccess,
-  onToggleSuccess = () => {}, // 默认空函数，防止未传时报错
+  onToggleSuccess = () => {},
 }) => {
-  // 按时间过滤器分组项目
+  // 新增：搜索状态
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // 新增：搜索过滤逻辑（支持按项目名称或负责人搜索）
+  const filterProjects = (list: Project[]) => {
+    if (!searchTerm.trim()) return list;
+    const term = searchTerm.toLowerCase();
+    return list.filter(p => 
+      (p.project_name && p.project_name.toLowerCase().includes(term)) ||
+      (p.project_owner && p.project_owner.toLowerCase().includes(term))
+    );
+  };
+
+  const searchedProjects = filterProjects(projects);
+  const searchedSuccessProjects = filterProjects(successProjects);
+
+  // 按时间过滤器分组项目 (使用搜索过滤后的数据)
   const groupProjectsByTimeFilter = () => {
     const grouped: { [key: string]: Project[] } = {};
     
     timeFilterOptions.forEach(option => {
       if (option.value === 'all') {
-        grouped[option.value] = projects;
+        grouped[option.value] = searchedProjects;
       } else {
-        grouped[option.value] = projects.filter(project => {
+        grouped[option.value] = searchedProjects.filter(project => {
           const projectDate = new Date(project.selected_at);
           const now = new Date();
           
@@ -77,9 +91,20 @@ const ProjectList: React.FC<ProjectListProps> = ({
 
   return (
     <div className="project-list">
+      {/* 新增：搜索输入框区域 */}
+      <div className="project-search-box">
+        <input 
+          type="text" 
+          placeholder="搜索项目名称或负责人..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="project-search-input"
+        />
+      </div>
+
       <div className="time-filter-section">
         <h3>时间筛选</h3>
-        {/* 新增：竞标成功筛选区域 */}
+        {/* 竞标成功筛选区域 */}
         <div className="time-filter-group">
           <div
             className={`time-filter-header`}
@@ -100,9 +125,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <div className="project-items">
               {loadingSuccess ? (
                 <div className="loading">加载中...</div>
-              ) : successProjects.length > 0 ? (
-                // 按 selected_at 降序排序，显示 bidding_status_display
-                [...successProjects]
+              ) : searchedSuccessProjects.length > 0 ? (
+                // 按 selected_at 降序排序
+                [...searchedSuccessProjects]
                   .sort((a, b) => new Date(b.selected_at).getTime() - new Date(a.selected_at).getTime())
                   .map(project => (
                     <div
@@ -116,7 +141,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
                         <span>负责人: {project.project_owner || '-'}</span>
                         <span>
                           系统状态: {
-                            // 优先显示 bidding_status_display（后端返回的中文），否则 fallback
                             (project as any).bidding_status_display ||
                             (typeof project.bidding_status === 'string'
                               ? project.bidding_status
@@ -128,11 +152,12 @@ const ProjectList: React.FC<ProjectListProps> = ({
                     </div>
                   ))
               ) : (
-                <div className="no-projects">暂无项目</div>
+                <div className="no-projects">暂无匹配项目</div>
               )}
             </div>
           )}
         </div>
+        
         {/* 原有时间筛选区域 */}
         {timeFilterOptions.map(option => (
           <div key={option.value} className="time-filter-group">
@@ -169,7 +194,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
                         <span>负责人: {project.project_owner || '-'}</span>
                         <span>
                           系统状态: {
-                            // 优先显示 bidding_status_display（后端返回的中文），否则 fallback
                             (project as any).bidding_status_display ||
                             (typeof project.bidding_status === 'string'
                               ? project.bidding_status
@@ -181,7 +205,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                     </div>
                   ))
                 ) : (
-                  <div className="no-projects">暂无项目</div>
+                  <div className="no-projects">暂无匹配项目</div>
                 )}
               </div>
             )}
