@@ -31,17 +31,24 @@ const Detail: React.FC = () => {
   const [newRemark, setNewRemark] = useState('');
   const [remarksData, setRemarksData] = useState<any>({ remarks_history: [] });
   const [remarksLoading, setRemarksLoading] = useState(false);
-  const [latestRemark, setLatestRemark] = useState<any>(null); // [新增] 最新备注状态
+  const [latestRemark, setLatestRemark] = useState<any>(null); 
 
   const API_BASE_URL = '/api/emall/purchasing/procurement';
 
+  // [修改 1] 将获取数据的逻辑提取为一个独立函数，支持静默刷新
+  const fetchProjectDetail = (silent = false) => {
+    if (!id) return;
+    if (!silent) setLoading(true); // 首次加载显示全屏 loading，后续静默刷新不闪屏
+    
+    axios.get(`/api/bidding/project/${id}/`)
+      .then((res: any) => setData(res.data))
+      .catch((err) => { console.error(err); message.error('获取项目详情失败'); })
+      .finally(() => setLoading(false));
+  };
+
+  // [修改 2] 在 useEffect 中调用该函数
   useEffect(() => {
-    if (id) {
-      axios.get(`/api/bidding/project/${id}/`)
-        .then((res: any) => setData(res.data))
-        .catch((err) => { console.error(err); message.error('获取项目详情失败'); })
-        .finally(() => setLoading(false));
-    }
+    fetchProjectDetail();
   }, [id]);
 
   // [新增] 当 data 加载完成后，自动加载一次备注，以便在 Header 显示最新备注
@@ -174,6 +181,8 @@ const Detail: React.FC = () => {
           <AIRecommendation 
             recommendations={data.recommendations} 
             isSelected={data.is_selected} 
+            // [新增] 传入刷新方法，用于子组件触发重新寻源后的数据更新
+            onRefresh={() => fetchProjectDetail(true)} 
           />
         </div>
       </div>
