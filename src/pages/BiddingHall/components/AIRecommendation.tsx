@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Tag, Spin, Empty, Tooltip, Button, Modal, Input, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Tag, Spin, Empty, Tooltip, Button, Modal, Input, message, Select } from 'antd';
 import { 
   ThunderboltOutlined, 
   SearchOutlined,      
@@ -11,7 +11,6 @@ import {
 import axios from 'axios'; 
 import CandidateCard from './CandidateCard';
 
-// [修复] 补全所有字段，不再依赖外部可能缺失的 RecommendationItem
 export interface ExtendedRecommendationItem {
   brand_id?: number;
   item_name?: string;
@@ -23,7 +22,7 @@ export interface ExtendedRecommendationItem {
   notes?: string; 
   brand?: string;
   reason?: string;
-  candidates?: any[]; // 这里用 any[] 兜底，防止外部 Candidate 接口找不到
+  candidates?: any[]; 
 }
 
 interface AIRecommendationProps {
@@ -33,10 +32,19 @@ interface AIRecommendationProps {
 }
 
 const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, isSelected, onRefresh }) => {
+  // [核心修复] 使用本地 State 托管数据，实现点击后“瞬间同步更新”体验
+  const [localRecs, setLocalRecs] = useState<ExtendedRecommendationItem[]>([]);
+  
   const [retryModalVisible, setRetryModalVisible] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [currentRetryItem, setCurrentRetryItem] = useState<ExtendedRecommendationItem | null>(null);
   const [newKeyword, setNewKeyword] = useState('');
+  const [retryPlatform, setRetryPlatform] = useState('京东');
+
+  // 当外部传入的数据更新时，同步到本地
+  useEffect(() => {
+    setLocalRecs(recommendations || []);
+  }, [recommendations]);
 
   const handleOpenRetry = (item: ExtendedRecommendationItem) => {
     if (!item.brand_id) {
@@ -44,6 +52,11 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
     }
     setCurrentRetryItem(item);
     setNewKeyword(item.key_word || item.item_name || '');
+    
+    // 如果已有平台则带入，没有则默认京东。控制在三个选项内
+    const initialPlatform = item.search_platform || '京东';
+    setRetryPlatform(['京东', '1688', '淘宝'].includes(initialPlatform) ? initialPlatform : '京东');
+    
     setRetryModalVisible(true);
   };
 
@@ -54,12 +67,29 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
     try {
       const res = await axios.post('/api/bidding/item/retry/', {
         brand_id: currentRetryItem.brand_id,
-        new_keyword: newKeyword.trim()
+        new_keyword: newKeyword.trim(),
+        new_platform: retryPlatform // 传递平台给后端
       });
       
       if (res.data.success) {
-        message.success({ content: '✅ 已加入寻源队列，请稍后刷新查看', duration: 3 });
+        message.success({ content: '✅ 已加入寻源队列', duration: 2 });
         setRetryModalVisible(false);
+        
+        // [核心修复] 直接在前端更新本地数据结构，外层标签瞬间改变！
+        setLocalRecs(prev => prev.map(item => {
+          if (item.brand_id === currentRetryItem.brand_id) {
+            return {
+              ...item,
+              key_word: newKeyword.trim(),
+              search_platform: retryPlatform,
+              reason: 'AI 正在全网寻源中，请稍后刷新...', // 状态变更为分析中
+              candidates: [] // 清空旧的推荐商品
+            };
+          }
+          return item;
+        }));
+
+        // 静默触发外部刷新，获取最新状态
         if (onRefresh) onRefresh();
       } else {
         message.error(res.data.message);
@@ -86,9 +116,9 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
         <span className="text-gray-400 text-sm">核心模型引擎：qwen3:8b</span>
       </div>
 
-      {recommendations && recommendations.length > 0 ? (
+      {localRecs && localRecs.length > 0 ? (
         <div className="space-y-8">
-          {recommendations.map((item, idx) => (
+          {localRecs.map((item, idx) => (
             <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 pr-4"> 
@@ -106,7 +136,7 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
                     )}
 
                     {isSelected && (
-                      <Tooltip title="关键词不精准没搜到？修改关键词让 AI 重新找">
+                      <Tooltip title="抓取结果不满意？修改平台或关键词让 AI 重新找">
                         <Button 
                           type="dashed" 
                           size="small" 
@@ -135,6 +165,7 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
                     )}
                   </div>
 
+                  {/* 标签同步更新展示区 */}
                   <div className="flex flex-wrap gap-2 items-center mt-1">
                     {item.search_platform && (
                         <Tag variant="filled" color="blue" className="m-0 text-xs flex items-center gap-1 px-2">
@@ -176,7 +207,6 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
                 )}
               </div>
 
-              {/* [修复] 给 cand 和 cIdx 补充了明确类型 any 和 number */}
               {item.candidates && item.candidates.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {item.candidates.map((cand: any, cIdx: number) => (
@@ -220,10 +250,10 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
         <div className="py-4">
           <div className="mb-4 text-gray-600">
             您正在对 <span className="font-bold text-gray-800">[{currentRetryItem?.item_name}]</span> 发起重新抓取。
-            <br/>很多时候搜不到是因为原始名称包含了太多冗余信息，您可以在下方精简或修改搜索关键词：
+            <br/>请精简关键词，并指定目标寻源平台：
           </div>
+
           <div className="font-bold mb-2">搜索关键词：</div>
-          {/* [修复] 给 e 补充了 React.ChangeEvent<HTMLInputElement> 类型 */}
           <Input 
             size="large"
             value={newKeyword} 
@@ -231,6 +261,21 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
             placeholder="请输入最核心的商品名称..."
             allowClear
             prefix={<SearchOutlined className="text-gray-400" />}
+          />
+
+          {/* 只保留三个选项 */}
+          <div className="font-bold mb-2 mt-4">目标寻源平台：</div>
+          <Select
+            size="large"
+            value={retryPlatform}
+            // [修复] 显式声明 val 的类型为 string
+            onChange={(val: string) => setRetryPlatform(val)}
+            style={{ width: '100%' }}
+            options={[
+              { label: '京东 (JD.com)', value: '京东' },
+              { label: '1688 (阿里巴巴)', value: '1688' },
+              { label: '淘宝 (Taobao)', value: '淘宝' },
+            ]}
           />
         </div>
       </Modal>
