@@ -155,3 +155,4 @@ docker-compose.override.yml
 echo "src/components/auth/AuthLayout.tsx" >> .gitignore
 # 或者忽略所有环境配置文件
 echo ".env*" >> .gitignoresrc/pages/Auth/login.tsx
+src/services/api_auth/auth.ts
