@@ -11,6 +11,7 @@ const PROVINCES = [
   { key: 'ZJ', name: '浙江省', color: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-200' },
   // [新增] 新疆入口 (橙色主题)
   { key: 'XJ', name: '新疆', color: 'from-orange-500 to-orange-600', shadow: 'shadow-orange-200' },
+  { key: 'GZ', name: '贵州省', color: 'from-teal-500 to-teal-600', shadow: 'shadow-teal-200' },
 ];
 
 const Portal: React.FC = () => {

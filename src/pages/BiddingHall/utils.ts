@@ -10,7 +10,8 @@ export const adaptProjectData = (data: ExtendedProjectDetail | null) => {
     HN: '湖南', 
     AH: '安徽', 
     ZJ: '浙江',
-    XJ: '新疆'  // [新增]
+    XJ: '新疆',
+    GZ: '贵州'  // [新增]
   };
   
   const reqs = data.requirements || {}; // 安全访问

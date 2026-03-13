@@ -16,7 +16,8 @@ const BiddingHallPage: React.FC = () => {
     HN: '湖南', 
     AH: '安徽', 
     ZJ: '浙江',
-    XJ: '新疆' 
+    XJ: '新疆',
+    GZ: '贵州' 
   };
   
   const { loading, list, total, filters, updateFilter, handlePageChange } = useBiddingList(province);
