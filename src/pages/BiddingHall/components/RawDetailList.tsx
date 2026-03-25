@@ -13,17 +13,37 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
     return <Empty description="暂无抓取到的商品详情原数据" className="py-20" />;
   }
 
+  // 🛡️ [防御性函数] 确保传入的值一定被转换为安全数组
+  const safeArray = (val: any): any[] => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    // 应对类似 item_imgs: { item_img: [...] } 这种恶心的嵌套
+    if (typeof val === 'object') {
+       const keys = Object.keys(val);
+       if (keys.length > 0 && Array.isArray(val[keys[0]])) {
+           return val[keys[0]];
+       }
+    }
+    // 如果是单个对象或字符串，包成数组
+    return [val];
+  };
+
   return (
-    <div className="space-y-10 bg-gray-100 p-4 rounded-xl">
+    <div className="space-y-10 bg-gray-100 p-4 rounded-xl text-left">
       {data.map((record, index) => {
         const item = record.raw_data?.item || {};
-        const skus = item.skus?.sku || [];
-        const props = item.props || [];
+        
+        // 使用防御性函数处理所有可能出问题的嵌套列表
+        const skus = safeArray(item.skus?.sku);
+        const props = safeArray(item.props);
+        const itemImgs = safeArray(item.item_imgs);
+        const descImgs = safeArray(item.desc_img);
+        
         const seller = item.seller_info || {};
         const descHtml = item.desc || "";
 
         return (
-          <div key={record.id || index} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 text-left">
+          <div key={record.id || index} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
             <div className="bg-blue-600 px-6 py-2 flex justify-between items-center text-white">
               <span className="font-mono text-xs">记录 ID: {record.id} | 采集时间: {new Date(record.created_at).toLocaleString()}</span>
               <Tag color="orange" className="m-0 border-none">#{index + 1} 最新回采结果</Tag>
@@ -39,15 +59,20 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
                       fallback="https://os.alipayobjects.com/rmsportal/mqaQswcyDLcXyDK.png"
                     />
                     <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                      {(item.item_imgs || []).map((img: any, i: number) => (
-                        <Image 
-                          key={i} 
-                          src={img.url} 
-                          width={60} 
-                          height={60} 
-                          className="rounded border object-cover cursor-pointer hover:border-blue-500" 
-                        />
-                      ))}
+                      {itemImgs.map((imgObj: any, i: number) => {
+                        // 兼容直接字符串或 {url: '...'} 对象
+                        const imgUrl = typeof imgObj === 'string' ? imgObj : imgObj.url;
+                        if (!imgUrl) return null;
+                        return (
+                          <Image 
+                            key={i} 
+                            src={imgUrl} 
+                            width={60} 
+                            height={60} 
+                            className="rounded border object-cover cursor-pointer hover:border-blue-500" 
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </Col>
@@ -56,16 +81,16 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
                   <div className="space-y-4">
                     <div className="flex gap-2 items-center">
                       {item.tmall && <Tag color="red">天猫</Tag>}
-                      <Title level={4} className="m-0 leading-tight">{item.title}</Title>
+                      <Title level={4} className="m-0 leading-tight">{item.title || '无标题'}</Title>
                     </div>
 
                     <div className="bg-red-50 p-4 rounded-lg border border-red-100">
                       <div className="flex items-baseline gap-2">
                         <Text type="danger" className="text-sm font-bold">价格</Text>
                         <Text className="text-3xl font-bold text-red-600 font-mono">
-                          <span className="text-lg">¥</span>{item.price}
+                          <span className="text-lg">¥</span>{item.price || '0.00'}
                         </Text>
-                        {item.orginal_price && (
+                        {item.orginal_price && item.orginal_price !== item.price && (
                           <Text delete type="secondary" className="text-sm ml-2">¥{item.orginal_price}</Text>
                         )}
                       </div>
@@ -79,11 +104,13 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
                       <div className="flex items-center gap-2">
                         <Badge dot status="success"><ShopOutlined className="text-xl text-blue-500" /></Badge>
                         <div>
-                          <div className="font-bold text-sm">{item.nick || seller.shop_name || '官方推荐店铺'}</div>
+                          <div className="font-bold text-sm">{item.nick || seller.shop_name || seller.nick || '官方推荐店铺'}</div>
                           <div className="text-[10px] text-gray-400">评分: {seller.item_score || '4.9'} | 服务: {seller.delivery_score || '4.9'}</div>
                         </div>
                       </div>
-                      <a href={item.detail_url} target="_blank" rel="noreferrer" className="text-xs text-blue-500">进入店铺 {'>'}</a>
+                      {item.detail_url && (
+                        <a href={item.detail_url} target="_blank" rel="noreferrer" className="text-xs text-blue-500">进入店铺 {'>'}</a>
+                      )}
                     </div>
 
                     {skus.length > 0 && (
@@ -96,7 +123,7 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
                             dataSource={skus} 
                             pagination={false} 
                             size="small" 
-                            rowKey={(record) => record.sku_id || Math.random().toString()}
+                            rowKey={(r) => r.sku_id || Math.random().toString()}
                             className="text-[11px]"
                           >
                             <Table.Column 
@@ -120,14 +147,13 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
                 </Col>
               </Row>
 
-              {/* 🛠️ 这里通过 {"left" as any} 解决了 TS 报错 */}
               <Divider orientation={"left" as any} plain><Text type="secondary" className="text-xs font-bold uppercase">Product Specs / 商品参数</Text></Divider>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-8 px-4">
                 {props.map((p: any, i: number) => (
                   <div key={i} className="flex border-b border-gray-50 pb-1">
-                    <span className="text-gray-400 text-xs w-24 shrink-0">{p.name}:</span>
-                    <span className="text-gray-700 text-xs truncate" title={p.value}>{p.value}</span>
+                    <span className="text-gray-400 text-xs w-24 shrink-0">{p.name || '参数'}:</span>
+                    <span className="text-gray-700 text-xs truncate" title={p.value}>{p.value || '-'}</span>
                   </div>
                 ))}
               </div>
@@ -143,7 +169,7 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
                     />
                   ) : (
                     <div className="flex flex-col gap-0">
-                       {(item.desc_img || []).map((img: string, i: number) => (
+                       {descImgs.map((img: string, i: number) => (
                          <img key={i} src={img.startsWith('//') ? `https:${img}` : img} className="w-full block" alt="详情图" />
                        ))}
                     </div>
