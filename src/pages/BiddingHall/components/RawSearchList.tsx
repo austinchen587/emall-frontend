@@ -55,11 +55,17 @@ const RawSearchList: React.FC<Props> = ({ data, platform }) => {
         grid={{ gutter: 16, column: 3, xs: 1, sm: 2, md: 3, lg: 3, xl: 3, xxl: 3 }}
         dataSource={processedData}
         renderItem={(rawItem: RawSearchItem) => {
+          // 🌟 修复 3: 强制补全图片协议
+          let rawPicUrl = rawItem.pic_url || rawItem.img_url || rawItem.pic_path || '';
+          if (rawPicUrl && rawPicUrl.startsWith('//')) {
+            rawPicUrl = `https:${rawPicUrl}`;
+          }
+
           const item = {
             title: rawItem.title || rawItem.item_title || rawItem.name || "无标题商品",
             price: rawItem.promotion_price || rawItem.price || rawItem.view_price || 0,
             originalPrice: rawItem.orginal_price || rawItem.price || 0,
-            picUrl: rawItem.pic_url || rawItem.img_url || rawItem.pic_path,
+            picUrl: rawPicUrl, // 👈 使用修复后的图片链接
             detailUrl: rawItem.detail_url || rawItem.item_url || rawItem.url,
             shopName: rawItem.shop_name || rawItem.nick || rawItem.seller_nick || rawItem.vendor || rawItem.shop_title || "点击详情查看商家",
             numIid: rawItem.num_iid || rawItem.item_id || rawItem.id

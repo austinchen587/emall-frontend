@@ -94,7 +94,21 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
         // 2. 分配数据：search 取 items.item 数组，detail 取解析后的完整记录
         let finalDisplayData = parsedRows;
         if (type === 'search' && parsedRows.length > 0) {
-          finalDisplayData = parsedRows[0].raw_data?.items?.item || [];
+          const raw = parsedRows[0].raw_data;
+          
+          if (Array.isArray(raw)) {
+            // 兼容本身就是数组的情况 (京东/淘宝可能直接返回数组)
+            finalDisplayData = raw; 
+          } else if (raw?.items?.item) {
+            // 兼容 1688 的奇葩嵌套结构
+            finalDisplayData = raw.items.item; 
+          } else if (raw?.data && Array.isArray(raw.data)) {
+            // 兼容某些带有 data 层级的接口
+            finalDisplayData = raw.data; 
+          } else {
+            // 如果都匹配不上，直接置空，让列表显示 Empty 状态，而不是错误的无标题卡片
+            finalDisplayData = []; 
+          }
         }
         
         setRawData(finalDisplayData);

@@ -53,20 +53,21 @@ const RawDetailList: React.FC<Props> = ({ data }) => {
               <Row gutter={32}>
                 <Col xs={24} md={10}>
                   <div className="sticky top-4">
+                    {/* 🌟 修复 1: 从 item_imgs 中提取 1688 主图，并自动补全 https 协议 */}
                     <Image
-                      src={item.pic_url}
+                      src={(item.pic_url || (itemImgs.length > 0 ? (typeof itemImgs[0] === 'string' ? itemImgs[0] : itemImgs[0].url) : ''))?.replace(/^\/\//, 'https://')}
                       className="w-full rounded-lg border border-gray-100 shadow-sm"
                       fallback="https://os.alipayobjects.com/rmsportal/mqaQswcyDLcXyDK.png"
                     />
                     <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
                       {itemImgs.map((imgObj: any, i: number) => {
-                        // 兼容直接字符串或 {url: '...'} 对象
                         const imgUrl = typeof imgObj === 'string' ? imgObj : imgObj.url;
                         if (!imgUrl) return null;
+                        // 🌟 修复 2: 缩略图也补全 https 协议
                         return (
                           <Image 
                             key={i} 
-                            src={imgUrl} 
+                            src={imgUrl.startsWith('//') ? `https:${imgUrl}` : imgUrl} 
                             width={60} 
                             height={60} 
                             className="rounded border object-cover cursor-pointer hover:border-blue-500" 
