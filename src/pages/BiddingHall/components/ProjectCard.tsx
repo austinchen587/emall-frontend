@@ -5,7 +5,8 @@ import {
   ClockCircleOutlined, 
   UserOutlined, 
   CheckCircleFilled,
-  InfoCircleOutlined 
+  InfoCircleOutlined,
+  CalendarOutlined
 } from '@ant-design/icons';
 import { IBiddingProject } from '@/services/types/bidding';
 
@@ -92,6 +93,17 @@ export const ProjectCard: React.FC<Props> = ({ data }) => {
               {data.price_display}
             </span>
           </div>
+
+          {/* [新增] 发布日期显示行 */}
+  <div className="flex justify-between items-center text-xs text-gray-500 pt-1">
+    <div className="flex items-center gap-1">
+      <CalendarOutlined className="text-gray-400" />
+      <span>发布日期:</span>
+    </div>
+    <span className="font-mono text-gray-400">
+      {data.publish_date || '-'}
+    </span>
+  </div>
           
           {/* 时间状态行 */}
           <div className="flex justify-between items-center text-xs text-gray-500 pt-1">

@@ -54,6 +54,7 @@ export interface IBiddingProject {
   latest_remark_content?: string;
   latest_remark_by?: string;
   latest_remark_at?: string;
+  publish_date?: string;
 }
 
 // 分页响应结构
