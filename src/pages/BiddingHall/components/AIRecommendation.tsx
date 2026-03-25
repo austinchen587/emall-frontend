@@ -74,25 +74,31 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
 
       if (res.data.success) {
         const dbRows = res.data.data || [];
-        let finalDisplayData = dbRows;
-
-        // 🌟 【关键修复】如果是 Search 类型，从 raw_data 字符串中解析出 items.item 数组
-        if (type === 'search' && dbRows.length > 0) {
-          try {
-            const latestRecord = dbRows[0];
-            let rawObj = latestRecord.raw_data;
-            if (typeof rawObj === 'string') {
-              // 兼容双引号转义
-              rawObj = JSON.parse(rawObj.replace(/""/g, '"'));
+        
+        // 1. 统一清洗：无论 search 还是 detail，都先解析 raw_data 字符串 (兼容 1688的CSV导出转义)
+        const parsedRows = dbRows.map((row: any) => {
+          if (typeof row.raw_data === 'string') {
+            try {
+              let cleanStr = row.raw_data.trim();
+              if (cleanStr.startsWith('"') && cleanStr.endsWith('"')) {
+                cleanStr = cleanStr.substring(1, cleanStr.length - 1);
+              }
+              row.raw_data = JSON.parse(cleanStr.replace(/""/g, '"'));
+            } catch (e) {
+              console.error("解析 raw_data 失败:", e);
             }
-            finalDisplayData = rawObj?.items?.item || [];
-          } catch (e) {
-            console.error("解析 raw_data 失败:", e);
           }
+          return row;
+        });
+
+        // 2. 分配数据：search 取 items.item 数组，detail 取解析后的完整记录
+        let finalDisplayData = parsedRows;
+        if (type === 'search' && parsedRows.length > 0) {
+          finalDisplayData = parsedRows[0].raw_data?.items?.item || [];
         }
         
-        // 如果是 Detail，直接将整个 dbRows (包含 raw_data.item 等) 传给组件渲染
         setRawData(finalDisplayData);
+      
       } else {
         message.error(res.data.error || '获取失败');
       }

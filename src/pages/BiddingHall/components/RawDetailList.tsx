@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, Typography, Tag, Table, Divider, Row, Col, Badge, Empty } from 'antd';
-import { ShopOutlined, EnvironmentOutlined, ShoppingCartOutlined, ThunderboltOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { ShopOutlined, EnvironmentOutlined, ShoppingCartOutlined, ThunderboltOutlined, SafetyCertificateOutlined, } from '@ant-design/icons';
 
 const { Text, Title } = Typography;
 

@@ -35,7 +35,17 @@ interface Props {
 }
 
 const RawSearchList: React.FC<Props> = ({ data, platform }) => {
-  if (!data || data.length === 0) {
+  // 🌟 新增：处理 1688 特有的嵌套结构 items.item
+  const processedData = React.useMemo(() => {
+    if (!data) return [];
+    // 如果传入的是 1688 原始对象，尝试提取 items.item
+    if (!Array.isArray(data) && (data as any).items?.item) {
+      return (data as any).items.item;
+    }
+    return Array.isArray(data) ? data : [data];
+  }, [data]);
+
+  if (processedData.length === 0) {
     return <Empty description="数据库中暂无该记录的回采搜索数据" className="py-10" />;
   }
 
@@ -43,8 +53,8 @@ const RawSearchList: React.FC<Props> = ({ data, platform }) => {
     <div className="bg-gray-50 p-4 rounded-lg">
       <List
         grid={{ gutter: 16, column: 3, xs: 1, sm: 2, md: 3, lg: 3, xl: 3, xxl: 3 }}
-        dataSource={data}
-        renderItem={(rawItem) => {
+        dataSource={processedData}
+        renderItem={(rawItem: RawSearchItem) => {
           const item = {
             title: rawItem.title || rawItem.item_title || rawItem.name || "无标题商品",
             price: rawItem.promotion_price || rawItem.price || rawItem.view_price || 0,
