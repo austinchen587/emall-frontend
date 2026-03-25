@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Spin, Empty, Tooltip, Button, Modal, Input, message, Select } from 'antd';
+import { Tag, Spin, Empty, Tooltip, Button, Modal, Input, message, Select, Typography } from 'antd'; // 👈 修复：加入了 Typography
 import { 
   ThunderboltOutlined, 
   SearchOutlined,      
@@ -10,6 +10,8 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios'; 
 import CandidateCard from './CandidateCard';
+import RawSearchList from './RawSearchList';
+import RawDetailList from './RawDetailList';
 
 export interface ExtendedRecommendationItem {
   brand_id?: number;
@@ -32,19 +34,74 @@ interface AIRecommendationProps {
 }
 
 const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, isSelected, onRefresh }) => {
-  // [核心修复] 使用本地 State 托管数据，实现点击后“瞬间同步更新”体验
   const [localRecs, setLocalRecs] = useState<ExtendedRecommendationItem[]>([]);
   
+  // 重新寻源相关状态
   const [retryModalVisible, setRetryModalVisible] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [currentRetryItem, setCurrentRetryItem] = useState<ExtendedRecommendationItem | null>(null);
   const [newKeyword, setNewKeyword] = useState('');
   const [retryPlatform, setRetryPlatform] = useState('京东');
 
-  // 当外部传入的数据更新时，同步到本地
+  // [修复新增] 原数据查询相关状态
+  const [rawModalVisible, setRawModalVisible] = useState(false);
+  const [rawDataType, setRawDataType] = useState<'search' | 'detail'>('search');
+  const [rawData, setRawData] = useState<any[]>([]);
+  const [rawLoading, setRawLoading] = useState(false);
+
   useEffect(() => {
     setLocalRecs(recommendations || []);
   }, [recommendations]);
+
+  // [修改] 处理查看原数据逻辑 - 增加嵌套数据解析
+  const handleOpenRawData = async (item: ExtendedRecommendationItem, type: 'search' | 'detail') => {
+    if (!item.brand_id) return message.warning('缺少商品 ID标识');
+    
+    setRawDataType(type);
+    setCurrentRetryItem(item);
+    setRawModalVisible(true);
+    setRawLoading(true);
+    setRawData([]); 
+    
+    try {
+      const res = await axios.get('/api/bidding/raw-data/', {
+        params: {
+          brand_id: item.brand_id,
+          platform: item.search_platform || '京东',
+          type: type
+        }
+      });
+
+      if (res.data.success) {
+        const dbRows = res.data.data || [];
+        let finalDisplayData = dbRows;
+
+        // 🌟 【关键修复】如果是 Search 类型，从 raw_data 字符串中解析出 items.item 数组
+        if (type === 'search' && dbRows.length > 0) {
+          try {
+            const latestRecord = dbRows[0];
+            let rawObj = latestRecord.raw_data;
+            if (typeof rawObj === 'string') {
+              // 兼容双引号转义
+              rawObj = JSON.parse(rawObj.replace(/""/g, '"'));
+            }
+            finalDisplayData = rawObj?.items?.item || [];
+          } catch (e) {
+            console.error("解析 raw_data 失败:", e);
+          }
+        }
+        
+        // 如果是 Detail，直接将整个 dbRows (包含 raw_data.item 等) 传给组件渲染
+        setRawData(finalDisplayData);
+      } else {
+        message.error(res.data.error || '获取失败');
+      }
+    } catch (error) {
+      message.error('请求原数据接口失败');
+    } finally {
+      setRawLoading(false);
+    }
+  };
 
   const handleOpenRetry = (item: ExtendedRecommendationItem) => {
     if (!item.brand_id) {
@@ -52,50 +109,41 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
     }
     setCurrentRetryItem(item);
     setNewKeyword(item.key_word || item.item_name || '');
-    
-    // 如果已有平台则带入，没有则默认京东。控制在三个选项内
     const initialPlatform = item.search_platform || '京东';
     setRetryPlatform(['京东', '1688', '淘宝'].includes(initialPlatform) ? initialPlatform : '京东');
-    
     setRetryModalVisible(true);
   };
 
   const handleRetrySubmit = async () => {
     if (!currentRetryItem?.brand_id) return;
-    
     setRetrying(true);
     try {
       const res = await axios.post('/api/bidding/item/retry/', {
         brand_id: currentRetryItem.brand_id,
         new_keyword: newKeyword.trim(),
-        new_platform: retryPlatform // 传递平台给后端
+        new_platform: retryPlatform
       });
-      
       if (res.data.success) {
-        message.success({ content: '✅ 已加入寻源队列', duration: 2 });
+        message.success('✅ 已加入寻源队列');
         setRetryModalVisible(false);
-        
-        // [核心修复] 直接在前端更新本地数据结构，外层标签瞬间改变！
         setLocalRecs(prev => prev.map(item => {
           if (item.brand_id === currentRetryItem.brand_id) {
             return {
               ...item,
               key_word: newKeyword.trim(),
               search_platform: retryPlatform,
-              reason: 'AI 正在全网寻源中，请稍后刷新...', // 状态变更为分析中
-              candidates: [] // 清空旧的推荐商品
+              reason: 'AI 正在全网寻源中，请稍后刷新...',
+              candidates: []
             };
           }
           return item;
         }));
-
-        // 静默触发外部刷新，获取最新状态
         if (onRefresh) onRefresh();
       } else {
         message.error(res.data.message);
       }
     } catch (error) {
-      message.error('请求失败，请检查网络');
+      message.error('请求失败');
     } finally {
       setRetrying(false);
     }
@@ -107,11 +155,7 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
         <div className="flex items-center gap-2">
           <ThunderboltOutlined className="text-2xl text-blue-600" />
           <h2 className="text-lg font-bold m-0">AI 智能寻源结果</h2>
-          {isSelected ? (
-             <Tag color="purple">全网比价进行中</Tag>
-          ) : (
-             <Tag color="default">未启动</Tag>
-          )}
+          {isSelected ? <Tag color="purple">全网比价进行中</Tag> : <Tag color="default">未启动</Tag>}
         </div>
         <span className="text-gray-400 text-sm">核心模型引擎：qwen3:8b</span>
       </div>
@@ -122,84 +166,72 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
             <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 pr-4"> 
-                  
                   <div className="flex items-center flex-wrap gap-3 mb-2">
-                    <h3 className="text-base font-bold text-gray-800 m-0">
-                      {idx + 1}. {item.item_name}
-                    </h3>
-                    
+                    <h3 className="text-base font-bold text-gray-800 m-0">{idx + 1}. {item.item_name}</h3>
                     {(item.quantity || item.unit) && (
                       <span className="bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
-                        <NumberOutlined />
-                        <span>{item.quantity || '-'} {item.unit || '件'}</span>
+                        <NumberOutlined /><span>{item.quantity || '-'} {item.unit || '件'}</span>
                       </span>
                     )}
 
+                    {/* 操作按钮组 */}
                     {isSelected && (
-                      <Tooltip title="抓取结果不满意？修改平台或关键词让 AI 重新找">
+                      <div className="flex gap-2 flex-wrap">
+                        {/* [新增的两个原数据按钮] */}
+                        <Tooltip title="查看爬虫搜索到的原始列表数据">
+                          <Button 
+                            size="small" 
+                            icon={<SearchOutlined />} 
+                            onClick={() => handleOpenRawData(item, 'search')}
+                          >
+                            Search原数据
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="查看爬虫进入详情页抓取的规格参数数据">
+                          <Button 
+                            size="small" 
+                            icon={<InfoCircleOutlined />} 
+                            onClick={() => handleOpenRawData(item, 'detail')}
+                          >
+                            Detail原数据
+                          </Button>
+                        </Tooltip>
+                        
                         <Button 
                           type="dashed" 
                           size="small" 
                           icon={<SyncOutlined />} 
-                          className="text-blue-500 border-blue-200 hover:bg-blue-50 hover:border-blue-400"
+                          className="text-blue-500 border-blue-200"
                           onClick={() => handleOpenRetry(item)}
                         >
                           重新寻源
                         </Button>
-                      </Tooltip>
-                    )}
-                  </div>
-
-                  <div className="text-xs text-gray-500 mb-2 leading-relaxed">
-                    <div>
-                      <span className="font-medium text-gray-400">规格需求：</span>
-                      <span>{item.specifications || "无具体规格描述"}</span>
-                    </div>
-
-                    {item.notes && (
-                      <div className="mt-1 text-orange-600 flex items-start gap-1">
-                        <InfoCircleOutlined className="mt-0.5" />
-                        <span className="font-medium">备注要求：</span>
-                        <span>{item.notes}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* 标签同步更新展示区 */}
+                  <div className="text-xs text-gray-500 mb-2 leading-relaxed">
+                    <div><span className="font-medium text-gray-400">规格需求：</span><span>{item.specifications || "无具体规格描述"}</span></div>
+                    {item.notes && (
+                      <div className="mt-1 text-orange-600 flex items-start gap-1">
+                        <InfoCircleOutlined className="mt-0.5" /><span className="font-medium">备注要求：</span><span>{item.notes}</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex flex-wrap gap-2 items-center mt-1">
-                    {item.search_platform && (
-                        <Tag variant="filled" color="blue" className="m-0 text-xs flex items-center gap-1 px-2">
-                            <ShopOutlined /> {item.search_platform}
-                        </Tag>
-                    )}
-
+                    {item.search_platform && <Tag color="blue" className="m-0 text-xs flex items-center gap-1 px-2"><ShopOutlined /> {item.search_platform}</Tag>}
                     {item.key_word && (
-                      <Tooltip title={`搜索使用的关键词: ${item.key_word}`}>
-                        <Tag 
-                          variant="filled" 
-                          color="orange" 
-                          className="m-0 text-xs flex items-center gap-1 px-2 whitespace-normal h-auto py-1"
-                        >
-                          <SearchOutlined className="flex-shrink-0" /> 
-                          <span>{item.key_word}</span>
-                        </Tag>
+                      <Tooltip title={`搜索关键词: ${item.key_word}`}>
+                        <Tag color="orange" className="m-0 text-xs flex items-center gap-1 px-2 whitespace-normal h-auto py-1"><SearchOutlined /><span>{item.key_word}</span></Tag>
                       </Tooltip>
-                    )}
-
-                    {item.brand && item.brand !== '-' && (
-                      <Tag variant="filled" color="geekblue" className="m-0 text-xs px-2">
-                        品牌: {item.brand}
-                      </Tag>
                     )}
                   </div>
                 </div>
 
                 {item.reason && (
                   <div className="flex-shrink-0 ml-2 max-w-[200px] text-right">
-                    <Tag 
-                      color={item.reason.includes('分析中') || item.reason.includes('寻源中') ? 'processing' : 'cyan'} 
-                      className="mr-0 whitespace-normal text-left"
-                    >
+                    <Tag color={item.reason.includes('分析中') || item.reason.includes('寻源中') ? 'processing' : 'cyan'} className="mr-0 whitespace-normal text-left">
                       {item.reason.includes('分析中') || item.reason.includes('寻源中') ? <Spin size="small" className="mr-1"/> : null}
                       AI: {item.reason.substring(0, 15)}...
                     </Tag>
@@ -209,35 +241,21 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
 
               {item.candidates && item.candidates.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {item.candidates.map((cand: any, cIdx: number) => (
-                    <CandidateCard key={cIdx} candidate={cand} />
-                  ))}
+                  {item.candidates.map((cand: any, cIdx: number) => <CandidateCard key={cIdx} candidate={cand} />)}
                 </div>
-              ) : (
-                isSelected && (
-                  <div className="bg-white border-dashed border-2 border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-400">
-                    <Spin size="small" className="mb-2" />
-                    <span className="text-sm">⏳ AI 正在全网寻源中，请稍后刷新...</span>
-                  </div>
-                )
+              ) : isSelected && (
+                <div className="bg-white border-dashed border-2 border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-400">
+                  <Spin size="small" className="mb-2" /><span className="text-sm">⏳ AI 正在全网寻源中，请稍后刷新...</span>
+                </div>
               )}
             </div>
           ))}
         </div>
-      ) : (
-        <Empty 
-          image={Empty.PRESENTED_IMAGE_SIMPLE} 
-          description="暂无 AI 推荐数据" 
-        />
-      )}
+      ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无 AI 推荐数据" />}
 
+      {/* 重新寻源 Modal */}
       <Modal
-        title={
-          <div className="flex items-center gap-2">
-            <SyncOutlined className="text-blue-500" />
-            <span>重新全网寻源</span>
-          </div>
-        }
+        title={<div className="flex items-center gap-2"><SyncOutlined className="text-blue-500" /><span>重新全网寻源</span></div>}
         open={retryModalVisible}
         onOk={handleRetrySubmit}
         onCancel={() => setRetryModalVisible(false)}
@@ -248,37 +266,46 @@ const AIRecommendation: React.FC<AIRecommendationProps> = ({ recommendations, is
         destroyOnClose
       >
         <div className="py-4">
-          <div className="mb-4 text-gray-600">
-            您正在对 <span className="font-bold text-gray-800">[{currentRetryItem?.item_name}]</span> 发起重新抓取。
-            <br/>请精简关键词，并指定目标寻源平台：
-          </div>
-
+          <div className="mb-4 text-gray-600">您正在对 <span className="font-bold text-gray-800">[{currentRetryItem?.item_name}]</span> 发起重新抓取。<br/>请精简关键词，并指定目标寻源平台：</div>
           <div className="font-bold mb-2">搜索关键词：</div>
-          <Input 
-            size="large"
-            value={newKeyword} 
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewKeyword(e.target.value)}
-            placeholder="请输入最核心的商品名称..."
-            allowClear
-            prefix={<SearchOutlined className="text-gray-400" />}
-          />
-
-          {/* 只保留三个选项 */}
+          <Input size="large" value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} placeholder="请输入关键词..." allowClear prefix={<SearchOutlined className="text-gray-400" />} />
           <div className="font-bold mb-2 mt-4">目标寻源平台：</div>
-          <Select
-            size="large"
-            value={retryPlatform}
-            // [修复] 显式声明 val 的类型为 string
-            onChange={(val: string) => setRetryPlatform(val)}
-            style={{ width: '100%' }}
-            options={[
-              { label: '京东 (JD.com)', value: '京东' },
-              { label: '1688 (阿里巴巴)', value: '1688' },
-              { label: '淘宝 (Taobao)', value: '淘宝' },
-            ]}
-          />
+          <Select size="large" value={retryPlatform} onChange={(val) => setRetryPlatform(val)} style={{ width: '100%' }} options={[{ label: '京东 (JD.com)', value: '京东' }, { label: '1688 (阿里巴巴)', value: '1688' }, { label: '淘宝 (Taobao)', value: '淘宝' }]} />
         </div>
       </Modal>
+
+      {/* [新增] 原数据展示 Modal - 解决变量未读和闭合错误 */}
+      <Modal
+  title={
+    <div className="flex items-center gap-2">
+      {/* 👈 修复：明确使用 Typography.Text */}
+      <Typography.Text strong>{currentRetryItem?.item_name}</Typography.Text>
+      <Tag color={rawDataType === 'search' ? 'orange' : 'purple'}>
+        {rawDataType === 'search' ? '回采搜索列表' : '回采商品详情'}
+      </Tag>
+    </div>
+  }
+  open={rawModalVisible}
+  onCancel={() => setRawModalVisible(false)}
+  footer={null}
+  width={rawDataType === 'search' ? 1100 : 1200}
+  centered
+  destroyOnClose
+>
+  <Spin spinning={rawLoading}>
+    <div className="max-h-[80vh] overflow-y-auto">
+      {rawData && rawData.length > 0 ? (
+        rawDataType === 'search' ? (
+          <RawSearchList data={rawData} platform={currentRetryItem?.search_platform} />
+        ) : (
+          <RawDetailList data={rawData} />
+        )
+      ) : (
+        <Empty description="数据库中暂无相关记录" className="py-20" />
+      )}
+    </div>
+  </Spin>
+</Modal>
     </div>
   );
 };
